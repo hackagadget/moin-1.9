@@ -164,7 +164,7 @@ space between words. Group page name is not allowed.""", wiki=True) % wikiutil.e
 
         # try to get the (optional) preferred language
         request.user.language = wikiutil.clean_input(form.get('language', ''))
-        if request.user.language == u'': # For language-statistics
+        if request.user.language == '': # For language-statistics
             from MoinMoin import i18n
             request.user.real_language = i18n.get_browser_language(request)
         else:
@@ -274,11 +274,11 @@ space between words. Group page name is not allowed.""", wiki=True) % wikiutil.e
         try:
             dt_d_combined = '%s & %s' % (self.request.user.datetime_fmt, self.request.user.date_fmt)
             selected = [
-                k for k, v in self._date_formats.items()
+                k for k, v in list(self._date_formats.items())
                     if v == dt_d_combined][0]
         except IndexError:
             selected = ''
-        options = [('', _('Default'))] + self._date_formats.items()
+        options = [('', _('Default'))] + list(self._date_formats.items())
 
         return util.web.makeSelection('datetime_fmt', options, selected)
 
@@ -288,7 +288,7 @@ space between words. Group page name is not allowed.""", wiki=True) % wikiutil.e
         from MoinMoin import i18n
         _ = self._
         cur_lang = self.request.user.valid and self.request.user.language or ''
-        langs = i18n.wikiLanguages().items()
+        langs = list(i18n.wikiLanguages().items())
         langs.sort(lambda x, y: cmp(x[1]['x-language'], y[1]['x-language']))
         options = [('', _('<Browser setting>'))]
         for lang in langs:
@@ -407,4 +407,4 @@ space between words. Group page name is not allowed.""", wiki=True) % wikiutil.e
                 ])
         self.make_row('', button_cell)
 
-        return unicode(self._form)
+        return str(self._form)

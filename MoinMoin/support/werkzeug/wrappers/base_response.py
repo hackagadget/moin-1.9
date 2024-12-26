@@ -583,11 +583,11 @@ class BaseResponse(object):
         # speedup.
         for key, value in headers:
             ikey = key.lower()
-            if ikey == u"location":
+            if ikey == "location":
                 location = value
-            elif ikey == u"content-location":
+            elif ikey == "content-location":
                 content_location = value
-            elif ikey == u"content-length":
+            elif ikey == "content-length":
                 content_length = value
 
         # make sure the location header is an absolute URL

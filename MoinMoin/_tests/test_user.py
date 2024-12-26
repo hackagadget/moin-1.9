@@ -28,7 +28,7 @@ class TestEncodePassword(object):
         for scheme, salt, expected in tests:
             result = user.encodePassword(cfg, "MoinMoin", salt=salt, scheme=scheme)
             assert result == expected
-            result = user.encodePassword(cfg, u"MoinMoin", salt=salt, scheme=scheme)
+            result = user.encodePassword(cfg, "MoinMoin", salt=salt, scheme=scheme)
             assert result == expected
 
     def testUnicode(self):
@@ -39,7 +39,7 @@ class TestEncodePassword(object):
             ('{SSHA}', '12345', "{SSHA}YiwfeVWdVW9luqyVn8t2JivlzmUxMjM0NQ=="),
             ]
         for scheme, salt, expected in tests:
-            result = user.encodePassword(cfg, u'סיסמה סודית בהחלט', salt=salt, scheme=scheme) # Hebrew
+            result = user.encodePassword(cfg, 'סיסמה סודית בהחלט', salt=salt, scheme=scheme) # Hebrew
             assert result == expected
 
 
@@ -83,7 +83,7 @@ class TestLoginWithPassword(object):
     def testAsciiPassword(self):
         """ user: login with ascii password """
         # Create test user
-        name = u'__Non Existent User Name__'
+        name = '__Non Existent User Name__'
         password = name
         self.createUser(name, password)
 
@@ -94,7 +94,7 @@ class TestLoginWithPassword(object):
     def testUnicodePassword(self):
         """ user: login with non-ascii password """
         # Create test user
-        name = u'__שם משתמש לא קיים__' # Hebrew
+        name = '__שם משתמש לא קיים__' # Hebrew
         password = name
         self.createUser(name, password)
 
@@ -108,7 +108,7 @@ class TestLoginWithPassword(object):
         Also check if auto-upgrade happens and is saved to disk.
         """
         # Create test user
-        name = u'Test User'
+        name = 'Test User'
         password = '12345'
         # generated with "htpasswd -nbm blaze 12345"
         pw_hash = '{APR1}$apr1$NG3VoiU5$PSpHT6tV0ZMKkSZ71E3qg.'
@@ -127,7 +127,7 @@ class TestLoginWithPassword(object):
         Also check if auto-upgrade happens and is saved to disk.
         """
         # Create test user
-        name = u'Test User'
+        name = 'Test User'
         password = '12345'
         pw_hash = '{MD5}$1$salt$etVYf53ma13QCiRbQOuRk/'
         self.createUser(name, pw_hash, True)
@@ -145,7 +145,7 @@ class TestLoginWithPassword(object):
         Also check if auto-upgrade happens and is saved to disk.
         """
         # Create test user
-        name = u'Test User'
+        name = 'Test User'
         password = '12345'
         # generated with "htpasswd -nbd blaze 12345"
         pw_hash = '{DES}gArsfn7O5Yqfo'
@@ -168,7 +168,7 @@ class TestLoginWithPassword(object):
         Also check if auto-upgrade happens and is saved to disk.
         """
         # Create test user
-        name = u'Test User'
+        name = 'Test User'
         password = '12345'
         pw_hash = '{SHA}jLIjfQZ5yojbZGTqxg2pY0VROWQ='
         self.createUser(name, pw_hash, True)
@@ -186,7 +186,7 @@ class TestLoginWithPassword(object):
         Also check if auto-upgrade happens and is saved to disk.
         """
         # Create test user
-        name = u'Test User'
+        name = 'Test User'
         password = '12345'
         pw_hash = '{SSHA}dbeFtH5EGkOI1jgPADlGZgHWq072TIsKqWfHX7zZbUQa85Ze8774Rg=='
         self.createUser(name, pw_hash, True)
@@ -205,7 +205,7 @@ class TestLoginWithPassword(object):
         if not self.passlib_support:
             py.test.skip("test requires passlib, but passlib_support is False")
         # Create test user
-        name = u'Test User'
+        name = 'Test User'
         password = '12345'
         pw_hash = '{PASSLIB}$6$rounds=1001$/AVWSh/RUWpcppfl$8DCRGLaBD3KoV4Ag67sUv6b2QdrUFXk1yWCxqWnBLJ.iHSe4Piv6nqzSQgELeLPIvwTC9APaWv1XCTOHjkLOj/'
         self.createUser(name, pw_hash, True)
@@ -219,8 +219,8 @@ class TestLoginWithPassword(object):
 
     def testSubscriptionSubscribedPage(self):
         """ user: tests isSubscribedTo  """
-        pagename = u'HelpMiscellaneous'
-        name = u'__Jürgen Herman__'
+        pagename = 'HelpMiscellaneous'
+        name = '__Jürgen Herman__'
         password = name
         self.createUser(name, password)
         # Login - this should replace the old password in the user file
@@ -230,9 +230,9 @@ class TestLoginWithPassword(object):
 
     def testSubscriptionSubPage(self):
         """ user: tests isSubscribedTo on a subpage """
-        pagename = u'HelpMiscellaneous'
-        testPagename = u'HelpMiscellaneous/FrequentlyAskedQuestions'
-        name = u'__Jürgen Herman__'
+        pagename = 'HelpMiscellaneous'
+        testPagename = 'HelpMiscellaneous/FrequentlyAskedQuestions'
+        name = '__Jürgen Herman__'
         password = name
         self.createUser(name, password)
         # Login - this should replace the old password in the user file
@@ -245,13 +245,13 @@ class TestLoginWithPassword(object):
         the old username is removed (and the lookup cache behaves well)
         """
         # Create test user
-        name = u'__Some Name__'
+        name = '__Some Name__'
         password = name
         self.createUser(name, password)
         # Login - this should replace the old password in the user file
         theUser = user.User(self.request, name=name)
         # Rename user
-        theUser.name = u'__SomeName__'
+        theUser.name = '__SomeName__'
         theUser.save()
         theUser = user.User(self.request, name=name, password=password)
 
@@ -261,8 +261,8 @@ class TestLoginWithPassword(object):
         """
         checks for no access to the email attribute by getting the user object from name
         """
-        name = u"__TestUser__"
-        password = u"ekfdweurwerh"
+        name = "__TestUser__"
+        password = "ekfdweurwerh"
         email = "__TestUser__@moinhost"
         self.createUser(name, password, email=email)
         theuser = user.User(self.request, name=name)
@@ -272,8 +272,8 @@ class TestLoginWithPassword(object):
         """
         checks access to the email attribute by getting the user object from the uid
         """
-        name = u"__TestUser2__"
-        password = u"ekERErwerwerh"
+        name = "__TestUser2__"
+        password = "ekERErwerwerh"
         email = "__TestUser2__@moinhost"
         self.createUser(name, password, email=email)
         uid = user.getUserId(self.request, name)
@@ -311,7 +311,7 @@ class TestGroupName(object):
 
     def testGroupNames(self):
         """ user: isValidName: reject group names """
-        test = u'AdminGroup'
+        test = 'AdminGroup'
         assert not user.isValidName(self.request, test)
 
 
@@ -322,8 +322,8 @@ class TestIsValidName(object):
 
         : and , used in acl rules, we might add more characters to the syntax.
         """
-        invalid = u'! # $ % ^ & * ( ) = + , : ; " | ~ / \\ \u0000 \u202a'.split()
-        base = u'User%sName'
+        invalid = '! # $ % ^ & * ( ) = + , : ; " | ~ / \\ \u0000 \u202a'.split()
+        base = 'User%sName'
         for c in invalid:
             name = base % c
             assert not user.isValidName(self.request, name)
@@ -331,9 +331,9 @@ class TestIsValidName(object):
     def testWhitespace(self):
         """ user: isValidName: reject leading, trailing or multiple whitespace """
         cases = (
-            u' User Name',
-            u'User Name ',
-            u'User   Name',
+            ' User Name',
+            'User Name ',
+            'User   Name',
             )
         for test in cases:
             assert not user.isValidName(self.request, test)
@@ -341,10 +341,10 @@ class TestIsValidName(object):
     def testValid(self):
         """ user: isValidName: accept names in any language, with spaces """
         cases = (
-            u'Jürgen Hermann', # German
-            u'ניר סופר', # Hebrew
-            u'CamelCase', # Good old camel case
-            u'가각간갇갈 갉갊감 갬갯걀갼' # Hangul (gibberish)
+            'Jürgen Hermann', # German
+            'ניר סופר', # Hebrew
+            'CamelCase', # Good old camel case
+            '가각간갇갈 갉갊감 갬갯걀갼' # Hangul (gibberish)
             )
         for test in cases:
             assert user.isValidName(self.request, test)

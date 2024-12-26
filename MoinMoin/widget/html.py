@@ -74,7 +74,7 @@ class Element:
 
     def _openingtag(self):
         result = [self.tagname()]
-        attrs = self.attrs.items()
+        attrs = list(self.attrs.items())
         if _SORT_ATTRS:
             attrs.sort()
         for key, val in attrs:
@@ -83,7 +83,7 @@ class Element:
                 if val:
                     result.append(key)
             else:
-                result.append(u'%s="%s"' % (key, wikiutil.escape(val, 1)))
+                result.append('%s="%s"' % (key, wikiutil.escape(val, 1)))
         return ' '.join(result)
 
     def __unicode__(self):
@@ -95,7 +95,7 @@ class EmptyElement(Element):
     """
 
     def __unicode__(self):
-        return u"<%s>" % self._openingtag()
+        return "<%s>" % self._openingtag()
 
 
 class CompositeElement(Element):
@@ -119,11 +119,11 @@ class CompositeElement(Element):
     def __unicode__(self):
         childout = []
         for c in self.children:
-            co = unicode(c)
+            co = str(c)
             childout.append(co)
         return "<%s>%s</%s>" % (
             self._openingtag(),
-            u''.join(childout),
+            ''.join(childout),
             self.tagname(),
         )
 
@@ -437,7 +437,7 @@ class LABEL(CompositeElement):
 
     def _openingtag(self):
         result = [self.tagname()]
-        attrs = self.attrs.items()
+        attrs = list(self.attrs.items())
         if _SORT_ATTRS:
             attrs.sort()
         for key, val in attrs:
@@ -448,7 +448,7 @@ class LABEL(CompositeElement):
                 if val:
                     result.append(key)
             else:
-                result.append(u'%s="%s"' % (key, wikiutil.escape(val, 1)))
+                result.append('%s="%s"' % (key, wikiutil.escape(val, 1)))
         return ' '.join(result)
 
 

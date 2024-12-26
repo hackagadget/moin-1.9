@@ -13,22 +13,22 @@ class ExternalCookie(BaseAuth):
 
     def request(self, request, user_obj, **kw):
         """ authenticate via external cookie """
-        import Cookie
+        import http.cookies
         user = None
         try_next = True # if True, moin tries the next auth method
         cookiename = "whatever" # +++ external cookie name you want to use
 
         try:
-            cookie = Cookie.SimpleCookie(request.saved_cookie)
-        except Cookie.CookieError:
+            cookie = http.cookies.SimpleCookie(request.saved_cookie)
+        except http.cookies.CookieError:
             # ignore invalid cookies
             cookie = None
         if cookie and cookiename in cookie:
-            import urllib
+            import urllib.request, urllib.parse, urllib.error
             cookievalue = cookie[cookiename].value
             # +++ now we decode and parse the cookie value - edit this to fit your needs.
             # the minimum we need to get is auth_username. aliasname and email is optional.
-            cookievalue = urllib.unquote(cookievalue) # cookie value is urlencoded, decode it
+            cookievalue = urllib.parse.unquote(cookievalue) # cookie value is urlencoded, decode it
             cookievalue = cookievalue.decode('iso-8859-1') # decode cookie charset to unicode
             cookievalue = cookievalue.split('#') # cookie has format loginname#firstname#lastname#email
 

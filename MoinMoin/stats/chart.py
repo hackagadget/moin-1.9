@@ -87,7 +87,7 @@ class Chart:
 
 
 # copy GDC constants to Chart's namespace
-for key, val in vars(gdchart).items():
+for key, val in list(vars(gdchart).items()):
     if key.startswith('GDC'):
         setattr(Chart, key, val)
 

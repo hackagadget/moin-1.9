@@ -197,7 +197,7 @@ class Navigation:
         filter_regex = '^%s/' % re.escape(parent)
         pos, size, links = _getLinks(request, self.pagename, filter_regex)
         pos += 1
-        links = zip(labels, (parent, ) + links)
+        links = list(zip(labels, (parent, ) + links))
 
         # generate links to neighborhood
         for label, name in links:
@@ -218,16 +218,16 @@ class Navigation:
 
 
 def macro_Navigation(macro,
-                    scheme=wikiutil.required_arg((u'children', u'siblings',
-                                                  u'slideshow', u'slides')),
+                    scheme=wikiutil.required_arg(('children', 'siblings',
+                                                  'slideshow', 'slides')),
                     depth=0):
     # get HTML code with the links
     navi = Navigation(macro, scheme, depth).dispatch()
 
     if navi:
         # return links packed into a table
-        return u'<table class="navigation"><tr><td>%s</td></tr></table>' % navi
+        return '<table class="navigation"><tr><td>%s</td></tr></table>' % navi
 
     # navigation disabled in plain print mode
-    return u''
+    return ''
 

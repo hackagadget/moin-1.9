@@ -396,7 +396,7 @@ def _unquote_to_bytes(string, unsafe=""):
         hex_to_byte = _unquote_maps[unsafe]
     except KeyError:
         hex_to_byte = _unquote_maps[unsafe] = {
-            h: b for h, b in _hextobyte.items() if b not in unsafe
+            h: b for h, b in list(_hextobyte.items()) if b not in unsafe
         }
 
     for group in groups:
@@ -625,7 +625,7 @@ def url_unquote_plus(s, charset="utf-8", errors="replace"):
     :param errors: The error handling for the `charset` decoding.
     """
     if isinstance(s, text_type):
-        s = s.replace(u"+", u" ")
+        s = s.replace("+", " ")
     else:
         s = s.replace(b"+", b" ")
     return url_unquote(s, charset, errors)
@@ -1117,7 +1117,7 @@ class Href(object):
             query, path = path[-1], path[:-1]
         elif query:
             query = dict(
-                [(k.endswith("_") and k[:-1] or k, v) for k, v in query.items()]
+                [(k.endswith("_") and k[:-1] or k, v) for k, v in list(query.items())]
             )
         path = "/".join(
             [

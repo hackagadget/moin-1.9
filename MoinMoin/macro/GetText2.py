@@ -21,7 +21,7 @@ def execute(macro, args):
     and the remaining elements are substituted in the message using string
     substitution.
     """
-    msg = u''
+    msg = ''
     if args:
         sep = args[0]
         args = unpackLine(args[1:], sep)

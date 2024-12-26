@@ -28,7 +28,7 @@ class TestHTMLWidgets:
             )
 
         for description, obj, expected in tests:
-            result = unicode(obj)
+            result = str(obj)
             assert result == expected
 
     def testInvalidAttributes(self):
@@ -59,7 +59,7 @@ class TestHTMLWidgets:
 
         for action, data, expected in actions:
             action(data)
-            result = unicode(element)
+            result = str(element)
             assert result == expected
 
 coverage_modules = ['MoinMoin.widget.html']

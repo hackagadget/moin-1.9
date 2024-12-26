@@ -14,7 +14,7 @@ from MoinMoin._tests import become_trusted, create_page, make_macro, nuke_page
 
 class TestGetVal:
     """GetVal: testing getVal macro """
-    pagename = u'MyDict'
+    pagename = 'MyDict'
 
     def setup_class(self):
         become_trusted(self.request)
@@ -29,19 +29,19 @@ class TestGetVal:
 
     def testGetValNoACLs(self):
         """ macro GetVal test: 'reads VAR' """
-        page = create_page(self.request, self.pagename, u' VAR:: This is an example')
-        result = self._test_macro(u'GetVal', "%s,%s" % (self.pagename, u'VAR'), page)
+        page = create_page(self.request, self.pagename, ' VAR:: This is an example')
+        result = self._test_macro('GetVal', "%s,%s" % (self.pagename, 'VAR'), page)
         assert result == "This is an example"
 
     def testGetValAfterADictPageIsDeleted(self):
         """ macro GetVal test: 'reads Dict var after another Dict is removed' """
         request = self.request
         become_trusted(request)
-        page = create_page(request, u'SomeDict', u" EXAMPLE:: This is an example text")
+        page = create_page(request, 'SomeDict', " EXAMPLE:: This is an example text")
         page.deletePage()
-        page = create_page(request, self.pagename, u' VAR:: This is a brand new example')
-        result = self._test_macro(u'GetVal', "%s,%s" % (self.pagename, u'VAR'), page)
-        nuke_page(request, u'SomeDict')
+        page = create_page(request, self.pagename, ' VAR:: This is a brand new example')
+        result = self._test_macro('GetVal', "%s,%s" % (self.pagename, 'VAR'), page)
+        nuke_page(request, 'SomeDict')
         assert result == "This is a brand new example"
 
     def testGetValACLs(self):
@@ -49,7 +49,7 @@ class TestGetVal:
         py.test.skip("user has no rights to create acl pages")
         page = create_page(self.request, self.pagename,
                            '#acl SomeUser:read,write All:delete\n VAR:: This is an example')
-        result = self._test_macro(u'GetVal', "%s,%s" % (self.pagename, u'VAR'), page)
+        result = self._test_macro('GetVal', "%s,%s" % (self.pagename, 'VAR'), page)
         assert result == "&lt;&lt;GetVal: You don't have enough rights on this page&gt;&gt;"
 
 coverage_modules = ['MoinMoin.macro.GetVal']

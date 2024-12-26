@@ -5,7 +5,7 @@
 #=============================================================================
 # imports
 #=============================================================================
-from __future__ import division
+
 # core
 import hashlib
 import logging; log = logging.getLogger(__name__)

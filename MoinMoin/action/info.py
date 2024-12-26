@@ -138,7 +138,7 @@ def execute(pagename, request):
                     add_offset_link(0)
                     # adding gap only if min_offset not explicitly following beginning
                     if min_offset > 1:
-                        offset_links.append(f.table_cell(1, css_class="info-offset-gap") + f.text(u'\u2026') + f.table_cell(0))
+                        offset_links.append(f.table_cell(1, css_class="info-offset-gap") + f.text('\u2026') + f.table_cell(0))
 
                 # generating near pages links
                 for cur_offset in range(min_offset, max_offset + 1):
@@ -156,7 +156,7 @@ def execute(pagename, request):
                 # link to the last page of event log
                 if max_offset < (log_size - 1) / max_count:
                     if max_offset < (log_size - 1) / max_count - 1:
-                        offset_links.append(f.table_cell(1, css_class="info-offset-gap") + f.text(u'\u2026') + f.table_cell(0))
+                        offset_links.append(f.table_cell(1, css_class="info-offset-gap") + f.text('\u2026') + f.table_cell(0))
                     add_offset_link(((log_size - 1) / max_count) * max_count)
 
                 # special case - if offset is greater than max_offset * max_count
@@ -310,7 +310,7 @@ def execute(pagename, request):
         # print version history
         from MoinMoin.widget.browser import DataBrowserWidget
 
-        request.write(unicode(html.H2().append(_('Revision History'))))
+        request.write(str(html.H2().append(_('Revision History'))))
 
         if not count: # there was no entry in logfile
             request.write(_('No log entries found.'))
@@ -338,7 +338,7 @@ def execute(pagename, request):
                 paging_nav_html,
                 f.div(0)
             ]))
-        request.write(unicode(form))
+        request.write(str(form))
 
     # main function
     _ = request.getText

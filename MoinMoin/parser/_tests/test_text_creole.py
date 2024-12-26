@@ -10,7 +10,7 @@
 """
 
 import re
-from StringIO import StringIO
+from io import StringIO
 
 import py
 
@@ -18,7 +18,7 @@ from MoinMoin.Page import Page
 from MoinMoin.parser.text_creole import Parser as CreoleParser
 from MoinMoin.formatter.text_html import Formatter as HtmlFormatter
 
-PAGENAME = u'ThisPageDoesNotExistsAndWillNeverBeReally'
+PAGENAME = 'ThisPageDoesNotExistsAndWillNeverBeReally'
 
 class ParserTestCase(object):
     """ Helper class that provide a parsing method """
@@ -213,7 +213,7 @@ class TestEscapeHTML(ParserTestCase):
 
     def testEscapeInGetTextMacro(self):
         """ parser.wiki: escape html markup in GetText macro """
-        test = u"text <<GetText(<escape-me>)>> text"
+        test = "text <<GetText(<escape-me>)>> text"
         self._test(test)
 
 # Getting double escaping
@@ -303,7 +303,7 @@ pattern = re.compile(r'{{{This is some nested text}}}')
 }}}"""
         output = self.parse(raw)
         output = ''.join(output)
-        print output
+        print(output)
         # note: recent pygments renders the opening {{{ intermixed into some <span> tags
         assert "This is some nested text}}}" in output
 
@@ -317,7 +317,7 @@ You can use {{{brackets}}}
 }}}"""
         output = self.parse(raw)
         output = ''.join(output)
-        print output
+        print(output)
         assert 'You can use {{{brackets}}}' in output
 
     def testTextBeforeNestingPreBrackets(self):

@@ -7,7 +7,7 @@
 """
 
 from MoinMoin.support.htmlmarkup import Markup
-from HTMLParser import HTMLParseError
+from html.parser import HTMLParseError
 
 Dependencies = []
 
@@ -27,8 +27,8 @@ class Parser:
         """ Send the text. """
         try:
             self.request.write(formatter.rawHTML(Markup(self.raw).sanitize()))
-        except HTMLParseError, e:
+        except HTMLParseError as e:
             self.request.write(formatter.sysmsg(1) +
-                formatter.text(u'HTML parsing error: %s in "%s"' % (e.msg,
+                formatter.text('HTML parsing error: %s in "%s"' % (e.msg,
                                   self.raw.splitlines()[e.lineno - 1].strip())) +
                 formatter.sysmsg(0))

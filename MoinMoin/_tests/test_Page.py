@@ -12,18 +12,18 @@ from MoinMoin.Page import Page
 
 class TestPage:
     def testMeta(self):
-        page = Page(self.request, u'FrontPage')
+        page = Page(self.request, 'FrontPage')
         meta = page.meta
         for k, v in meta:
-            if k == u'format':
-                assert v == u'wiki'
-            elif k == u'language':
-                assert v == u'en'
+            if k == 'format':
+                assert v == 'wiki'
+            elif k == 'language':
+                assert v == 'en'
 
     def testBody(self):
-        page = Page(self.request, u'FrontPage')
+        page = Page(self.request, 'FrontPage')
         body = page.body
-        assert type(body) is unicode
+        assert type(body) is str
         assert 'MoinMoin' in body
         assert body.endswith('\n')
         assert '\r' not in body
@@ -36,28 +36,28 @@ class TestPage:
     def testEditInfoSystemPage(self):
         # system pages have no edit-log (and only 1 revision),
         # thus edit_info will return None
-        page = Page(self.request, u'RecentChanges')
+        page = Page(self.request, 'RecentChanges')
         edit_info = page.edit_info()
         assert edit_info == {}
 
     def testSplitTitle(self):
-        page = Page(self.request, u"FrontPage")
-        assert page.split_title(force=True) == u'Front Page'
+        page = Page(self.request, "FrontPage")
+        assert page.split_title(force=True) == 'Front Page'
 
     def testGetRevList(self):
-        page = Page(self.request, u"FrontPage")
+        page = Page(self.request, "FrontPage")
         assert 1 in page.getRevList()
 
     def testGetPageLinks(self):
-        page = Page(self.request, u"FrontPage")
-        assert u'WikiSandBox' in page.getPageLinks(self.request)
+        page = Page(self.request, "FrontPage")
+        assert 'WikiSandBox' in page.getPageLinks(self.request)
 
     def testSendPage(self):
-        page = Page(self.request, u"FrontPage")
-        import StringIO
-        out = StringIO.StringIO()
+        page = Page(self.request, "FrontPage")
+        import io
+        out = io.StringIO()
         self.request.redirect(out)
-        page.send_page(msg=u'Done', emit_headers=False)
+        page.send_page(msg='Done', emit_headers=False)
         result = out.getvalue()
         self.request.redirect()
         del out
@@ -69,8 +69,8 @@ class TestRootPage:
         rootpage = self.request.rootpage
         pagelist = rootpage.getPageList()
         assert len(pagelist) > 100
-        assert u'FrontPage' in pagelist
-        assert u'' not in pagelist
+        assert 'FrontPage' in pagelist
+        assert '' not in pagelist
 
 
 coverage_modules = ['MoinMoin.Page']

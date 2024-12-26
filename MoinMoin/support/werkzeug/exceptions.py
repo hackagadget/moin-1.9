@@ -142,16 +142,16 @@ class HTTPException(Exception):
 
     def get_description(self, environ=None):
         """Get the description."""
-        return u"<p>%s</p>" % escape(self.description).replace("\n", "<br>")
+        return "<p>%s</p>" % escape(self.description).replace("\n", "<br>")
 
     def get_body(self, environ=None):
         """Get the HTML body."""
         return text_type(
             (
-                u'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n'
-                u"<title>%(code)s %(name)s</title>\n"
-                u"<h1>%(name)s</h1>\n"
-                u"%(description)s\n"
+                '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n'
+                "<title>%(code)s %(name)s</title>\n"
+                "<h1>%(name)s</h1>\n"
+                "%(description)s\n"
             )
             % {
                 "code": self.code,

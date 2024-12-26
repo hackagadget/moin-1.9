@@ -41,8 +41,8 @@ class NewPage:
             and create the page as a subpage of MoinMoinBugs.
     """
 
-    def __init__(self, macro, template=u'', button_label=u'',
-                 parent_page=u'', name_template=u'%s'):
+    def __init__(self, macro, template='', button_label='',
+                 parent_page='', name_template='%s'):
         self.macro = macro
         self.request = macro.request
         self.formatter = macro.formatter
@@ -76,25 +76,25 @@ class NewPage:
 
         # TODO: better abstract this using the formatter
         html = [
-            u'<form class="macro" method="POST" action="%s"><div>' % self.request.href(self.formatter.page.page_name),
-            u'<input type="hidden" name="action" value="newpage">',
-            u'<input type="hidden" name="parent" value="%s">' % wikiutil.escape(self.parent, 1),
-            u'<input type="hidden" name="template" value="%s">' % wikiutil.escape(self.template, 1),
-            u'<input type="hidden" name="nametemplate" value="%s">' % wikiutil.escape(self.nametemplate, 1),
+            '<form class="macro" method="POST" action="%s"><div>' % self.request.href(self.formatter.page.page_name),
+            '<input type="hidden" name="action" value="newpage">',
+            '<input type="hidden" name="parent" value="%s">' % wikiutil.escape(self.parent, 1),
+            '<input type="hidden" name="template" value="%s">' % wikiutil.escape(self.template, 1),
+            '<input type="hidden" name="nametemplate" value="%s">' % wikiutil.escape(self.nametemplate, 1),
         ]
 
         if requires_input:
             html += [
-                u'<input type="text" name="pagename" size="30">',
+                '<input type="text" name="pagename" size="30">',
             ]
         html += [
-            u'<input type="submit" value="%s">' % wikiutil.escape(self.label, 1),
-            u'</div></form>',
+            '<input type="submit" value="%s">' % wikiutil.escape(self.label, 1),
+            '</div></form>',
             ]
         return self.formatter.rawHTML('\n'.join(html))
 
-def macro_NewPage(macro, template=u'', button_label=u'',
-                  parent_page=u'', name_template=u'%s'):
+def macro_NewPage(macro, template='', button_label='',
+                  parent_page='', name_template='%s'):
     """ Temporary glue code to use with moin current macro system """
     return NewPage(macro, template, button_label, parent_page, name_template).renderInPage()
 

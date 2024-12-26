@@ -11,7 +11,7 @@ lowercase = []
 digits = []
 space = []
 for code in range(1, 65535):
-    c = unichr(code)
+    c = chr(code)
     str = "\\u%04x" % code
     if c.isupper():
         uppercase.append(str)
@@ -22,12 +22,12 @@ for code in range(1, 65535):
     elif c.isspace():
         space.append(str)
 
-chars_upper = u''.join(uppercase)
-chars_lower = u''.join(lowercase+digits)
-chars_digits = u''.join(digits)
-chars_spaces = u''.join(space)
+chars_upper = ''.join(uppercase)
+chars_lower = ''.join(lowercase+digits)
+chars_digits = ''.join(digits)
+chars_spaces = ''.join(space)
 
-print """
+print("""
 chars_upper = u"%(chars_upper)s"
 
 chars_lower = u"%(chars_lower)s"
@@ -37,5 +37,5 @@ chars_digits = u"%(chars_digits)s"
 chars_spaces = u"%(chars_spaces)s"
 
 
-""" % globals()
+""" % globals())
 

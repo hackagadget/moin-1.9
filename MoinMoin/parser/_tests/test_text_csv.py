@@ -7,7 +7,7 @@
 """
 
 import re
-from StringIO import StringIO
+from io import StringIO
 
 import py
 
@@ -15,7 +15,7 @@ from MoinMoin.Page import Page
 from MoinMoin.parser.text_csv import Parser as CSV_Parser
 from MoinMoin.formatter.text_html import Formatter as HtmlFormatter
 
-PAGENAME = u'ThisPageDoesNotExistsAndWillNeverBeReally'
+PAGENAME = 'ThisPageDoesNotExistsAndWillNeverBeReally'
 
 class ParserTestCase(object):
     """ Helper class that provide a parsing method """

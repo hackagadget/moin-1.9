@@ -48,7 +48,7 @@ class QueryParser(object):
             item = items[0]
             items = items[1:]
 
-            if isinstance(item, unicode):
+            if isinstance(item, str):
                 if item.lower() == 'or':
                     sub = terms.subterms()
                     if len(sub) >= 1:
@@ -162,7 +162,7 @@ class QueryParser(object):
                                                         multikey=True,
                                                         brackets=('()', ),
                                                         quotes='\'"')
-        except wikiutil.BracketError, err:
+        except wikiutil.BracketError as err:
             raise QueryError(str(err))
         logging.debug("parse_quoted_separated items: %r" % items)
         query = self._analyse_items(items)

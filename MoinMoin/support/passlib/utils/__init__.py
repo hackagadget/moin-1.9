@@ -58,7 +58,7 @@ from passlib.utils.decor import (
 from passlib.exc import ExpectedStringError
 from passlib.utils.compat import (add_doc, join_bytes, join_byte_values,
                                   join_byte_elems, irange, imap, PY3, u,
-                                  join_unicode, unicode, byte_elem_value, nextgetter,
+                                  join_unicode, str, byte_elem_value, nextgetter,
                                   unicode_or_bytes_types,
                                   get_method_function, suppress_cause)
 # local
@@ -108,7 +108,7 @@ __all__ = [
 #=============================================================================
 
 # bitsize of system architecture (32 or 64)
-sys_bits = int(math.log(sys.maxsize if PY3 else sys.maxint, 2) + 1.5)
+sys_bits = int(math.log(sys.maxsize if PY3 else sys.maxsize, 2) + 1.5)
 
 # list of hashes algs supported by crypt() on at least one OS.
 # XXX: move to .registry for passlib 2.0?
@@ -328,8 +328,8 @@ def consteq(left, right):
     #       http://bugs.python.org/issue14955
 
     # validate types
-    if isinstance(left, unicode):
-        if not isinstance(right, unicode):
+    if isinstance(left, str):
+        if not isinstance(right, str):
             raise TypeError("inputs must be both unicode or both bytes")
         is_py3_bytes = False
     elif isinstance(left, bytes):
@@ -437,7 +437,7 @@ def saslprep(source, param="value"):
     # validate type
     # XXX: support bytes (e.g. run through want_unicode)?
     #      might be easier to just integrate this into cryptcontext.
-    if not isinstance(source, unicode):
+    if not isinstance(source, str):
         raise TypeError("input must be unicode string, not %s" %
                         (type(source),))
 
@@ -590,7 +590,7 @@ def right_pad_string(source, size, pad=None):
     cur = len(source)
     if size > cur:
         if pad is None:
-            pad = _UNULL if isinstance(source, unicode) else _BNULL
+            pad = _UNULL if isinstance(source, str) else _BNULL
         return source+pad*(size-cur)
     else:
         return source[:size]
@@ -652,7 +652,7 @@ def to_bytes(source, encoding="utf-8", param="value", source_encoding=None):
             return source.decode(source_encoding).encode(encoding)
         else:
             return source
-    elif isinstance(source, unicode):
+    elif isinstance(source, str):
         return source.encode(encoding)
     else:
         raise ExpectedStringError(source, param)
@@ -676,7 +676,7 @@ def to_unicode(source, encoding="utf-8", param="value"):
         * returns bytes strings decoded using *encoding*
     """
     assert encoding
-    if isinstance(source, unicode):
+    if isinstance(source, str):
         return source
     elif isinstance(source, bytes):
         return source.decode(encoding)
@@ -687,7 +687,7 @@ if PY3:
     def to_native_str(source, encoding="utf-8", param="value"):
         if isinstance(source, bytes):
             return source.decode(encoding)
-        elif isinstance(source, unicode):
+        elif isinstance(source, str):
             return source
         else:
             raise ExpectedStringError(source, param)
@@ -695,7 +695,7 @@ else:
     def to_native_str(source, encoding="utf-8", param="value"):
         if isinstance(source, bytes):
             return source
-        elif isinstance(source, unicode):
+        elif isinstance(source, str):
             return source.encode(encoding)
         else:
             raise ExpectedStringError(source, param)
@@ -797,11 +797,11 @@ else:
             return result
     else:
         def safe_crypt(secret, hash):
-            if isinstance(secret, unicode):
+            if isinstance(secret, str):
                 secret = secret.encode("utf-8")
             if _NULL in secret:
                 raise ValueError("null character in secret")
-            if isinstance(hash, unicode):
+            if isinstance(hash, str):
                 hash = hash.encode("ascii")
             result = _crypt(secret, hash)
             if not result:
@@ -970,7 +970,7 @@ def getrandstr(rng, charset, count):
             value //= letters
             i += 1
 
-    if isinstance(charset, unicode):
+    if isinstance(charset, str):
         return join_unicode(helper())
     else:
         return join_byte_elems(helper())

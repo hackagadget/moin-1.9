@@ -2,7 +2,7 @@
 #=============================================================================
 # imports
 #=============================================================================
-from __future__ import absolute_import, division, print_function, unicode_literals
+
 # core
 import codecs
 from collections import defaultdict
@@ -84,7 +84,7 @@ def _self_info_rate(source):
     for char in source:
         counts[char] += 1
     if size is None:
-        values = counts.values()
+        values = list(counts.values())
         size = sum(values)
     else:
         values = itervalues(counts)
@@ -266,7 +266,7 @@ class SequenceGenerator(object):
 
         # hand off to parent
         if kwds and _superclasses(self, SequenceGenerator) == (object,):
-            raise TypeError("Unexpected keyword(s): %s" % ", ".join(kwds.keys()))
+            raise TypeError("Unexpected keyword(s): %s" % ", ".join(list(kwds.keys())))
         super(SequenceGenerator, self).__init__(**kwds)
 
     #=============================================================================

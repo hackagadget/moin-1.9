@@ -124,7 +124,7 @@ class PageGraphicalEditor(PageEditor.PageEditor):
         # get request parameters
         try:
             text_rows = int(form['rows'])
-        except StandardError:
+        except Exception:
             text_rows = self.cfg.edit_rows
             if request.user.valid:
                 text_rows = int(request.user.edit_rows)
@@ -194,7 +194,7 @@ Please review the page and save then. Do not save this page as it is!""")
                     loadable_draft = True
                     page_rev = rev
                     draft_timestamp_str = request.user.getFormattedDateTime(draft_timestamp)
-                    draft_message = _(u"'''<<BR>>Your draft based on revision %(draft_rev)d (saved %(draft_timestamp_str)s) can be loaded instead of the current revision %(page_rev)d by using the load draft button - in case you lost your last edit somehow without saving it.''' A draft gets saved for you when you do a preview, cancel an edit or unsuccessfully save.", wiki=True, percent=True) % locals()
+                    draft_message = _("'''<<BR>>Your draft based on revision %(draft_rev)d (saved %(draft_timestamp_str)s) can be loaded instead of the current revision %(page_rev)d by using the load draft button - in case you lost your last edit somehow without saving it.''' A draft gets saved for you when you do a preview, cancel an edit or unsuccessfully save.", wiki=True, percent=True) % locals()
 
         # Setup status message
         status = [kw.get('msg', ''), conflict_msg, edit_lock_message, draft_message]
@@ -234,7 +234,7 @@ Please review the page and save then. Do not save this page as it is!""")
         # http://fplanque.net/2003/Articles/iecsstextarea/
         request.write('<fieldset style="border:none;padding:0;">')
 
-        request.write(unicode(html.INPUT(type="hidden", name="action", value="edit")))
+        request.write(str(html.INPUT(type="hidden", name="action", value="edit")))
 
         # Send revision of the page our edit is based on
         request.write('<input type="hidden" name="rev" value="%d">' % (rev, ))
@@ -249,7 +249,7 @@ Please review the page and save then. Do not save this page as it is!""")
         # Save backto in a hidden input
         backto = request.values.get('backto')
         if backto:
-            request.write(unicode(html.INPUT(type="hidden", name="backto", value=backto)))
+            request.write(str(html.INPUT(type="hidden", name="backto", value=backto)))
 
         # button bar
         button_spellcheck = '<input class="button" type="submit" name="button_spellcheck" value="%s">' % _('Check Spelling')
@@ -377,7 +377,7 @@ If you don't want that, hit '''%(cancel_button_text)s''' to cancel your changes.
         cat_pages.insert(0, ('', _('<No addition>')))
         request.write("<p>")
         request.write(_('Add to: %(category)s') % {
-            'category': unicode(web.makeSelection('category', cat_pages)),
+            'category': str(web.makeSelection('category', cat_pages)),
         })
         if self.cfg.mail_enabled:
             request.write('''

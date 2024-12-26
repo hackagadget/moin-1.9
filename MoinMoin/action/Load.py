@@ -41,7 +41,7 @@ class Load(ActionBase):
         if not TextCha(request).check_answer_from_form():
             return status, _('TextCha: Wrong answer! Go back and try again...')
 
-        comment = form.get('comment', u'')
+        comment = form.get('comment', '')
         comment = wikiutil.clean_input(comment)
 
         file_upload = request.files.get('file')
@@ -68,10 +68,10 @@ class Load(ActionBase):
             try:
                 msg = pg.saveText(filecontent, 0, comment=comment)
                 status = True
-            except pg.EditConflict, e:
+            except pg.EditConflict as e:
                 msg = e.message
-            except pg.SaveError, msg:
-                msg = unicode(msg)
+            except pg.SaveError as msg:
+                msg = str(msg)
         else:
             msg = _("Pagename not specified!")
         return status, msg

@@ -12,7 +12,7 @@
 Dependencies = ['pages']
 
 import sys, os
-from StringIO import StringIO
+from io import StringIO
 
 from MoinMoin import wikiutil, version
 from MoinMoin import action, macro, parser
@@ -27,17 +27,17 @@ class SystemInfo:
 
     def formatInReadableUnits(self, size):
         size = float(size)
-        unit = u' Byte'
+        unit = ' Byte'
         if size > 9999:
-            unit = u' KiB'
+            unit = ' KiB'
             size /= 1024
         if size > 9999:
-            unit = u' MiB'
+            unit = ' MiB'
             size /= 1024
         if size > 9999:
-            unit = u' GiB'
+            unit = ' GiB'
             size /= 1024
-        return u"%.1f %s" % (size, unit)
+        return "%.1f %s" % (size, unit)
 
     def getDirectorySize(self, path):
         try:
@@ -58,15 +58,15 @@ class SystemInfo:
 
         buf = StringIO()
 
-        row = lambda label, value, buf=buf: buf.write(u'<dt>%s</dt><dd>%s</dd>' % (label, value))
+        row = lambda label, value, buf=buf: buf.write('<dt>%s</dt><dd>%s</dd>' % (label, value))
 
-        buf.write(u'<dl>')
+        buf.write('<dl>')
         row(_('Python Version'), sys.version)
         row(_('MoinMoin Version'), _('Release %s [Revision %s]') % (version.release, version.revision))
 
         if not request.user.valid:
             # for an anonymous user it ends here.
-            buf.write(u'</dl>')
+            buf.write('</dl>')
             return buf.getvalue()
 
         if request.user.isSuperUser():
@@ -162,7 +162,7 @@ class SystemInfo:
             t_count = None
 
         row(_('Active threads'), t_count or _('N/A'))
-        buf.write(u'</dl>')
+        buf.write('</dl>')
 
         return buf.getvalue()
 

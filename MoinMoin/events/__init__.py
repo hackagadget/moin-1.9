@@ -29,7 +29,7 @@ class Event(object):
     """A class handling information common to all events."""
 
     # NOTE: each Event subclass must have a unique name attribute
-    name = u"Event"
+    name = "Event"
 
     def __init__(self, request):
         self.request = request
@@ -38,7 +38,7 @@ class Event(object):
 class PageEvent(Event):
     """An event related to a page change"""
 
-    name = u"PageEvent"
+    name = "PageEvent"
 
     def __init__(self, request):
         Event.__init__(self, request)
@@ -46,8 +46,8 @@ class PageEvent(Event):
 
 class PageChangedEvent(PageEvent):
 
-    name = u"PageChangedEvent"
-    description = _(u"""Page has been modified""")
+    name = "PageChangedEvent"
+    description = _("""Page has been modified""")
     req_superuser = False
 
     def __init__(self, request, page, comment):
@@ -58,8 +58,8 @@ class PageChangedEvent(PageEvent):
 
 class TrivialPageChangedEvent(PageEvent):
 
-    name = u"TrivialPageChangedEvent"
-    description = _(u"Page has been modified in a trivial fashion")
+    name = "TrivialPageChangedEvent"
+    description = _("Page has been modified in a trivial fashion")
     req_superuser = False
 
     def __init__(self, request, page, comment):
@@ -70,8 +70,8 @@ class TrivialPageChangedEvent(PageEvent):
 
 class PageRenamedEvent(PageEvent):
 
-    name = u"PageRenamedEvent"
-    description = _(u"""Page has been renamed""")
+    name = "PageRenamedEvent"
+    description = _("""Page has been renamed""")
     req_superuser = False
 
     def __init__(self, request, page, old_page, comment=""):
@@ -83,8 +83,8 @@ class PageRenamedEvent(PageEvent):
 
 class PageDeletedEvent(PageEvent):
 
-    name = u"PageDeletedEvent"
-    description = _(u"""Page has been deleted""")
+    name = "PageDeletedEvent"
+    description = _("""Page has been deleted""")
     req_superuser = False
 
     def __init__(self, request, page, comment):
@@ -95,8 +95,8 @@ class PageDeletedEvent(PageEvent):
 
 class PageCopiedEvent(PageEvent):
 
-    name = u"PageCopiedEvent"
-    description = _(u"""Page has been copied""")
+    name = "PageCopiedEvent"
+    description = _("""Page has been copied""")
     req_superuser = False
 
     def __init__(self, request, page, old_page, comment):
@@ -108,8 +108,8 @@ class PageCopiedEvent(PageEvent):
 
 class FileAttachedEvent(PageEvent):
 
-    name = u"FileAttachedEvent"
-    description = _(u"""A new attachment has been added""")
+    name = "FileAttachedEvent"
+    description = _("""A new attachment has been added""")
     req_superuser = False
 
     def __init__(self, request, pagename, filename, size):
@@ -122,8 +122,8 @@ class FileAttachedEvent(PageEvent):
 
 class FileRemovedEvent(PageEvent):
 
-    name = u"FileRemovedEvent"
-    description = _(u"""An attachment has been removed""")
+    name = "FileRemovedEvent"
+    description = _("""An attachment has been removed""")
     req_superuser = False
 
     def __init__(self, request, pagename, filename, size):
@@ -136,8 +136,8 @@ class FileRemovedEvent(PageEvent):
 
 class PageRevertedEvent(PageEvent):
 
-    name = u"PageRevertedEvent"
-    description = _(u"""A page has been reverted to a previous state""")
+    name = "PageRevertedEvent"
+    description = _("""A page has been reverted to a previous state""")
     req_superuser = False
 
     def __init__(self, request, pagename, previous, current):
@@ -149,8 +149,8 @@ class PageRevertedEvent(PageEvent):
 
 class SubscribedToPageEvent(PageEvent):
 
-    name = u"SubscribedToPageEvent"
-    description = _(u"""A user has subscribed to a page""")
+    name = "SubscribedToPageEvent"
+    description = _("""A user has subscribed to a page""")
     req_superuser = True
 
     def __init__(self, request, pagename, username):
@@ -182,8 +182,8 @@ class JabberIDUnsetEvent(Event):
 class UserCreatedEvent(Event):
     """ Sent when a new user has been created """
 
-    name = u"UserCreatedEvent"
-    description = _(u"""A new account has been created""")
+    name = "UserCreatedEvent"
+    description = _("""A new account has been created""")
     req_superuser = True
 
     def __init__(self, request, user):
@@ -198,7 +198,7 @@ class PagePreSaveEvent(Event):
     This can be used to abort a save, for instance, if handler returns Abort.
     """
 
-    name = u"PagePreSaveEvent"
+    name = "PagePreSaveEvent"
 
     def __init__(self, request, page_editor, new_text):
         Event.__init__(self, request)
@@ -275,8 +275,8 @@ def get_subscribable_events():
     defs = globals()
     subscribable_events = {}
 
-    for ev in defs.values():
-        if type(ev) is type and issubclass(ev, Event) and ev.__dict__.has_key("description") and ev.__dict__.has_key("name"):
+    for ev in list(defs.values()):
+        if type(ev) is type and issubclass(ev, Event) and "description" in ev.__dict__ and "name" in ev.__dict__:
             subscribable_events[ev.name] = {'desc': ev.description, 'superuser': ev.req_superuser}
 
     return subscribable_events

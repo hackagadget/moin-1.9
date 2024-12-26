@@ -47,7 +47,7 @@ try:
     from urllib.parse import unquote_to_bytes as _unquote
 except ImportError:
     from urllib2 import parse_http_list as _parse_list_header
-    from urllib2 import unquote as _unquote
+    from urllib.parse import unquote as _unquote
 
 _cookie_charset = "latin1"
 _basic_auth_charset = "utf-8"

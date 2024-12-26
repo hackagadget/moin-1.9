@@ -23,17 +23,17 @@ def get_data(request):
     users = user.getUserList(request)
     for userID in users:
         current_user = user.User(request, userID)
-        if current_user.language == u'':
+        if current_user.language == '':
             # User is using <Browser setting>, attempting to look up if we've managed to store the real language...
             try:
                 data[current_user.real_language] = data.get(current_user.real_language, 0) + 1
             except AttributeError: # Couldn't find the used language at all...
-                data[u''] = data.get(u'', 0) + 1
+                data[''] = data.get('', 0) + 1
         else:
             data[current_user.language] = data.get(current_user.language, 0) + 1
-    if u'' in data:
-        data[u'browser'] = data.pop(u'') # In case we have users whose languages aren't detectable.
-    data = [(cnt, current_user_language) for current_user_language, cnt in data.items()]
+    if '' in data:
+        data['browser'] = data.pop('') # In case we have users whose languages aren't detectable.
+    data = [(cnt, current_user_language) for current_user_language, cnt in list(data.items())]
     data.sort()
     data.reverse()
     return data
@@ -65,7 +65,7 @@ def used_languages(request):
     if total:
         for cnt, lang in data:
             try:
-                if lang == u'browser':
+                if lang == 'browser':
                     languages.addRow((browserlang, "%(percent).2f%% (%(count)d)" % {
                         'percent': 100.0 * cnt / total,
                         'count': cnt}))

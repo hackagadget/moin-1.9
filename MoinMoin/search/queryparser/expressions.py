@@ -48,7 +48,7 @@ class BaseExpression(object):
         @param use_re: treat pattern as re of plain text, bool
         @param case: do case sensitive search, bool
         """
-        self._pattern = unicode(pattern)
+        self._pattern = str(pattern)
         self.negated = 0
         self.use_re = use_re
         self.case = case
@@ -62,7 +62,7 @@ class BaseExpression(object):
         self.pattern, self.search_re = self._build_re(self._pattern, use_re=use_re, case=case)
 
     def __str__(self):
-        return unicode(self).encode(config.charset, 'replace')
+        return str(self).encode(config.charset, 'replace')
 
     def negate(self):
         """ Negate the result of this term """
@@ -113,7 +113,7 @@ class BaseExpression(object):
 
         Used to display the needle in the page.
         """
-        return u''
+        return ''
 
     def _build_re(self, pattern, use_re=False, case=False, stemmed=False):
         """ Make a regular expression out of a text pattern """
@@ -145,7 +145,7 @@ class BaseExpression(object):
                             queries.append(connection.query_field(field_to_check, term))
             else:
                 # Check all fields
-                for field, terms in data.iteritems():
+                for field, terms in data.items():
                     for term in terms:
                         if self.search_re.match(term):
                             queries.append(connection.query_field(field_to_check, term))
@@ -157,7 +157,7 @@ class BaseExpression(object):
 
     def __unicode__(self):
         neg = self.negated and '-' or ''
-        return u'%s%s"%s"' % (neg, self._tag, unicode(self._pattern))
+        return '%s%s"%s"' % (neg, self._tag, str(self._pattern))
 
 
 class AndExpression(BaseExpression):
@@ -183,8 +183,8 @@ class AndExpression(BaseExpression):
     def __unicode__(self):
         result = ''
         for t in self._subterms:
-            result += self.operator + unicode(t)
-        return u'[' + result[len(self.operator):] + u']'
+            result += self.operator + str(t)
+        return '[' + result[len(self.operator):] + ']'
 
     def _filter(self, terms, name):
         """ A function that returns True if all terms filter name """
@@ -229,7 +229,7 @@ class AndExpression(BaseExpression):
 
     def highlight_re(self):
         if not self.highlight:
-            return u''
+            return ''
 
         result = []
         for s in self._subterms:
@@ -237,7 +237,7 @@ class AndExpression(BaseExpression):
             if highlight_re:
                 result.append(highlight_re)
 
-        return u'|'.join(result)
+        return '|'.join(result)
 
     def xapian_need_postproc(self):
         for term in self._subterms:
@@ -366,9 +366,9 @@ class TextSearch(BaseTextFieldSearch):
 
     def highlight_re(self):
         if not self.highlight:
-            return u''
+            return ''
 
-        return u"(%s)" % self.pattern
+        return "(%s)" % self.pattern
 
     def _get_matches(self, page):
         matches = []
@@ -464,9 +464,9 @@ class LinkSearch(BaseFieldSearch):
 
     def highlight_re(self):
         if not self.highlight:
-            return u''
+            return ''
 
-        return u"(%s)" % self._textpattern
+        return "(%s)" % self._textpattern
 
     def _get_matches(self, page):
         # Get matches in page links
@@ -547,9 +547,9 @@ class CategorySearch(BaseFieldSearch):
 
     def highlight_re(self):
         if not self.highlight:
-            return u''
+            return ''
 
-        return u'(\\b%s\\b)' % self._pattern
+        return '(\\b%s\\b)' % self._pattern
 
     def xapian_term(self, request, connection):
         # XXX Probably, it is a good idea to inherit this class from
@@ -581,7 +581,7 @@ class MimetypeSearch(BaseFieldSearch):
 
     def _get_matches(self, page):
 
-        page_mimetype = u'text/%s' % page.pi['format']
+        page_mimetype = 'text/%s' % page.pi['format']
 
         if self.search_re.search(page_mimetype):
             return [Match()]

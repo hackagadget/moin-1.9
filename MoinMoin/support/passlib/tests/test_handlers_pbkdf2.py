@@ -203,9 +203,9 @@ class scram_test(HandlerCase):
         # should normalize to the same value: 'IX \xE0')
         (u('IX \xE0'),             '$scram$6400$0BojBCBE6P2/N4bQ$'
                                    'sha-1=YniLes.b8WFMvBhtSACZyyvxeCc'),
-        (u('\u2168\u3000a\u0300'), '$scram$6400$0BojBCBE6P2/N4bQ$'
+        (u('\\u2168\\u3000a\\u0300'), '$scram$6400$0BojBCBE6P2/N4bQ$'
                                    'sha-1=YniLes.b8WFMvBhtSACZyyvxeCc'),
-        (u('\u00ADIX \xE0'),       '$scram$6400$0BojBCBE6P2/N4bQ$'
+        (u('\\u00ADIX \xE0'),       '$scram$6400$0BojBCBE6P2/N4bQ$'
                                    'sha-1=YniLes.b8WFMvBhtSACZyyvxeCc'),
     ]
 
@@ -340,7 +340,7 @@ class scram_test(HandlerCase):
         # check various encodings of password work.
         s1 = b'\x01\x02\x03'
         d1 = b'\xb2\xfb\xab\x82[tNuPnI\x8aZZ\x19\x87\xcen\xe9\xd3'
-        self.assertEqual(hash(u("\u2168"), s1, 1000, 'sha-1'), d1)
+        self.assertEqual(hash(u("\\u2168"), s1, 1000, 'sha-1'), d1)
         self.assertEqual(hash(b"\xe2\x85\xa8", s1, 1000, 'SHA-1'), d1)
         self.assertEqual(hash(u("IX"), s1, 1000, 'sha1'), d1)
         self.assertEqual(hash(b"IX", s1, 1000, 'SHA1'), d1)
@@ -363,18 +363,18 @@ class scram_test(HandlerCase):
         # to verify full normalization behavior.
 
         # hash unnormalized
-        h = self.do_encrypt(u("I\u00ADX"))
+        h = self.do_encrypt(u("I\\u00ADX"))
         self.assertTrue(self.do_verify(u("IX"), h))
-        self.assertTrue(self.do_verify(u("\u2168"), h))
+        self.assertTrue(self.do_verify(u("\\u2168"), h))
 
         # hash normalized
         h = self.do_encrypt(u("\xF3"))
-        self.assertTrue(self.do_verify(u("o\u0301"), h))
-        self.assertTrue(self.do_verify(u("\u200Do\u0301"), h))
+        self.assertTrue(self.do_verify(u("o\\u0301"), h))
+        self.assertTrue(self.do_verify(u("\\u200Do\\u0301"), h))
 
         # throws error if forbidden char provided
-        self.assertRaises(ValueError, self.do_encrypt, u("\uFDD0"))
-        self.assertRaises(ValueError, self.do_verify, u("\uFDD0"), h)
+        self.assertRaises(ValueError, self.do_encrypt, u("\\uFDD0"))
+        self.assertRaises(ValueError, self.do_verify, u("\\uFDD0"), h)
 
     def test_94_using_w_default_algs(self, param="default_algs"):
         """using() -- 'default_algs' parameter"""

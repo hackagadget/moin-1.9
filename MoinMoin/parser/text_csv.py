@@ -82,7 +82,7 @@ class Parser:
         quoting = QUOTE_NONE
         name = None
         hdr = reader([kw.get('format_args', '').strip().encode('utf-8')], delimiter=" ")
-        args = hdr.next()
+        args = next(hdr)
 
         for arg in args:
             arg = arg.decode('utf-8')
@@ -125,13 +125,13 @@ class Parser:
             staticvals = staticvals[:len(staticcols)]
 
         r = reader(data, delimiter=delimiter, quotechar=quotechar, quoting=quoting)
-        cols = map(lambda x: x.decode('utf-8'), r.next()) + staticcols
+        cols = [x.decode('utf-8') for x in next(r)] + staticcols
 
         self._show_header = True
 
         if cols == staticcols:
             try:
-                self._first_row = map(lambda x: x.decode('utf-8'), r.next())
+                self._first_row = [x.decode('utf-8') for x in next(r)]
                 cols = [None] * len(self._first_row) + staticcols
                 self._show_header = False
             except StopIteration:
@@ -156,7 +156,7 @@ class Parser:
             linkparse[colidx] = col in linkcols
 
         for row in self._read_rows(r):
-            row = map(lambda x: x.decode('utf-8'), row)
+            row = [x.decode('utf-8') for x in row]
             if len(row) > num_entry_cols:
                 row = row[:num_entry_cols]
             elif len(row) < num_entry_cols:

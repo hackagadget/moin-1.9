@@ -28,7 +28,7 @@ class TestWikiGroupBackend(GroupsBackendTest):
     def setup_class(self):
         become_trusted(self.request)
 
-        for group, members in self.test_groups.iteritems():
+        for group, members in self.test_groups.items():
             page_text = ' * %s' % '\n * '.join(members)
             create_page(self.request, group, page_text)
 
@@ -45,11 +45,11 @@ class TestWikiGroupBackend(GroupsBackendTest):
         request = self.request
         become_trusted(request)
 
-        page = create_page(request, u'SomeGroup', u" * ExampleUser")
+        page = create_page(request, 'SomeGroup', " * ExampleUser")
         page.renamePage('AnotherGroup')
 
-        result = u'ExampleUser' in request.groups[u'AnotherGroup']
-        nuke_page(request, u'AnotherGroup')
+        result = 'ExampleUser' in request.groups['AnotherGroup']
+        nuke_page(request, 'AnotherGroup')
 
         assert result is True
 
@@ -60,13 +60,13 @@ class TestWikiGroupBackend(GroupsBackendTest):
         request = self.request
         become_trusted(request)
 
-        page = create_page(request, u'SomeGroup', u" * ExampleUser")
-        page.copyPage(u'SomeOtherGroup')
+        page = create_page(request, 'SomeGroup', " * ExampleUser")
+        page.copyPage('SomeOtherGroup')
 
-        result = u'ExampleUser' in request.groups[u'SomeOtherGroup']
+        result = 'ExampleUser' in request.groups['SomeOtherGroup']
 
-        nuke_page(request, u'OtherGroup')
-        nuke_page(request, u'SomeGroup')
+        nuke_page(request, 'OtherGroup')
+        nuke_page(request, 'SomeGroup')
 
         assert result is True
 
@@ -78,12 +78,12 @@ class TestWikiGroupBackend(GroupsBackendTest):
         become_trusted(request)
 
         # long list of users
-        page_content = [u" * %s" % member for member in create_random_string_list(length=15, count=1234)]
+        page_content = [" * %s" % member for member in create_random_string_list(length=15, count=1234)]
         test_user = create_random_string_list(length=15, count=1)[0]
-        create_page(request, u'UserGroup', "\n".join(page_content))
-        append_page(request, u'UserGroup', u' * %s' % test_user)
+        create_page(request, 'UserGroup', "\n".join(page_content))
+        append_page(request, 'UserGroup', ' * %s' % test_user)
         result = test_user in request.groups['UserGroup']
-        nuke_page(request, u'UserGroup')
+        nuke_page(request, 'UserGroup')
 
         assert result
 
@@ -95,17 +95,17 @@ class TestWikiGroupBackend(GroupsBackendTest):
         become_trusted(request)
 
         # long list of users
-        page_content = [u" * %s" % member for member in create_random_string_list()]
-        create_page(request, u'UserGroup', "\n".join(page_content))
+        page_content = [" * %s" % member for member in create_random_string_list()]
+        create_page(request, 'UserGroup', "\n".join(page_content))
 
         new_user = create_random_string_list(length=15, count=1)[0]
-        append_page(request, u'UserGroup', u' * %s' % new_user)
+        append_page(request, 'UserGroup', ' * %s' % new_user)
         user = User(request, name=new_user)
         if not user.exists():
             User(request, name=new_user, password=new_user).save()
 
-        result = new_user in request.groups[u'UserGroup']
-        nuke_page(request, u'UserGroup')
+        result = new_user in request.groups['UserGroup']
+        nuke_page(request, 'UserGroup')
         nuke_user(request, new_user)
 
         assert result
@@ -119,17 +119,17 @@ class TestWikiGroupBackend(GroupsBackendTest):
         become_trusted(request)
 
         # long list of users
-        page_content = [u" * %s" % member for member in create_random_string_list()]
+        page_content = [" * %s" % member for member in create_random_string_list()]
         page_content = "\n".join(page_content)
-        create_page(request, u'UserGroup', page_content)
+        create_page(request, 'UserGroup', page_content)
 
         test_user = create_random_string_list(length=15, count=1)[0]
-        page = append_page(request, u'UserGroup', u' * %s' % test_user)
+        page = append_page(request, 'UserGroup', ' * %s' % test_user)
 
         # saves the text without test_user
         page.saveText(page_content, 0)
-        result = test_user in request.groups[u'UserGroup']
-        nuke_page(request, u'UserGroup')
+        result = test_user in request.groups['UserGroup']
+        nuke_page(request, 'UserGroup')
 
         assert not result
 
@@ -141,17 +141,17 @@ class TestWikiGroupBackend(GroupsBackendTest):
         become_trusted(request)
 
         test_user = create_random_string_list(length=15, count=1)[0]
-        member = u" * %s\n" % test_user
-        page = create_page(request, u'UserGroup', member)
+        member = " * %s\n" % test_user
+        page = create_page(request, 'UserGroup', member)
 
         # next member saved  as trivial change
         test_user = create_random_string_list(length=15, count=1)[0]
-        member = u" * %s\n" % test_user
+        member = " * %s\n" % test_user
         page.saveText(member, 0, trivial=1)
 
-        result = test_user in request.groups[u'UserGroup']
+        result = test_user in request.groups['UserGroup']
 
-        nuke_page(request, u'UserGroup')
+        nuke_page(request, 'UserGroup')
 
         assert result
 
@@ -164,19 +164,19 @@ class TestWikiGroupBackend(GroupsBackendTest):
         request = self.request
         become_trusted(request)
 
-        create_page(request, u'NewGroup', u" * ExampleUser")
+        create_page(request, 'NewGroup', " * ExampleUser")
 
         acl_rights = ["NewGroup:read,write"]
         acl = security.AccessControlList(request.cfg, acl_rights)
 
-        has_rights_before = acl.may(request, u"AnotherUser", "read")
+        has_rights_before = acl.may(request, "AnotherUser", "read")
 
         # update page - add AnotherUser to a page group NewGroup
-        append_page(request, u'NewGroup', u" * AnotherUser")
+        append_page(request, 'NewGroup', " * AnotherUser")
 
-        has_rights_after = acl.may(request, u"AnotherUser", "read")
+        has_rights_after = acl.may(request, "AnotherUser", "read")
 
-        nuke_page(request, u'NewGroup')
+        nuke_page(request, 'NewGroup')
 
         assert not has_rights_before, 'AnotherUser has no read rights because in the beginning he is not a member of a group page NewGroup'
         assert has_rights_after, 'AnotherUser must have read rights because after appendage he is member of NewGroup'
@@ -187,14 +187,14 @@ class TestWikiGroupBackend(GroupsBackendTest):
         """
         request = self.request
         become_trusted(request)
-        group_name = u'SimpleGroup'
-        page_text = u"""\
+        group_name = 'SimpleGroup'
+        page_text = """\
  * FirstUser
  * SecondUser
  * LastUser"""
         page = create_page(request, group_name, page_text)
         group_members = set(request.groups[group_name])
-        assert group_members == set([u'FirstUser', u'SecondUser', u'LastUser'])
+        assert group_members == set(['FirstUser', 'SecondUser', 'LastUser'])
         nuke_page(request, group_name)
 
     def test_complex_group_page(self):
@@ -203,8 +203,8 @@ class TestWikiGroupBackend(GroupsBackendTest):
         """
         request = self.request
         become_trusted(request)
-        group_name = u'ComplexGroup'
-        page_text = u"""\
+        group_name = 'ComplexGroup'
+        page_text = """\
  * FirstUser
   * any text
  * SecondUser
@@ -212,7 +212,7 @@ class TestWikiGroupBackend(GroupsBackendTest):
   * any text"""
         page = create_page(request, group_name, page_text)
         group_members = set(request.groups[group_name])
-        assert group_members == set([u'FirstUser', u'SecondUser', u'LastUser'])
+        assert group_members == set(['FirstUser', 'SecondUser', 'LastUser'])
         nuke_page(request, group_name)
 
 coverage_modules = ['MoinMoin.datastruct.backends.wiki_groups']

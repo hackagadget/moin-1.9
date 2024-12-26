@@ -11,5 +11,5 @@ def execute(indexobj, filename):
 
         TODO: maybe extract title, artist, etc. from mp3 and ogg
     """
-    return u""
+    return ""
 

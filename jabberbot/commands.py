@@ -14,7 +14,7 @@ from pyxmpp.jid import JID
 # First, XML RPC -> XMPP commands
 class NotificationCommand:
     """Class representing a notification request"""
-    def __init__(self, jids, notification, msg_type=u"normal", async=True):
+    def __init__(self, jids, notification, msg_type="normal", async=True):
         """A constructor
 
         @param jids: a list of jids to sent this message to
@@ -48,7 +48,7 @@ class NotificationCommandI18n(NotificationCommand):
         @return: translated message and subject
         @rtype: tuple
         """
-        if self.notification.has_key('data'):
+        if 'data' in self.notification:
             msg =  gettext_func(self.notification['text']) % self.notification['data']
         else:
             msg = gettext_func(self.notification['text'])
@@ -78,12 +78,12 @@ class BaseDataCommand(object):
     """
 
     # Description of what the command does
-    description = u""
+    description = ""
 
     # Parameter list in a human-readable format
-    parameter_list = u""
+    parameter_list = ""
 
-    def __init__(self, jid, presentation=u"text"):
+    def __init__(self, jid, presentation="text"):
         """A constructor
 
         @param jid: Jabber ID to send the reply to
@@ -98,8 +98,8 @@ class BaseDataCommand(object):
 
 class GetPage(BaseDataCommand):
 
-    description = u"retrieve raw content of a named page"
-    parameter_list = u"pagename"
+    description = "retrieve raw content of a named page"
+    parameter_list = "pagename"
 
     def __init__(self, jid, pagename):
         BaseDataCommand.__init__(self, jid)
@@ -107,8 +107,8 @@ class GetPage(BaseDataCommand):
 
 class GetPageHTML(BaseDataCommand):
 
-    description = u"retrieve HTML-formatted content of a named page"
-    parameter_list = u"pagename"
+    description = "retrieve HTML-formatted content of a named page"
+    parameter_list = "pagename"
 
     def __init__(self, jid, pagename):
         BaseDataCommand.__init__(self, jid)
@@ -116,25 +116,25 @@ class GetPageHTML(BaseDataCommand):
 
 class GetPageList(BaseDataCommand):
 
-    description = u"get a list of accesible pages"
-    parameter_list = u""
+    description = "get a list of accesible pages"
+    parameter_list = ""
 
     def __init__(self, jid):
         BaseDataCommand.__init__(self, jid)
 
 class GetPageInfo(BaseDataCommand):
 
-    description = u"show detailed information about a page"
-    parameter_list = u"pagename"
+    description = "show detailed information about a page"
+    parameter_list = "pagename"
 
-    def __init__(self, jid, pagename, presentation=u"text"):
+    def __init__(self, jid, pagename, presentation="text"):
         BaseDataCommand.__init__(self, jid, presentation)
         self.pagename = pagename
 
 class Search(BaseDataCommand):
 
-    description = u"perform a wiki search"
-    parameter_list = u"{title|text} term"
+    description = "perform a wiki search"
+    parameter_list = "{title|text} term"
 
     def __init__(self, jid, search_type, *args, **kwargs):
         BaseDataCommand.__init__(self, jid)
@@ -152,8 +152,8 @@ class Search(BaseDataCommand):
 
 class RevertPage(BaseDataCommand):
 
-    description = u"revert a page to previous revision"
-    parameter_list = u"page_name revision"
+    description = "revert a page to previous revision"
+    parameter_list = "page_name revision"
 
     def __init__(self, jid, pagename, revision):
         BaseDataCommand.__init__(self, jid)

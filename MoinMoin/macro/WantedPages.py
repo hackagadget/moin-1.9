@@ -37,7 +37,7 @@ def macro_WantedPages(macro):
     # build a dict of wanted pages
     wanted = {}
     deprecated_links = []
-    for name, page in pages.items():
+    for name, page in list(pages.items()):
         # Skip system pages, because missing translations are not wanted pages,
         # unless you are a translator and clicked "Include system pages"
         if not allpages and wikiutil.isSystemPage(request, name):
@@ -63,10 +63,10 @@ def macro_WantedPages(macro):
 
     # Check for the extreme case when there are no wanted pages
     if not wanted:
-        return u"%s<p>%s</p>" % (controlbar, _("No wanted pages in this wiki."))
+        return "%s<p>%s</p>" % (controlbar, _("No wanted pages in this wiki."))
 
     # Return a list of page links
-    wantednames = wanted.keys()
+    wantednames = list(wanted.keys())
     wantednames.sort()
     result = []
     result.append(macro.formatter.number_list(1))
@@ -81,7 +81,7 @@ def macro_WantedPages(macro):
 
         # Add links to pages that want this page, highliting
         # the link in those pages.
-        where = wanted[name].keys()
+        where = list(wanted[name].keys())
         where.sort()
         if macro.formatter.page.page_name in where:
             where.remove(macro.formatter.page.page_name)
@@ -91,5 +91,5 @@ def macro_WantedPages(macro):
         result.append(macro.formatter.listitem(0))
     result.append(macro.formatter.number_list(0))
 
-    return u'%s%s' % (controlbar, u''.join(result))
+    return '%s%s' % (controlbar, ''.join(result))
 

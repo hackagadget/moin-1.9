@@ -31,7 +31,7 @@ class DebugPackage(Package, ScriptEngine):
         Package.__init__(self, request)
         ScriptEngine.__init__(self)
         self.filename = filename
-        self.script = script or u"""moinmoinpackage|1
+        self.script = script or """moinmoinpackage|1
 print|foo
 ReplaceUnderlay|testdatei|TestSeite2
 IgnoreExceptions|True
@@ -69,7 +69,7 @@ class TestUnsafePackage:
         become_superuser(self.request)
         myPackage = DebugPackage(self.request, 'test')
         myPackage.installPackage()
-        assert myPackage.msg == u'foo\nFooPage added \n'
+        assert myPackage.msg == 'foo\nFooPage added \n'
         testseite2 = Page(self.request, 'TestSeite2')
         assert testseite2.getPageText() == "Hello world, I am the file testdatei"
         assert testseite2.isUnderlayPage()
@@ -78,7 +78,7 @@ class TestUnsafePackage:
 class TestQuoting:
 
     def testQuoting(self):
-        for line in ([':foo', 'is\\', 'ja|', u't|�', u'baAz�'], [], ['', '']):
+        for line in ([':foo', 'is\\', 'ja|', 't|�', 'baAz�'], [], ['', '']):
             assert line == unpackLine(packLine(line))
 
 
@@ -86,7 +86,7 @@ class TestRealCreation:
 
     def testSearch(self):
         package = PackagePages(self.request.rootpage.page_name, self.request)
-        assert package.searchpackage(self.request, "title:BadCon") == [u'BadContent']
+        assert package.searchpackage(self.request, "title:BadCon") == ['BadContent']
 
     def testListCreate(self):
         package = PackagePages(self.request.rootpage.page_name, self.request)
@@ -133,9 +133,9 @@ class TestRealPackageInstallation:
 
     def testAttachments_after_page_creation(self):
         become_trusted(self.request)
-        pagename = u'PackageTestPageCreatedFirst'
-        page = create_page(self.request, pagename, u"This page has not yet an attachments dir")
-        script = u"""MoinMoinPackage|1
+        pagename = 'PackageTestPageCreatedFirst'
+        page = create_page(self.request, pagename, "This page has not yet an attachments dir")
+        script = """MoinMoinPackage|1
 AddRevision|1|%(pagename)s
 AddAttachment|1_attachment|my_test.txt|%(pagename)s
 Print|Thank you for using PackagePages!
@@ -151,8 +151,8 @@ Print|Thank you for using PackagePages!
 
     def testAttachments_without_page_creation(self):
         become_trusted(self.request)
-        pagename = u"PackageAttachmentAttachWithoutPageCreation"
-        script = u"""MoinMoinPackage|1
+        pagename = "PackageAttachmentAttachWithoutPageCreation"
+        script = """MoinMoinPackage|1
 AddAttachment|1_attachment|my_test.txt|%(pagename)s
 Print|Thank you for using PackagePages!
 """ % {"pagename": pagename}

@@ -8,7 +8,7 @@
     @license: GNU GPL, see COPYING for details.
 """
 
-import xmlrpclib
+import xmlrpc.client
 
 from MoinMoin import log
 logging = log.getLogger(__name__)
@@ -58,9 +58,9 @@ def handle_jid_changed(event):
             server.addJIDToRoster(secret, event.jid)
         else:
             server.removeJIDFromRoster(secret, event.jid)
-    except xmlrpclib.Error, err:
+    except xmlrpc.client.Error as err:
         logging.error("XML RPC error: %s" % str(err))
-    except Exception, err:
+    except Exception as err:
         logging.error("Low-level communication error: %s" % str(err))
 
 
@@ -80,7 +80,7 @@ def handle_file_attached(event):
     attachlink = request.getQualifiedURL(getAttachUrl(event.pagename, event.filename, request))
     pagelink = request.getQualifiedURL(page.url(request, {}))
 
-    for lang in subscribers.keys():
+    for lang in list(subscribers.keys()):
         _ = lambda text: request.getText(text, lang=lang)
         data = notification.attachment_added(request, _, event.pagename, event.filename, event.size)
         links = [{'url': attachlink, 'description': _("Attachment link")},
@@ -139,7 +139,7 @@ def handle_user_created(event):
     request = event.request
     sitename = request.cfg.sitename
     event_name = event.name
-    email = event.user.email or u"NOT SET"
+    email = event.user.email or "NOT SET"
     username = event.user.name
 
     for usr in superusers(request):
@@ -201,8 +201,8 @@ def send_notification(request, jids, notification):
     try:
         server.send_notification(request.cfg.secrets['jabberbot'], jids, notification)
         return True
-    except xmlrpclib.Error, err:
+    except xmlrpc.client.Error as err:
         logging.error("XML RPC error: %s" % str(err))
-    except Exception, err:
+    except Exception as err:
         logging.error("Low-level communication error: %s" % str(err))
 

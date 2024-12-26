@@ -24,21 +24,21 @@ class Theme(ThemeBase):
             self.emit_custom_html(self.cfg.page_header1),
 
             # Header
-            u'<div id="header">',
+            '<div id="header">',
             self.logo(),
             self.searchform(d),
             self.username(d),
-            u'<div id="locationline">',
+            '<div id="locationline">',
             self.interwiki(d),
             self.title(d),
-            u'</div>',
+            '</div>',
             self.trail(d),
             self.navibar(d),
             #u'<hr id="pageline">',
-            u'<div id="pageline"><hr style="display:none;"></div>',
+            '<div id="pageline"><hr style="display:none;"></div>',
             self.msg(d),
             self.editbar(d),
-            u'</div>',
+            '</div>',
 
             # Post header custom html (not recommended)
             self.emit_custom_html(self.cfg.page_header2),
@@ -46,7 +46,7 @@ class Theme(ThemeBase):
             # Start of page
             self.startPage(),
         ]
-        return u'\n'.join(html)
+        return '\n'.join(html)
 
     def editorheader(self, d, **kw):
         """ Assemble wiki header for editor
@@ -60,10 +60,10 @@ class Theme(ThemeBase):
             self.emit_custom_html(self.cfg.page_header1),
 
             # Header
-            u'<div id="header">',
+            '<div id="header">',
             self.title(d),
             self.msg(d),
-            u'</div>',
+            '</div>',
 
             # Post header custom html (not recommended)
             self.emit_custom_html(self.cfg.page_header2),
@@ -71,7 +71,7 @@ class Theme(ThemeBase):
             # Start of page
             self.startPage(),
         ]
-        return u'\n'.join(html)
+        return '\n'.join(html)
 
     def footer(self, d, **keywords):
         """ Assemble wiki footer
@@ -91,16 +91,16 @@ class Theme(ThemeBase):
             self.emit_custom_html(self.cfg.page_footer1),
 
             # Footer
-            u'<div id="footer">',
+            '<div id="footer">',
             self.editbar(d),
             self.credits(d),
             self.showversion(d, **keywords),
-            u'</div>',
+            '</div>',
 
             # Post footer custom html
             self.emit_custom_html(self.cfg.page_footer2),
             ]
-        return u'\n'.join(html)
+        return '\n'.join(html)
 
 
 def execute(request):

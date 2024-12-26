@@ -47,15 +47,15 @@ class Theme(ThemeBase):
 
                  # Post footer custom html
                  self.emit_custom_html(self.cfg.page_footer2), ]
-        return u'\n'.join(parts)
+        return '\n'.join(parts)
 
     def editbar(self, d, **keywords):
         if not self.shouldShowEditbar(d['page']):
             return ''
-        parts = [u'<div id="footer">',
+        parts = ['<div id="footer">',
                  self.edit_link(d, **keywords),
                  self.availableactions(d),
-                 u'</div>', ]
+                 '</div>', ]
         return ''.join(parts)
 
     def iconbar(self, d):
@@ -169,7 +169,7 @@ class Theme(ThemeBase):
         @return: edittext link html
         """
         page = d['page']
-        return  u'<ul class="editbar"><li>%s</li></ul>' % self.editorLink(page)
+        return  '<ul class="editbar"><li>%s</li></ul>' % self.editorLink(page)
 
     def availableactions(self, d):
         """
@@ -206,10 +206,10 @@ class Theme(ThemeBase):
 
         cache = caching.CacheEntry(request, page, page.getFormatterName(), scope='item')
         date = request.user.getFormattedDateTime(cache.mtime())
-        deletecache = u'<p>%s %s</p>' % (link, _('(cached %s)') % date)
+        deletecache = '<p>%s %s</p>' % (link, _('(cached %s)') % date)
 
-        html = deletecache + u'<p>%s %s</p>\n' % (_('Or try one of these actions:'),
-                                       u', '.join(html))
+        html = deletecache + '<p>%s %s</p>\n' % (_('Or try one of these actions:'),
+                                       ', '.join(html))
         return html
 
 

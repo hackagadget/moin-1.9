@@ -29,7 +29,7 @@ def log_attempt(system, success, request=None, username=None, pagename=None):
         if request and hasattr(request, 'user') and request.user.valid:
             username = request.user.name
         else:
-            username = u'anonymous'
+            username = 'anonymous'
     level = (logging.WARNING, logging.INFO)[success]
     msg = """: %s: status %s: username "%s": ip %s: page %s"""
     status = ("failure", "success")[success]

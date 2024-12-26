@@ -26,7 +26,7 @@ def _get_valid_actions(macro):
 
     return actions_builtin + actions_global + actions_local
 
-def macro_Action(macro, action=u'show', text=None, _kwargs=None):
+def macro_Action(macro, action='show', text=None, _kwargs=None):
     _ = macro.request.getText
     if text is None:
         text = action

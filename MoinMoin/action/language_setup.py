@@ -83,7 +83,7 @@ def execute(pagename, request):
                                                   'pageset': pageset_name, })
                   for _lang in wiki_languages]
 
-    lang_selector = u''.join([fmt.paragraph(1), _("Choose:"), ' ', ' '.join(lang_links), fmt.paragraph(0)])
+    lang_selector = ''.join([fmt.paragraph(1), _("Choose:"), ' ', ' '.join(lang_links), fmt.paragraph(0)])
 
     title = _("Install language packs for '%s'") % wikiutil.escape(lang)
     request.theme.add_msg(msg, "info")

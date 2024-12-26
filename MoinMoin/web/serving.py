@@ -102,12 +102,12 @@ def switch_user(uid, gid=None):
         return
 
     import pwd, grp
-    if isinstance(uid, basestring):
+    if isinstance(uid, str):
         try:
             uid = pwd.getpwnam(uid)[2]
         except KeyError:
             raise RuntimeError("Unknown user: '%s', check user setting" % uid)
-    if gid is not None and isinstance(gid, basestring):
+    if gid is not None and isinstance(gid, str):
         try:
             gid = grp.getgrnam(gid)[2]
         except KeyError:

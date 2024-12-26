@@ -17,10 +17,10 @@ class TestGroupFormatterWikiMarkup(object):
         formatter = Formatter(self.request)
 
         become_trusted(request)
-        create_page(request, u'TestPageGroup', text)
+        create_page(request, 'TestPageGroup', text)
         page = Page(request, 'TestPageGroup', formatter=formatter)
         page.send_page(content_only=True)
-        nuke_page(request, u'TestPageGroup')
+        nuke_page(request, 'TestPageGroup')
 
         return formatter.members
 
@@ -30,7 +30,7 @@ class TestGroupFormatterWikiMarkup(object):
 """
         members = self.get_members(text)
         assert len(members) == 1
-        assert u'CamelCase' in members
+        assert 'CamelCase' in members
 
     def test_extended_name(self):
         text = """
@@ -38,7 +38,7 @@ class TestGroupFormatterWikiMarkup(object):
 """
         members = self.get_members(text)
         assert len(members) == 1
-        assert u'extended name' in members
+        assert 'extended name' in members
 
     def test_extended_link(self):
         text = """
@@ -46,7 +46,7 @@ class TestGroupFormatterWikiMarkup(object):
 """
         members = self.get_members(text)
         assert len(members) == 1
-        assert u'extended link' in members
+        assert 'extended link' in members
 
     def test_extended_link_with_label(self):
         text = """
@@ -54,7 +54,7 @@ class TestGroupFormatterWikiMarkup(object):
 """
         members = self.get_members(text)
         assert len(members) == 1
-        assert u'extended link' in members
+        assert 'extended link' in members
 
     def test_ignore_not_first_level_list(self):
         text = """
@@ -93,7 +93,7 @@ Ignore previous line and this text.
 """
         members = self.get_members(text)
         assert len(members) == 1
-        assert u'take this' in members
+        assert 'take this' in members
 
     def test_strip_whitespace(self):
         text = """
@@ -101,7 +101,7 @@ Ignore previous line and this text.
 """
         members = self.get_members(text)
         assert len(members) == 1
-        assert u'take this' in members
+        assert 'take this' in members
 
 
 class TestGroupFormatterCreole(object):
@@ -111,10 +111,10 @@ class TestGroupFormatterCreole(object):
         formatter = Formatter(self.request)
 
         become_trusted(request)
-        create_page(request, u'TestPageGroup', "#FORMAT creole \n" + text)
+        create_page(request, 'TestPageGroup', "#FORMAT creole \n" + text)
         page = Page(request, 'TestPageGroup', formatter=formatter)
         page.send_page(content_only=True)
-        nuke_page(request, u'TestPageGroup')
+        nuke_page(request, 'TestPageGroup')
 
         return formatter.members
 
@@ -124,7 +124,7 @@ class TestGroupFormatterCreole(object):
 """
         members = self.get_members(text)
         assert len(members) == 1
-        assert u'CamelCase' in members
+        assert 'CamelCase' in members
 
     def test_extended_name(self):
         text = """
@@ -132,7 +132,7 @@ class TestGroupFormatterCreole(object):
 """
         members = self.get_members(text)
         assert len(members) == 1
-        assert u'extended name' in members
+        assert 'extended name' in members
 
     def test_extended_link(self):
         text = """
@@ -140,7 +140,7 @@ class TestGroupFormatterCreole(object):
 """
         members = self.get_members(text)
         assert len(members) == 1
-        assert u'extended link' in members
+        assert 'extended link' in members
 
     def test_extended_link_with_label(self):
         text = """
@@ -148,7 +148,7 @@ class TestGroupFormatterCreole(object):
 """
         members = self.get_members(text)
         assert len(members) == 1
-        assert u'FrontPage' in members
+        assert 'FrontPage' in members
 
     def test_ignore_not_first_level_list(self):
         text = """
@@ -187,7 +187,7 @@ Ignore previous line and this text.
 """
         members = self.get_members(text)
         assert len(members) == 1
-        assert u'take this' in members
+        assert 'take this' in members
 
     def test_strip_whitespace(self):
         text = """
@@ -195,7 +195,7 @@ Ignore previous line and this text.
 """
         members = self.get_members(text)
         assert len(members) == 1
-        assert u'take this' in members
+        assert 'take this' in members
 
 
 coverage_modules = ['MoinMoin.formtter.groups']

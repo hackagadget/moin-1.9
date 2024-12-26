@@ -236,7 +236,7 @@ class Color:
         elif not isinstance(color, str):
             raise TypeError("Color() expects a Color instance, a RGB triple or a color string")
         elif color[0] == '#':
-            color = long(color[1:], 16)
+            color = int(color[1:], 16)
             self.r = (color >> 16) & 255
             self.g = (color >> 8) & 255
             self.b = color & 255

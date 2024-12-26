@@ -51,12 +51,12 @@ General syntax: moin [options] maint mailtranslators [mailtranslators-options]
         self.init_request()
         request = self.request
 
-        from_address = unicode(self.options.from_address or "tw@waldmann-edv.de")
-        subject = unicode(self.options.subject or "MoinMoin i18n notification")
-        text_template = unicode(sys.stdin.read())
+        from_address = str(self.options.from_address or "tw@waldmann-edv.de")
+        subject = str(self.options.subject or "MoinMoin i18n notification")
+        text_template = str(sys.stdin.read())
 
         languages = i18n.wikiLanguages()
-        langs = languages.keys()
+        langs = list(languages.keys())
         langs.remove('en') # nothing to do for english, so remove it
         #langs = ['de', ] # for testing
 
@@ -67,5 +67,5 @@ General syntax: moin [options] maint mailtranslators [mailtranslators-options]
                 if to_address and '***vacant***' not in to_address:
                     text = text_template % locals()
                     rc = sendmail(request, [to_address], subject, text, mail_from=from_address)
-                    print lang, repr(from_address), repr(to_address), subject, repr(rc)
+                    print(lang, repr(from_address), repr(to_address), subject, repr(rc))
 

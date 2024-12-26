@@ -44,7 +44,7 @@ class LoginHandler:
         request.write(request.formatter.startContent("content"))
 
         extra = request._login_multistage(request, form)
-        request.write(unicode(form))
+        request.write(str(form))
         if extra:
             request.write(extra)
 

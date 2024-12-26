@@ -30,7 +30,7 @@ from connector import FCKeditorConnector
 from upload import FCKeditorQuickUpload
 
 import cgitb
-from cStringIO import StringIO
+from io import StringIO
 
 # Running from WSGI capable server (recomended)
 def App(environ, start_response):

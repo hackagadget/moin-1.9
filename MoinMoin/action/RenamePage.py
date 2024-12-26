@@ -26,7 +26,7 @@ class RenamePage(ActionBase):
         _ = self._
         self.form_trigger = 'rename'
         self.form_trigger_label = _('Rename Page')
-        filterfn = re.compile(ur"^%s/.*$" % re.escape(pagename), re.U).match
+        filterfn = re.compile(r"^%s/.*$" % re.escape(pagename), re.U).match
         subpagenames = request.rootpage.getPageList(user='', exists=1, filter=filterfn)
         self.subpages = [pagename for pagename in subpagenames if self.request.user.may.delete(pagename)]
         try:
@@ -53,9 +53,9 @@ class RenamePage(ActionBase):
         """ Rename this page to "pagename" """
         _ = self._
         form = self.form
-        newpagename = form.get('newpagename', u'')
+        newpagename = form.get('newpagename', '')
         newpagename = wikiutil.normalize_pagename(newpagename, self.cfg)
-        comment = form.get('comment', u'')
+        comment = form.get('comment', '')
         comment = wikiutil.clean_input(comment)
         try:
             rename_subpages = int(self.request.form.get('rename_subpages', '0'))

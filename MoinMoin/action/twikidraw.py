@@ -72,18 +72,18 @@ def attachment_drawing(self, url, text, **kw):
         mapfile.close()
         map = map.decode(config.charset)
     except (KeyError, IOError, OSError):
-        map = u''
+        map = ''
     if map:
         # we have a image map. inline it and add a map ref to the img tag
         # we have also to set a unique ID
-        mapid = u'ImageMapOf%s%s' % (self.request.uid_generator(pagename), drawing)
-        map = map.replace(u'%MAPNAME%', mapid)
+        mapid = 'ImageMapOf%s%s' % (self.request.uid_generator(pagename), drawing)
+        map = map.replace('%MAPNAME%', mapid)
         # add alt and title tags to areas
-        map = re.sub(ur'href\s*=\s*"((?!%TWIKIDRAW%).+?)"', ur'href="\1" alt="\1" title="\1"', map)
-        map = map.replace(u'%TWIKIDRAW%"', u'%s" alt="%s" title="%s"' % (
+        map = re.sub(r'href\s*=\s*"((?!%TWIKIDRAW%).+?)"', r'href="\1" alt="\1" title="\1"', map)
+        map = map.replace('%TWIKIDRAW%"', '%s" alt="%s" title="%s"' % (
             wikiutil.escape(drawing_url, 1), title, title))
         # unxml, because 4.01 concrete will not validate />
-        map = map.replace(u'/>', u'>')
+        map = map.replace('/>', '>')
         title = _('Clickable drawing: %(filename)s') % {'filename': self.text(containername)}
         if 'title' not in kw:
             kw['title'] = title

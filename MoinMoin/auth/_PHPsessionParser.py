@@ -28,7 +28,7 @@ class UnknownObject(object):
 def transformList(items):
     """ Transforms a list [1, 2, 3, 4, ...] into a
         [(1, 2), (3, 4), ...] generator. """
-    for i in xrange(0, len(items), 2):
+    for i in range(0, len(items), 2):
         yield (items[i], items[i+1])
     raise StopIteration
 
@@ -116,7 +116,7 @@ def loadSession(key, path=s_path, prefix=s_prefix):
 
     try:
         f = open(filename, "rb")
-    except IOError, e:
+    except IOError as e:
         if e.errno == 2:
             return None # session does not exist
         else:
@@ -140,6 +140,6 @@ if __name__ == '__main__':
     p_s = loadSession("...")
     import pprint
     pprint.pprint(p_s)
-    print time.clock() - a
-    print listSessions()
+    print(time.clock() - a)
+    print(listSessions())
 

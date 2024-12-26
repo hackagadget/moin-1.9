@@ -8,7 +8,7 @@
     @license: GNU GPL, see COPYING for details.
 """
 import os, time
-from StringIO import StringIO
+from io import StringIO
 
 from MoinMoin import Page, wikiutil
 from MoinMoin.util import thread_monitor

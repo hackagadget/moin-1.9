@@ -13,7 +13,7 @@ import os, sys, re, random
 # cPickle can encode normal and Unicode strings
 # see http://docs.python.org/lib/node66.html
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
@@ -101,12 +101,12 @@ class simpleIO:
         self.buffer = []
 
     def write(self, foo):
-        if not isinstance(foo, unicode):
+        if not isinstance(foo, str):
             foo = foo.decode("iso-8859-1", "replace")
         self.buffer.append(foo)
 
     def getvalue(self):
-        return u''.join(self.buffer)
+        return ''.join(self.buffer)
 
     def close(self):
         self.buffer = None
@@ -122,6 +122,6 @@ def random_string(length, allowed_chars=None):
         @return: random string
     """
     if allowed_chars is None:
-        return ''.join([chr(random.randint(0, 255)) for dummy in xrange(length)])
+        return ''.join([chr(random.randint(0, 255)) for dummy in range(length)])
 
-    return ''.join([random.choice(allowed_chars) for dummy in xrange(length)])
+    return ''.join([random.choice(allowed_chars) for dummy in range(length)])

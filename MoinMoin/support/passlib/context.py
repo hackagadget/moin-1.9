@@ -2,7 +2,7 @@
 #=============================================================================
 # imports
 #=============================================================================
-from __future__ import with_statement
+
 # core
 import re
 import logging; log = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ from passlib.utils import (handlers as uh, to_bytes,
                            )
 from passlib.utils.binary import BASE64_CHARS
 from passlib.utils.compat import (iteritems, num_types, irange,
-                                  PY2, PY3, unicode, SafeConfigParser,
+                                  PY2, PY3, str, SafeConfigParser,
                                   NativeStringIO, BytesIO,
                                   unicode_or_bytes_types, native_string_types,
                                   )
@@ -225,7 +225,7 @@ class CryptPolicy(object):
             return source
         elif isinstance(source, dict):
             return cls(_internal_context=CryptContext(**source))
-        elif not isinstance(source, (bytes,unicode)):
+        elif not isinstance(source, (bytes,str)):
             raise TypeError("source must be CryptPolicy, dict, config string, "
                             "or file path: %r" % (type(source),))
         elif any(c in source for c in "\n\r\t") or not source.strip(" \t./\;:"):
@@ -1059,7 +1059,7 @@ class _CryptConfig(object):
 
         # type check
         if category is not None and not isinstance(category, native_string_types):
-            if PY2 and isinstance(category, unicode):
+            if PY2 and isinstance(category, str):
                 # for compatibility with unicode-centric py2 apps
                 return self.get_record(scheme, category.encode("utf-8"))
             raise ExpectedTypeError(category, "str or None", "category")

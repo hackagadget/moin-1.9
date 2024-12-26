@@ -415,18 +415,18 @@ def extract_path_info(
     """
 
     def _normalize_netloc(scheme, netloc):
-        parts = netloc.split(u"@", 1)[-1].split(u":", 1)
+        parts = netloc.split("@", 1)[-1].split(":", 1)
         if len(parts) == 2:
             netloc, port = parts
-            if (scheme == u"http" and port == u"80") or (
-                scheme == u"https" and port == u"443"
+            if (scheme == "http" and port == "80") or (
+                scheme == "https" and port == "443"
             ):
                 port = None
         else:
             netloc = parts[0]
             port = None
         if port is not None:
-            netloc += u":" + port
+            netloc += ":" + port
         return netloc
 
     # make sure whatever we are working on is a IRI and parse it
@@ -444,10 +444,10 @@ def extract_path_info(
     # is that IRI even on a known HTTP scheme?
     if collapse_http_schemes:
         for scheme in base_scheme, cur_scheme:
-            if scheme not in (u"http", u"https"):
+            if scheme not in ("http", "https"):
                 return None
     else:
-        if not (base_scheme in (u"http", u"https") and base_scheme == cur_scheme):
+        if not (base_scheme in ("http", "https") and base_scheme == cur_scheme):
             return None
 
     # are the netlocs compatible?
@@ -455,11 +455,11 @@ def extract_path_info(
         return None
 
     # are we below the application path?
-    base_path = base_path.rstrip(u"/")
+    base_path = base_path.rstrip("/")
     if not cur_path.startswith(base_path):
         return None
 
-    return u"/" + cur_path[len(base_path) :].lstrip(u"/")
+    return "/" + cur_path[len(base_path) :].lstrip("/")
 
 
 @implements_iterator
@@ -806,7 +806,7 @@ def make_chunk_iter(
     if isinstance(first_item, text_type):
         separator = to_unicode(separator)
         _split = re.compile(r"(%s)" % re.escape(separator)).split
-        _join = u"".join
+        _join = "".join
     else:
         separator = to_bytes(separator)
         _split = re.compile(b"(" + re.escape(separator) + b")").split

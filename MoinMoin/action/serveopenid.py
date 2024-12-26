@@ -216,7 +216,7 @@ class MoinOpenIDServer:
             answer = self.handle_response(False, username, identity)
             if answer is None:
                 return
-        elif form.has_key('approve'):
+        elif 'approve' in form:
             answer = self.handle_response(True, username, identity)
             if answer is None:
                 return
@@ -226,7 +226,7 @@ class MoinOpenIDServer:
                 query[key] = form[key]
             try:
                 openidreq = openidsrv.decodeRequest(query)
-            except Exception, e:
+            except Exception as e:
                 request.makeForbidden(403, 'OpenID decode error: %r' % e)
                 return
 
@@ -394,7 +394,7 @@ delegation on its own.)''') % openidreq.identity)
         td.append(html.INPUT(type='submit', name='approve', value=_("Approve")))
         td.append(html.INPUT(type='submit', name='dontapprove', value=_("Don't approve")))
 
-        request.write(unicode(form))
+        request.write(str(form))
 
         request.write(request.formatter.endContent())
         request.theme.send_footer(request.page.page_name)
@@ -425,7 +425,7 @@ verification.'''))
 
         form.append(html.INPUT(type='submit', name='dontapprove', value=_("Cancel")))
 
-        request.write(unicode(form))
+        request.write(str(form))
 
         request.write(request.formatter.endContent())
         request.theme.send_footer(request.page.page_name)

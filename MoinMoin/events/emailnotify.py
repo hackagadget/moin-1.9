@@ -43,7 +43,7 @@ def prep_page_changed_mail(request, page, comment, email_lang, revisions,
     diff = change['diff']
     subject = change['subject']
 
-    if change.has_key('comment'):
+    if 'comment' in change:
         comment = _("Comment:") + "\n" + change['comment'] + "\n\n"
     else:
         comment = ''
@@ -176,7 +176,7 @@ def handle_user_created(event):
     sitename = request.cfg.sitename
     from_address = request.cfg.mail_from
     event_name = event.name
-    email = event.user.email or u"NOT SET"
+    email = event.user.email or "NOT SET"
     username = event.user.name
 
     for usr in superusers(request):

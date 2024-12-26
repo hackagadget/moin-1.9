@@ -18,7 +18,7 @@ from ..wsgi import get_input_stream
 try:
     from http import client
 except ImportError:
-    import httplib as client
+    import http.client as client
 
 
 class ProxyMiddleware(object):
@@ -85,7 +85,7 @@ class ProxyMiddleware(object):
 
         self.app = app
         self.targets = dict(
-            ("/%s/" % k.strip("/"), _set_defaults(v)) for k, v in targets.items()
+            ("/%s/" % k.strip("/"), _set_defaults(v)) for k, v in list(targets.items())
         )
         self.chunk_size = chunk_size
         self.timeout = timeout
@@ -110,7 +110,7 @@ class ProxyMiddleware(object):
             else:
                 headers.append(("Host", opts["host"]))
 
-            headers.extend(opts["headers"].items())
+            headers.extend(list(opts["headers"].items()))
             remote_path = path
 
             if opts["remove_prefix"]:
@@ -211,7 +211,7 @@ class ProxyMiddleware(object):
         path = environ["PATH_INFO"]
         app = self.app
 
-        for prefix, opts in self.targets.items():
+        for prefix, opts in list(self.targets.items()):
             if path.startswith(prefix):
                 app = self.proxy_to(opts, path, prefix)
                 break

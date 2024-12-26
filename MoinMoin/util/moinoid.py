@@ -71,7 +71,7 @@ class MoinOpenIDStore(OpenIDStore):
             return None
         assocs = ce.content()
         found = False
-        for idx in xrange(len(assocs)-1, -1, -1):
+        for idx in range(len(assocs)-1, -1, -1):
             assoc_str = assocs[idx]
             association = Association.deserialize(assoc_str)
             if association.getExpiresIn() == 0:
@@ -91,7 +91,7 @@ class MoinOpenIDStore(OpenIDStore):
         if not ce.exists():
             return
         assocs = ce.content()
-        for idx in xrange(len(assocs)-1, -1, -1):
+        for idx in range(len(assocs)-1, -1, -1):
             assoc_str = assocs[idx]
             association = Association.deserialize(assoc_str)
             if association.handle == handle:

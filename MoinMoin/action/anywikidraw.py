@@ -52,17 +52,17 @@ def attachment_drawing(self, url, text, **kw):
         mapfile.close()
         map = map.decode(config.charset)
     except (KeyError, IOError, OSError):
-        map = u''
+        map = ''
     if map:
         # ToDo mapid must become uniq
         # we have a image map. inline it and add a map ref to the img tag
         # we have also to set a unique ID
-        mapid = u'ImageMapOf%s%s' % (self.request.uid_generator(pagename), drawing)
+        mapid = 'ImageMapOf%s%s' % (self.request.uid_generator(pagename), drawing)
 
-        map = map.replace(u'id="%s.svg"' % drawing, '')
-        map = map.replace(u'name="%s.svg"' % drawing, u'name="%s"' % mapid)
+        map = map.replace('id="%s.svg"' % drawing, '')
+        map = map.replace('name="%s.svg"' % drawing, 'name="%s"' % mapid)
         # unxml, because 4.01 concrete will not validate />
-        map = map.replace(u'/>', u'>')
+        map = map.replace('/>', '>')
         title = _('Clickable drawing: %(filename)s') % {'filename': self.text(containername)}
         if 'title' not in kw:
             kw['title'] = title

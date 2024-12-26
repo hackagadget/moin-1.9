@@ -8,7 +8,7 @@
 """
 
 import logging, os, sys, time
-from Queue import Queue
+from queue import Queue
 
 from jabberbot.config import BotConfig
 from jabberbot.i18n import init_i18n
@@ -32,10 +32,10 @@ def _check_xmpp_version():
     try:
         msg.add_content(form)
     except TypeError:
-        print 'Your version of pyxmpp is too old!'
-        print 'You need a least pyxmpp SVN revision 665 to run this bot.'
-        print 'pyxmpp release 1.0.1 works, too.'
-        print 'Exiting...'
+        print('Your version of pyxmpp is too old!')
+        print('You need a least pyxmpp SVN revision 665 to run this bot.')
+        print('pyxmpp release 1.0.1 works, too.')
+        print('Exiting...')
         sys.exit(1)
 
 def main():
@@ -45,10 +45,10 @@ def main():
 
     args = sys.argv
     if "--help" in args:
-        print """MoinMoin notification bot
+        print("""MoinMoin notification bot
 
         Usage: %(myname)s [--server server] [--xmpp_port port] [--user user] [--resource resource] [--password pass] [--xmlrpc_host host] [--xmlrpc_port port]
-        """ % {"myname": os.path.basename(args[0])}
+        """ % {"myname": os.path.basename(args[0])})
 
         raise SystemExit
 
@@ -88,7 +88,7 @@ def main():
 
             time.sleep(5)
 
-        except KeyboardInterrupt, i:
+        except KeyboardInterrupt as i:
             xmpp_bot.stop()
             xmlrpc_client.stop()
 

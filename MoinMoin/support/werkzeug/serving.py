@@ -55,12 +55,12 @@ from .urls import url_unquote
 
 try:
     import socketserver
-    from http.server import BaseHTTPRequestHandler
-    from http.server import HTTPServer
+    from .http.server import BaseHTTPRequestHandler
+    from .http.server import HTTPServer
 except ImportError:
-    import SocketServer as socketserver
-    from BaseHTTPServer import HTTPServer
-    from BaseHTTPServer import BaseHTTPRequestHandler
+    import socketserver as socketserver
+    from http.server import HTTPServer
+    from http.server import BaseHTTPRequestHandler
 
 try:
     import ssl
@@ -492,7 +492,7 @@ class WSGIRequestHandler(BaseHTTPRequestHandler, object):
                 # will be left as is to match the Python 3 behavior.
                 items.append((key, value.lstrip()))
         else:
-            items = self.headers.items()
+            items = list(self.headers.items())
 
         return items
 
@@ -516,11 +516,11 @@ def generate_adhoc_ssl_pair(cn=None):
 
     # pretty damn sure that this is not actually accepted by anyone
     if cn is None:
-        cn = u"*"
+        cn = "*"
 
     subject = x509.Name(
         [
-            x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"Dummy Certificate"),
+            x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Dummy Certificate"),
             x509.NameAttribute(NameOID.COMMON_NAME, cn),
         ]
     )
@@ -535,7 +535,7 @@ def generate_adhoc_ssl_pair(cn=None):
         .not_valid_after(dt.utcnow() + timedelta(days=365))
         .add_extension(x509.ExtendedKeyUsage([x509.OID_SERVER_AUTH]), critical=False)
         .add_extension(
-            x509.SubjectAlternativeName([x509.DNSName(u"*")]), critical=False
+            x509.SubjectAlternativeName([x509.DNSName("*")]), critical=False
         )
         .sign(pkey, hashes.SHA256(), default_backend())
     )
@@ -562,7 +562,7 @@ def make_ssl_devcert(base_path, host=None, cn=None):
     """
 
     if host is not None:
-        cn = u"*.%s/CN=%s" % (host, host)
+        cn = "*.%s/CN=%s" % (host, host)
     cert, pkey = generate_adhoc_ssl_pair(cn=cn)
 
     from cryptography.hazmat.primitives import serialization

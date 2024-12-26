@@ -54,30 +54,30 @@ def search_box(type, macro):
     # Special code for fullsearch
     if type == "fullsearch":
         boxes = [
-            u'<br>',
-            u'<input type="checkbox" name="context" value="160" checked="checked">',
+            '<br>',
+            '<input type="checkbox" name="context" value="160" checked="checked">',
             _('Display context of search results'),
-            u'<br>',
-            u'<input type="checkbox" name="case" value="1">',
+            '<br>',
+            '<input type="checkbox" name="case" value="1">',
             _('Case-sensitive searching'),
             ]
-        boxes = u'\n'.join(boxes)
+        boxes = '\n'.join(boxes)
         button = _("Search Text")
 
     # Format
     type = (type == "titlesearch")
     html = [
-        u'<form method="get" action="%s">' % macro.request.href(macro.request.formatter.page.page_name),
-        u'<div>',
-        u'<input type="hidden" name="action" value="fullsearch">',
-        u'<input type="hidden" name="titlesearch" value="%i">' % type,
-        u'<input type="text" name="value" size="30" value="%s">' % default,
-        u'<input type="submit" value="%s">' % button,
+        '<form method="get" action="%s">' % macro.request.href(macro.request.formatter.page.page_name),
+        '<div>',
+        '<input type="hidden" name="action" value="fullsearch">',
+        '<input type="hidden" name="titlesearch" value="%i">' % type,
+        '<input type="text" name="value" size="30" value="%s">' % default,
+        '<input type="submit" value="%s">' % button,
         boxes,
-        u'</div>',
-        u'</form>',
+        '</div>',
+        '</form>',
         ]
-    html = u'\n'.join(html)
+    html = '\n'.join(html)
     return macro.formatter.rawHTML(html)
 
 def execute(macro, needle, titlesearch=False, case=False):
@@ -107,19 +107,19 @@ def execute(macro, needle, titlesearch=False, case=False):
         # First non-tuple item in resulting list to be needle
         for arg in args:
             if isinstance(arg, tuple):
-                val = arg[1].lower() in [u'1', u'true', u'y']
-                if arg[0] == u"highlight_pages":
+                val = arg[1].lower() in ['1', 'true', 'y']
+                if arg[0] == "highlight_pages":
                     highlight_pages = val
-                elif arg[0] == u"highlight_titles":
+                elif arg[0] == "highlight_titles":
                     highlight_titles = val
                 else:
-                    err = _(u"Unknown macro parameter: %s.") % arg[0]
-            elif isinstance(arg, basestring):
+                    err = _("Unknown macro parameter: %s.") % arg[0]
+            elif isinstance(arg, str):
                 if not needle_found:
                     needle_found = True
                     needle = arg
                 else:
-                    err = _(u"More than one needle with "
+                    err = _("More than one needle with "
                              "search_macro_parse_args config option enabled "
                              "('%(needle)s' found already, '%(arg)s' occurred)"
                              ) % {'needle': wikiutil.escape(needle),
@@ -130,16 +130,16 @@ def execute(macro, needle, titlesearch=False, case=False):
 
     # With empty arguments, simulate title click (backlinks to page)
     if needle == '' and not titlesearch:
-        needle = u'"%s"' % macro.formatter.page.page_name
+        needle = '"%s"' % macro.formatter.page.page_name
 
     # With whitespace argument, show error message like the one used in the search box
     # TODO: search should implement those errors message for clients
     elif not needle.strip():
-        err = _(u'Please use a more selective search term instead of '
+        err = _('Please use a more selective search term instead of '
                 '{{{"%s"}}}', wiki=True) % needle
 
     if err:
-        return u'<span class="error">%s</span>' % err
+        return '<span class="error">%s</span>' % err
 
     needle = needle.strip()
 
@@ -153,11 +153,11 @@ def execute(macro, needle, titlesearch=False, case=False):
 
     except ValueError:
         # same error as in MoinMoin/action/fullsearch.py, keep it that way!
-        ret = ''.join([macro.formatter.text(u'<<%s(' % macro.name),
-                      _(u'Your search query {{{"%s"}}} is invalid. Please refer '
+        ret = ''.join([macro.formatter.text('<<%s(' % macro.name),
+                      _('Your search query {{{"%s"}}} is invalid. Please refer '
                         'to HelpOnSearching for more information.', wiki=True,
                         percent=True) % wikiutil.escape(needle),
-                      macro.formatter.text(u')>>')])
+                      macro.formatter.text(')>>')])
 
     return ret
 

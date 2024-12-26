@@ -69,13 +69,13 @@ acl rights for the user. @EMAIL@ becomes expanded to the users obfuscated mail a
             userhomepage = PageEditor(self.request, account.name)
             try:
                 userhomepage.saveText(homepage_text, 0)
-                print "INFO homepage for %s created." % account.name
+                print("INFO homepage for %s created." % account.name)
             except userhomepage.Unchanged:
-                print "You did not change the page content, not saved!"
+                print("You did not change the page content, not saved!")
             except userhomepage.NoAdmin:
-                print "You don't have enough rights to create the %s page" % account.name
+                print("You don't have enough rights to create the %s page" % account.name)
         else:
-            print "INFO homepage for %s already exists or account is disabled or user does not exist." % account.name
+            print("INFO homepage for %s already exists or account is disabled or user does not exist." % account.name)
 
     def mainloop(self):
         # we don't expect non-option arguments
@@ -115,7 +115,7 @@ CategoryHomepage
             members = [user.User(request, uid).name for uid in uids]
 
         if not members:
-            print "No user selected!"
+            print("No user selected!")
             return
 
         # loop through members for creating homepages

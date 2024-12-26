@@ -21,9 +21,9 @@ class TestFormatter:
         except wikiutil.PluginAttributeError:
             pass
         else:
-            print "Formatting using %r" % formatter
+            print("Formatting using %r" % formatter)
             self.formatPage("HelpOnMoinWikiSyntax", formatter)
-            print "Done."
+            print("Done.")
 
     def testSyntaxReferenceDocBook(self):
         py.test.skip("docbook is broken")
@@ -33,9 +33,9 @@ class TestFormatter:
         except wikiutil.PluginAttributeError:
             pass
         else:
-            print "Formatting using %r" % formatter
+            print("Formatting using %r" % formatter)
             self.formatPage("HelpOnMoinWikiSyntax", formatter)
-            print "Done."
+            print("Done.")
 
     def testSyntaxReferenceOthers(self):
         formatters = wikiutil.getPlugins("formatter", self.request.cfg)
@@ -50,9 +50,9 @@ class TestFormatter:
             except wikiutil.PluginAttributeError:
                 pass
             else:
-                print "Formatting using %r" % formatter
+                print("Formatting using %r" % formatter)
                 self.formatPage("HelpOnMoinWikiSyntax", formatter)
-                print "Done."
+                print("Done.")
 
     def formatPage(self, pagename, formatter):
         """Parse a page. Should not raise an exception if the API of the
@@ -74,7 +74,7 @@ class TestIdIdempotency:
         def _verify(formatter, id):
             origid = formatter.sanitize_to_id(id)
             id = origid
-            for i in xrange(3):
+            for i in range(3):
                 id = formatter.sanitize_to_id(id)
                 assert id == origid
 
@@ -97,7 +97,7 @@ class TestIdIdempotency:
             r'--123',
             r'__$$',
             r'@@',
-            u'\xf6\xf6llasdf\xe4',
+            '\xf6\xf6llasdf\xe4',
         ]
 
         for f_name in formatters:

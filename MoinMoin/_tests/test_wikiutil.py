@@ -17,14 +17,14 @@ from werkzeug.datastructures import MultiDict
 class TestQueryStringSupport:
     tests = [
         ('', {}, {}),
-        ('key1=value1', {'key1': 'value1'}, {'key1': u'value1'}),
-        ('key1=value1&key2=value2', {'key1': 'value1', 'key2': 'value2'}, {'key1': u'value1', 'key2': u'value2'}),
-        ('rc_de=Aktuelle%C3%84nderungen', {'rc_de': 'Aktuelle\xc3\x84nderungen'}, {'rc_de': u'Aktuelle\xc4nderungen'}),
+        ('key1=value1', {'key1': 'value1'}, {'key1': 'value1'}),
+        ('key1=value1&key2=value2', {'key1': 'value1', 'key2': 'value2'}, {'key1': 'value1', 'key2': 'value2'}),
+        ('rc_de=Aktuelle%C3%84nderungen', {'rc_de': 'Aktuelle\xc3\x84nderungen'}, {'rc_de': 'Aktuelle\xc4nderungen'}),
     ]
     def testParseQueryString(self):
         for qstr, expected_str, expected_unicode in self.tests:
             assert wikiutil.parseQueryString(qstr) == MultiDict(expected_unicode)
-            assert wikiutil.parseQueryString(unicode(qstr)) == MultiDict(expected_unicode)
+            assert wikiutil.parseQueryString(str(qstr)) == MultiDict(expected_unicode)
 
     def testMakeQueryString(self):
         for qstr, in_str, in_unicode in self.tests:
@@ -36,15 +36,15 @@ class TestTickets:
     def testTickets(self):
         from MoinMoin.Page import Page
         # page name with double quotes
-        self.request.page = Page(self.request, u'bla"bla')
+        self.request.page = Page(self.request, 'bla"bla')
         ticket1 = wikiutil.createTicket(self.request)
         assert wikiutil.checkTicket(self.request, ticket1)
         # page name with non-ASCII chars
-        self.request.page = Page(self.request, u'\xc4rger')
+        self.request.page = Page(self.request, '\xc4rger')
         ticket2 = wikiutil.createTicket(self.request)
         assert wikiutil.checkTicket(self.request, ticket2)
         # same page with another action
-        self.request.page = Page(self.request, u'\xc4rger')
+        self.request.page = Page(self.request, '\xc4rger')
         self.request.action = 'another'
         ticket3 = wikiutil.createTicket(self.request)
         assert wikiutil.checkTicket(self.request, ticket3)
@@ -55,10 +55,10 @@ class TestTickets:
 
 class TestCleanInput:
     def testCleanInput(self):
-        tests = [(u"", u""), # empty
-                 (u"aaa\r\n\tbbb", u"aaa   bbb"), # ws chars -> blanks
-                 (u"aaa\x00\x01bbb", u"aaabbb"), # strip weird chars
-                 (u"a"*500, u""), # too long
+        tests = [("", ""), # empty
+                 ("aaa\r\n\tbbb", "aaa   bbb"), # ws chars -> blanks
+                 ("aaa\x00\x01bbb", "aaabbb"), # strip weird chars
+                 ("a"*500, ""), # too long
                 ]
         for instr, outstr in tests:
             assert wikiutil.clean_input(instr) == outstr
@@ -76,10 +76,10 @@ class TestInterWiki:
             assert wikiutil.split_wiki(markup) == (wikiname, pagename)
 
     def testJoinWiki(self):
-        tests = [(('http://example.org/', u'SomePage'), 'http://example.org/SomePage'),
-                 (('http://example.org/?page=$PAGE&action=show', u'SomePage'), 'http://example.org/?page=SomePage&action=show'),
-                 (('http://example.org/', u'Aktuelle\xc4nderungen'), 'http://example.org/Aktuelle%C3%84nderungen'),
-                 (('http://example.org/$PAGE/show', u'Aktuelle\xc4nderungen'), 'http://example.org/Aktuelle%C3%84nderungen/show'),
+        tests = [(('http://example.org/', 'SomePage'), 'http://example.org/SomePage'),
+                 (('http://example.org/?page=$PAGE&action=show', 'SomePage'), 'http://example.org/?page=SomePage&action=show'),
+                 (('http://example.org/', 'Aktuelle\xc4nderungen'), 'http://example.org/Aktuelle%C3%84nderungen'),
+                 (('http://example.org/$PAGE/show', 'Aktuelle\xc4nderungen'), 'http://example.org/Aktuelle%C3%84nderungen/show'),
                 ]
         for (baseurl, pagename), url in tests:
             assert wikiutil.join_wiki(baseurl, pagename) == url
@@ -205,95 +205,95 @@ class TestParmeterParser:
 
 class TestParamParsing:
     def testMacroArgs(self):
-        abcd = [u'a', u'b', u'c', u'd']
-        abcd_dict = {u'a': u'1', u'b': u'2', u'c': u'3', u'd': u'4'}
+        abcd = ['a', 'b', 'c', 'd']
+        abcd_dict = {'a': '1', 'b': '2', 'c': '3', 'd': '4'}
         tests = [
                   # regular and quoting tests
-                  (u'd = 4,c=3,b=2,a= 1 ',    ([], abcd_dict, [])),
-                  (u'a,b,c,d',                (abcd, {}, [])),
-                  (u' a , b , c , d ',        (abcd, {}, [])),
-                  (u'   a   ',                ([u'a'], {}, [])),
-                  (u'"  a  "',                ([u'  a  '], {}, [])),
-                  (u'a,b,c,d, "a,b,c,d"',     (abcd+[u'a,b,c,d'], {}, [])),
-                  (u'quote " :), b',          ([u'quote " :)', u'b'], {}, [])),
-                  (u'"quote "" :)", b',       ([u'quote " :)', u'b'], {}, [])),
-                  (u'=7',                     ([], {u'': u'7'}, [])),
-                  (u',,',                     ([None, None, None], {}, [])),
-                  (u',"",',                   ([None, u'', None], {}, [])),
-                  (u',"", ""',                ([None, u'', u''], {}, [])),
-                  (u'  ""  ,"", ""',          ([u'', u'', u''], {}, [])),
+                  ('d = 4,c=3,b=2,a= 1 ',    ([], abcd_dict, [])),
+                  ('a,b,c,d',                (abcd, {}, [])),
+                  (' a , b , c , d ',        (abcd, {}, [])),
+                  ('   a   ',                (['a'], {}, [])),
+                  ('"  a  "',                (['  a  '], {}, [])),
+                  ('a,b,c,d, "a,b,c,d"',     (abcd+['a,b,c,d'], {}, [])),
+                  ('quote " :), b',          (['quote " :)', 'b'], {}, [])),
+                  ('"quote "" :)", b',       (['quote " :)', 'b'], {}, [])),
+                  ('=7',                     ([], {'': '7'}, [])),
+                  (',,',                     ([None, None, None], {}, [])),
+                  (',"",',                   ([None, '', None], {}, [])),
+                  (',"", ""',                ([None, '', ''], {}, [])),
+                  ('  ""  ,"", ""',          (['', '', ''], {}, [])),
                   # some name=value test
-                  (u'd = 4,c=3,b=2,a= 1 ',    ([], abcd_dict, [])),
-                  (u'd=d,e="a,b,c,d"',        ([], {u'd': u'd',
-                                                    u'e': u'a,b,c,d'}, [])),
-                  (u'd = d,e = "a,b,c,d"',    ([], {u'd': u'd',
-                                                    u'e': u'a,b,c,d'}, [])),
-                  (u'd = d, e = "a,b,c,d"',   ([], {u'd': u'd',
-                                                    u'e': u'a,b,c,d'}, [])),
-                  (u'd = , e = "a,b,c,d"',    ([], {u'd': None,
-                                                    u'e': u'a,b,c,d'}, [])),
-                  (u'd = "", e = "a,b,c,d"',  ([], {u'd': u'',
-                                                    u'e': u'a,b,c,d'}, [])),
-                  (u'd = "", e = ',           ([], {u'd': u'', u'e': None},
+                  ('d = 4,c=3,b=2,a= 1 ',    ([], abcd_dict, [])),
+                  ('d=d,e="a,b,c,d"',        ([], {'d': 'd',
+                                                    'e': 'a,b,c,d'}, [])),
+                  ('d = d,e = "a,b,c,d"',    ([], {'d': 'd',
+                                                    'e': 'a,b,c,d'}, [])),
+                  ('d = d, e = "a,b,c,d"',   ([], {'d': 'd',
+                                                    'e': 'a,b,c,d'}, [])),
+                  ('d = , e = "a,b,c,d"',    ([], {'d': None,
+                                                    'e': 'a,b,c,d'}, [])),
+                  ('d = "", e = "a,b,c,d"',  ([], {'d': '',
+                                                    'e': 'a,b,c,d'}, [])),
+                  ('d = "", e = ',           ([], {'d': '', 'e': None},
                                                [])),
-                  (u'd=""',                   ([], {u'd': u''}, [])),
-                  (u'd = "", e = ""',         ([], {u'd': u'', u'e': u''},
+                  ('d=""',                   ([], {'d': ''}, [])),
+                  ('d = "", e = ""',         ([], {'d': '', 'e': ''},
                                                [])),
                   # no, None as key isn't accepted
-                  (u' = "",  e = ""',         ([], {u'': u'', u'e': u''},
+                  (' = "",  e = ""',         ([], {'': '', 'e': ''},
                                                [])),
                   # can quote both name and value:
-                  (u'd = d," e "= "a,b,c,d"', ([], {u'd': u'd',
-                                                    u' e ': u'a,b,c,d'}, [])),
+                  ('d = d," e "= "a,b,c,d"', ([], {'d': 'd',
+                                                    ' e ': 'a,b,c,d'}, [])),
                   # trailing args
-                  (u'1,2,a=b,3,4',            ([u'1', u'2'], {u'a': u'b'},
-                                               [u'3', u'4'])),
+                  ('1,2,a=b,3,4',            (['1', '2'], {'a': 'b'},
+                                               ['3', '4'])),
                   # can quote quotes:
-                  (u'd = """d"',              ([], {u'd': u'"d'}, [])),
-                  (u'd = """d"""',            ([], {u'd': u'"d"'}, [])),
-                  (u'd = "d"" ", e=7',        ([], {u'd': u'd" ', u'e': u'7'},
+                  ('d = """d"',              ([], {'d': '"d'}, [])),
+                  ('d = """d"""',            ([], {'d': '"d"'}, [])),
+                  ('d = "d"" ", e=7',        ([], {'d': 'd" ', 'e': '7'},
                                                [])),
-                  (u'd = "d""", e=8',         ([], {u'd': u'd"', u'e': u'8'},
+                  ('d = "d""", e=8',         ([], {'d': 'd"', 'e': '8'},
                                                [])),
                 ]
         for args, expected in tests:
             result = wikiutil.parse_quoted_separated(args)
             assert expected == result
             for val in result[0]:
-                assert val is None or isinstance(val, unicode)
-            for val in result[1].keys():
-                assert val is None or isinstance(val, unicode)
-            for val in result[1].values():
-                assert val is None or isinstance(val, unicode)
+                assert val is None or isinstance(val, str)
+            for val in list(result[1].keys()):
+                assert val is None or isinstance(val, str)
+            for val in list(result[1].values()):
+                assert val is None or isinstance(val, str)
             for val in result[2]:
-                assert val is None or isinstance(val, unicode)
+                assert val is None or isinstance(val, str)
 
     def testLimited(self):
         tests = [
                   # regular and quoting tests
-                  (u'd = 4,c=3,b=2,a= 1 ',    ([], {u'd': u'4',
-                                                    u'c': u'3,b=2,a= 1'}, [])),
-                  (u'a,b,c,d',                ([u'a', u'b,c,d'], {}, [])),
-                  (u'a=b,b,c,d',              ([], {u'a': u'b'}, [u'b,c,d'])),
+                  ('d = 4,c=3,b=2,a= 1 ',    ([], {'d': '4',
+                                                    'c': '3,b=2,a= 1'}, [])),
+                  ('a,b,c,d',                (['a', 'b,c,d'], {}, [])),
+                  ('a=b,b,c,d',              ([], {'a': 'b'}, ['b,c,d'])),
                 ]
         for args, expected in tests:
             result = wikiutil.parse_quoted_separated(args, seplimit=1)
             assert expected == result
             for val in result[0]:
-                assert val is None or isinstance(val, unicode)
-            for val in result[1].keys():
-                assert val is None or isinstance(val, unicode)
-            for val in result[1].values():
-                assert val is None or isinstance(val, unicode)
+                assert val is None or isinstance(val, str)
+            for val in list(result[1].keys()):
+                assert val is None or isinstance(val, str)
+            for val in list(result[1].values()):
+                assert val is None or isinstance(val, str)
             for val in result[2]:
-                assert val is None or isinstance(val, unicode)
+                assert val is None or isinstance(val, str)
 
     def testDoubleNameValueSeparator(self):
         tests = [
                   # regular and quoting tests
-                  (u'd==4,=3 ',    ([], {u'd': u'=4', u'': u'3'}, [])),
-                  (u'===a,b,c,d',  ([], {u'': u'==a'}, [u'b', u'c', u'd'])),
-                  (u'a,b,===,c,d', ([u'a', u'b'], {u'': u'=='}, [u'c', u'd'])),
+                  ('d==4,=3 ',    ([], {'d': '=4', '': '3'}, [])),
+                  ('===a,b,c,d',  ([], {'': '==a'}, ['b', 'c', 'd'])),
+                  ('a,b,===,c,d', (['a', 'b'], {'': '=='}, ['c', 'd'])),
                 ]
 
         def _check(a, e):
@@ -304,63 +304,63 @@ class TestParamParsing:
             yield _check, args, expected
 
     def testNoNameValue(self):
-        abcd = [u'a', u'b', u'c', u'd']
+        abcd = ['a', 'b', 'c', 'd']
         tests = [
                   # regular and quoting tests
-                  (u'd = 4,c=3,b=2,a= 1 ',    [u'd = 4', u'c=3',
-                                               u'b=2', u'a= 1']),
-                  (u'a,b,c,d',                abcd),
-                  (u' a , b , c , d ',        abcd),
-                  (u'   a   ',                [u'a']),
-                  (u'"  a  "',                [u'  a  ']),
-                  (u'a,b,c,d, "a,b,c,d"',     abcd + [u'a,b,c,d']),
-                  (u'quote " :), b',          [u'quote " :)', u'b']),
-                  (u'"quote "" :)", b',       [u'quote " :)', u'b']),
-                  (u'"unended quote',         [u'"unended quote']),
-                  (u'"',                      [u'"']),
-                  (u'd=d,e="a,b,c,d"',        [u'd=d', u'e="a', u'b',
-                                               u'c', u'd"']),
+                  ('d = 4,c=3,b=2,a= 1 ',    ['d = 4', 'c=3',
+                                               'b=2', 'a= 1']),
+                  ('a,b,c,d',                abcd),
+                  (' a , b , c , d ',        abcd),
+                  ('   a   ',                ['a']),
+                  ('"  a  "',                ['  a  ']),
+                  ('a,b,c,d, "a,b,c,d"',     abcd + ['a,b,c,d']),
+                  ('quote " :), b',          ['quote " :)', 'b']),
+                  ('"quote "" :)", b',       ['quote " :)', 'b']),
+                  ('"unended quote',         ['"unended quote']),
+                  ('"',                      ['"']),
+                  ('d=d,e="a,b,c,d"',        ['d=d', 'e="a', 'b',
+                                               'c', 'd"']),
                 ]
         for args, expected in tests:
             result = wikiutil.parse_quoted_separated(args, name_value=False)
             assert expected == result
             for val in result:
-                assert val is None or isinstance(val, unicode)
+                assert val is None or isinstance(val, str)
 
     def testUnitArgument(self):
         result = wikiutil.UnitArgument('7mm', float, ['%', 'mm'])
         assert result.get_default() ==  (7.0, 'mm')
         assert result.parse_argument('8%') == (8.0, '%')
-        py.test.raises(ValueError, result.parse_argument,  u'7m')
-        py.test.raises(ValueError, result.parse_argument,  u'7')
-        py.test.raises(ValueError, result.parse_argument,  u'mm')
+        py.test.raises(ValueError, result.parse_argument,  '7m')
+        py.test.raises(ValueError, result.parse_argument,  '7')
+        py.test.raises(ValueError, result.parse_argument,  'mm')
 
     def testExtendedParser(self):
         tests = [
-            (u'"a", "b", "c"', u',', None, [u'a', u'b', u'c']),
-            (u'a:b, b:c, c:d', u',', u':', [(u'a', u'b'), (u'b', u'c'), (u'c', u'd')]),
-            (u'a:b, b:c, c:d', u',', None, [u'a:b', u'b:c', u'c:d']),
-            (u'a=b, b=c, c=d', u',', None, [u'a=b', u'b=c', u'c=d']),
-            (u'a=b, b=c, c=d', u',', u'=', [(u'a', u'b'), (u'b', u'c'), (u'c', u'd')]),
-            (u'"a"; "b"; "c"', u';', None, [u'a', u'b', u'c']),
-            (u'a:b; b:c; c:d', u';', u':', [(u'a', u'b'), (u'b', u'c'), (u'c', u'd')]),
-            (u'a:b; b:c; c:d', u';', None, [u'a:b', u'b:c', u'c:d']),
-            (u'a=b; b=c; c=d', u';', None, [u'a=b', u'b=c', u'c=d']),
-            (u'a=b; b=c; c=d', u';', u'=', [(u'a', u'b'), (u'b', u'c'), (u'c', u'd')]),
-            (u'"a" "b" "c"', None, None, [u'a', u'b', u'c']),
-            (u'" a " "b" "c"', None, None, [u' a ', u'b', u'c']),
-            (u'"a  " "b" "c"', None, None, [u'a  ', u'b', u'c']),
-            (u'"  a" "b" "c"', None, None, [u'  a', u'b', u'c']),
-            (u'"  a" "b" "c"', None, u':', [u'  a', u'b', u'c']),
-            (u'"a:a" "b:b" "c:b"', None, u':', [u'a:a', u'b:b', u'c:b']),
-            (u'   a:a  ', None, u':', [None, None, None, (u'a', u'a'), None, None]),
-            (u'a a: a', None, u':', [u'a', (u'a', None), u'a']),
-            (u'a a:"b c d" a', None, u':', [u'a', (u'a', u'b c d'), u'a']),
-            (u'a a:"b "" d" a', None, u':', [u'a', (u'a', u'b " d'), u'a']),
-            (u'title:Help* dog cat', None, u':', [(u'title', u'Help*'), u'dog', u'cat']),
-            (u'title:Help* "dog cat"', None, u':', [(u'title', u'Help*'), u'dog cat']),
-            (u'a:b:c d:e:f', None, u':', [(u'a', u'b:c'), (u'd', 'e:f')]),
-            (u'a:b:c:d', None, u':', [(u'a', u'b:c:d')]),
+            ('"a", "b", "c"', ',', None, ['a', 'b', 'c']),
+            ('a:b, b:c, c:d', ',', ':', [('a', 'b'), ('b', 'c'), ('c', 'd')]),
+            ('a:b, b:c, c:d', ',', None, ['a:b', 'b:c', 'c:d']),
+            ('a=b, b=c, c=d', ',', None, ['a=b', 'b=c', 'c=d']),
+            ('a=b, b=c, c=d', ',', '=', [('a', 'b'), ('b', 'c'), ('c', 'd')]),
+            ('"a"; "b"; "c"', ';', None, ['a', 'b', 'c']),
+            ('a:b; b:c; c:d', ';', ':', [('a', 'b'), ('b', 'c'), ('c', 'd')]),
+            ('a:b; b:c; c:d', ';', None, ['a:b', 'b:c', 'c:d']),
+            ('a=b; b=c; c=d', ';', None, ['a=b', 'b=c', 'c=d']),
+            ('a=b; b=c; c=d', ';', '=', [('a', 'b'), ('b', 'c'), ('c', 'd')]),
+            ('"a" "b" "c"', None, None, ['a', 'b', 'c']),
+            ('" a " "b" "c"', None, None, [' a ', 'b', 'c']),
+            ('"a  " "b" "c"', None, None, ['a  ', 'b', 'c']),
+            ('"  a" "b" "c"', None, None, ['  a', 'b', 'c']),
+            ('"  a" "b" "c"', None, ':', ['  a', 'b', 'c']),
+            ('"a:a" "b:b" "c:b"', None, ':', ['a:a', 'b:b', 'c:b']),
+            ('   a:a  ', None, ':', [None, None, None, ('a', 'a'), None, None]),
+            ('a a: a', None, ':', ['a', ('a', None), 'a']),
+            ('a a:"b c d" a', None, ':', ['a', ('a', 'b c d'), 'a']),
+            ('a a:"b "" d" a', None, ':', ['a', ('a', 'b " d'), 'a']),
+            ('title:Help* dog cat', None, ':', [('title', 'Help*'), 'dog', 'cat']),
+            ('title:Help* "dog cat"', None, ':', [('title', 'Help*'), 'dog cat']),
+            ('a:b:c d:e:f', None, ':', [('a', 'b:c'), ('d', 'e:f')]),
+            ('a:b:c:d', None, ':', [('a', 'b:c:d')]),
         ]
 
         def _check(args, sep, kwsep, expected):
@@ -372,19 +372,19 @@ class TestParamParsing:
 
     def testExtendedParserBracketing(self):
         tests = [
-            (u'"a", "b", "c"', u',', None, [u'a', u'b', u'c']),
-            (u'("a", "b", "c")', u',', None, [[u'(', u'a', u'b', u'c']]),
-            (u'("a"("b", "c"))', u',', None, [[u'(', u'a', [u'(', u'b', u'c']]]),
-            (u'("a"("b)))", "c"))', u',', None, [[u'(', u'a', [u'(', u'b)))', u'c']]]),
-            (u'("a"("b>>> ( ab )>", "c"))', u',', None, [[u'(', u'a', [u'(', u'b>>> ( ab )>', u'c']]]),
-            (u'("a" ("b" "c"))', None, None, [[u'(', u'a', [u'(', u'b', u'c']]]),
-            (u'("a"("b", "c") ) ', u',', None, [[u'(', u'a', [u'(', u'b', u'c']]]),
-            (u'("a", <"b", ("c")>)', u',', None, [[u'(', u'a', [u'<', u'b', [u'(', u'c']]]]),
-            (u',,,(a, b, c)', u',', None, [None, None, None, [u'(', u'a', u'b', u'c']]),
+            ('"a", "b", "c"', ',', None, ['a', 'b', 'c']),
+            ('("a", "b", "c")', ',', None, [['(', 'a', 'b', 'c']]),
+            ('("a"("b", "c"))', ',', None, [['(', 'a', ['(', 'b', 'c']]]),
+            ('("a"("b)))", "c"))', ',', None, [['(', 'a', ['(', 'b)))', 'c']]]),
+            ('("a"("b>>> ( ab )>", "c"))', ',', None, [['(', 'a', ['(', 'b>>> ( ab )>', 'c']]]),
+            ('("a" ("b" "c"))', None, None, [['(', 'a', ['(', 'b', 'c']]]),
+            ('("a"("b", "c") ) ', ',', None, [['(', 'a', ['(', 'b', 'c']]]),
+            ('("a", <"b", ("c")>)', ',', None, [['(', 'a', ['<', 'b', ['(', 'c']]]]),
+            (',,,(a, b, c)', ',', None, [None, None, None, ['(', 'a', 'b', 'c']]),
         ]
 
         def _check(args, sep, kwsep, expected):
-            res = wikiutil.parse_quoted_separated_ext(args, sep, kwsep, brackets=(u'<>', u'()'))
+            res = wikiutil.parse_quoted_separated_ext(args, sep, kwsep, brackets=('<>', '()'))
             assert res == expected
 
         for test in tests:
@@ -392,11 +392,11 @@ class TestParamParsing:
 
     def testExtendedParserQuoting(self):
         tests = [
-            (u'"a b" -a b-', u'"', [u'a b', u'-a', u'b-']),
-            (u'"a b" -a b-', u"-", [u'"a', u'b"', u'a b']),
-            (u'"a b" -a b-', u'"-', [u'a b', u'a b']),
-            (u'"a- b" -a b-', u'"-', [u'a- b', u'a b']),
-            (u'"a- b" -a" b-', u'"-', [u'a- b', u'a" b']),
+            ('"a b" -a b-', '"', ['a b', '-a', 'b-']),
+            ('"a b" -a b-', "-", ['"a', 'b"', 'a b']),
+            ('"a b" -a b-', '"-', ['a b', 'a b']),
+            ('"a- b" -a b-', '"-', ['a- b', 'a b']),
+            ('"a- b" -a" b-', '"-', ['a- b', 'a" b']),
         ]
 
         def _check(args, quotes, expected):
@@ -408,31 +408,31 @@ class TestParamParsing:
 
     def testExtendedParserMultikey(self):
         tests = [
-            (u'"a", "b", "c"', u',', None, [u'a', u'b', u'c']),
-            (u'a:b, b:c, c:d', u',', u':', [(u'a', u'b'), (u'b', u'c'), (u'c', u'd')]),
-            (u'a:b, b:c, c:d', u',', None, [u'a:b', u'b:c', u'c:d']),
-            (u'a=b, b=c, c=d', u',', None, [u'a=b', u'b=c', u'c=d']),
-            (u'a=b, b=c, c=d', u',', u'=', [(u'a', u'b'), (u'b', u'c'), (u'c', u'd')]),
-            (u'"a"; "b"; "c"', u';', None, [u'a', u'b', u'c']),
-            (u'a:b; b:c; c:d', u';', u':', [(u'a', u'b'), (u'b', u'c'), (u'c', u'd')]),
-            (u'a:b; b:c; c:d', u';', None, [u'a:b', u'b:c', u'c:d']),
-            (u'a=b; b=c; c=d', u';', None, [u'a=b', u'b=c', u'c=d']),
-            (u'a=b; b=c; c=d', u';', u'=', [(u'a', u'b'), (u'b', u'c'), (u'c', u'd')]),
-            (u'"a" "b" "c"', None, None, [u'a', u'b', u'c']),
-            (u'" a " "b" "c"', None, None, [u' a ', u'b', u'c']),
-            (u'"a  " "b" "c"', None, None, [u'a  ', u'b', u'c']),
-            (u'"  a" "b" "c"', None, None, [u'  a', u'b', u'c']),
-            (u'"  a" "b" "c"', None, u':', [u'  a', u'b', u'c']),
-            (u'"a:a" "b:b" "c:b"', None, u':', [u'a:a', u'b:b', u'c:b']),
-            (u'   a:a  ', None, u':', [None, None, None, (u'a', u'a'), None, None]),
-            (u'a a: a', None, u':', [u'a', (u'a', None), u'a']),
-            (u'a a:"b c d" a', None, u':', [u'a', (u'a', u'b c d'), u'a']),
-            (u'a a:"b "" d" a', None, u':', [u'a', (u'a', u'b " d'), u'a']),
-            (u'title:Help* dog cat', None, u':', [(u'title', u'Help*'), u'dog', u'cat']),
-            (u'title:Help* "dog cat"', None, u':', [(u'title', u'Help*'), u'dog cat']),
-            (u'a:b:c d:e:f', None, u':', [(u'a', u'b', u'c'), (u'd', 'e', u'f')]),
-            (u'a:b:c:d', None, u':', [(u'a', u'b', u'c', u'd')]),
-            (u'a:"b:c":d', None, u':', [(u'a', u'b:c', u'd')]),
+            ('"a", "b", "c"', ',', None, ['a', 'b', 'c']),
+            ('a:b, b:c, c:d', ',', ':', [('a', 'b'), ('b', 'c'), ('c', 'd')]),
+            ('a:b, b:c, c:d', ',', None, ['a:b', 'b:c', 'c:d']),
+            ('a=b, b=c, c=d', ',', None, ['a=b', 'b=c', 'c=d']),
+            ('a=b, b=c, c=d', ',', '=', [('a', 'b'), ('b', 'c'), ('c', 'd')]),
+            ('"a"; "b"; "c"', ';', None, ['a', 'b', 'c']),
+            ('a:b; b:c; c:d', ';', ':', [('a', 'b'), ('b', 'c'), ('c', 'd')]),
+            ('a:b; b:c; c:d', ';', None, ['a:b', 'b:c', 'c:d']),
+            ('a=b; b=c; c=d', ';', None, ['a=b', 'b=c', 'c=d']),
+            ('a=b; b=c; c=d', ';', '=', [('a', 'b'), ('b', 'c'), ('c', 'd')]),
+            ('"a" "b" "c"', None, None, ['a', 'b', 'c']),
+            ('" a " "b" "c"', None, None, [' a ', 'b', 'c']),
+            ('"a  " "b" "c"', None, None, ['a  ', 'b', 'c']),
+            ('"  a" "b" "c"', None, None, ['  a', 'b', 'c']),
+            ('"  a" "b" "c"', None, ':', ['  a', 'b', 'c']),
+            ('"a:a" "b:b" "c:b"', None, ':', ['a:a', 'b:b', 'c:b']),
+            ('   a:a  ', None, ':', [None, None, None, ('a', 'a'), None, None]),
+            ('a a: a', None, ':', ['a', ('a', None), 'a']),
+            ('a a:"b c d" a', None, ':', ['a', ('a', 'b c d'), 'a']),
+            ('a a:"b "" d" a', None, ':', ['a', ('a', 'b " d'), 'a']),
+            ('title:Help* dog cat', None, ':', [('title', 'Help*'), 'dog', 'cat']),
+            ('title:Help* "dog cat"', None, ':', [('title', 'Help*'), 'dog cat']),
+            ('a:b:c d:e:f', None, ':', [('a', 'b', 'c'), ('d', 'e', 'f')]),
+            ('a:b:c:d', None, ':', [('a', 'b', 'c', 'd')]),
+            ('a:"b:c":d', None, ':', [('a', 'b:c', 'd')]),
         ]
 
         def _check(args, sep, kwsep, expected):
@@ -446,41 +446,41 @@ class TestParamParsing:
         P = wikiutil.ParserPrefix('+')
         M = wikiutil.ParserPrefix('-')
         tests = [
-            (u'"a", "b", "c"', u',', None, [u'a', u'b', u'c']),
-            (u'a:b, b:c, c:d', u',', u':', [(u'a', u'b'), (u'b', u'c'), (u'c', u'd')]),
-            (u'a:b, b:c, c:d', u',', None, [u'a:b', u'b:c', u'c:d']),
-            (u'a=b, b=c, c=d', u',', None, [u'a=b', u'b=c', u'c=d']),
-            (u'a=b, b=c, c=d', u',', u'=', [(u'a', u'b'), (u'b', u'c'), (u'c', u'd')]),
-            (u'"a"; "b"; "c"', u';', None, [u'a', u'b', u'c']),
-            (u'a:b; b:c; c:d', u';', u':', [(u'a', u'b'), (u'b', u'c'), (u'c', u'd')]),
-            (u'a:b; b:c; c:d', u';', None, [u'a:b', u'b:c', u'c:d']),
-            (u'a=b; b=c; c=d', u';', None, [u'a=b', u'b=c', u'c=d']),
-            (u'a=b; b=c; c=d', u';', u'=', [(u'a', u'b'), (u'b', u'c'), (u'c', u'd')]),
-            (u'"a" "b" "c"', None, None, [u'a', u'b', u'c']),
-            (u'" a " "b" "c"', None, None, [u' a ', u'b', u'c']),
-            (u'"a  " "b" "c"', None, None, [u'a  ', u'b', u'c']),
-            (u'"  a" "b" "c"', None, None, [u'  a', u'b', u'c']),
-            (u'"  a" "b" "c"', None, u':', [u'  a', u'b', u'c']),
-            (u'"a:a" "b:b" "c:b"', None, u':', [u'a:a', u'b:b', u'c:b']),
-            (u'   a:a  ', None, u':', [None, None, None, (u'a', u'a'), None, None]),
-            (u'a a: a', None, u':', [u'a', (u'a', None), u'a']),
-            (u'a a:"b c d" a', None, u':', [u'a', (u'a', u'b c d'), u'a']),
-            (u'a a:"b "" d" a', None, u':', [u'a', (u'a', u'b " d'), u'a']),
-            (u'title:Help* dog cat', None, u':', [(u'title', u'Help*'), u'dog', u'cat']),
-            (u'title:Help* "dog cat"', None, u':', [(u'title', u'Help*'), u'dog cat']),
-            (u'a:b:c d:e:f', None, u':', [(u'a', u'b', u'c'), (u'd', 'e', u'f')]),
-            (u'a:b:c:d', None, u':', [(u'a', u'b', u'c', u'd')]),
-            (u'a:"b:c":d', None, u':', [(u'a', u'b:c', u'd')]),
+            ('"a", "b", "c"', ',', None, ['a', 'b', 'c']),
+            ('a:b, b:c, c:d', ',', ':', [('a', 'b'), ('b', 'c'), ('c', 'd')]),
+            ('a:b, b:c, c:d', ',', None, ['a:b', 'b:c', 'c:d']),
+            ('a=b, b=c, c=d', ',', None, ['a=b', 'b=c', 'c=d']),
+            ('a=b, b=c, c=d', ',', '=', [('a', 'b'), ('b', 'c'), ('c', 'd')]),
+            ('"a"; "b"; "c"', ';', None, ['a', 'b', 'c']),
+            ('a:b; b:c; c:d', ';', ':', [('a', 'b'), ('b', 'c'), ('c', 'd')]),
+            ('a:b; b:c; c:d', ';', None, ['a:b', 'b:c', 'c:d']),
+            ('a=b; b=c; c=d', ';', None, ['a=b', 'b=c', 'c=d']),
+            ('a=b; b=c; c=d', ';', '=', [('a', 'b'), ('b', 'c'), ('c', 'd')]),
+            ('"a" "b" "c"', None, None, ['a', 'b', 'c']),
+            ('" a " "b" "c"', None, None, [' a ', 'b', 'c']),
+            ('"a  " "b" "c"', None, None, ['a  ', 'b', 'c']),
+            ('"  a" "b" "c"', None, None, ['  a', 'b', 'c']),
+            ('"  a" "b" "c"', None, ':', ['  a', 'b', 'c']),
+            ('"a:a" "b:b" "c:b"', None, ':', ['a:a', 'b:b', 'c:b']),
+            ('   a:a  ', None, ':', [None, None, None, ('a', 'a'), None, None]),
+            ('a a: a', None, ':', ['a', ('a', None), 'a']),
+            ('a a:"b c d" a', None, ':', ['a', ('a', 'b c d'), 'a']),
+            ('a a:"b "" d" a', None, ':', ['a', ('a', 'b " d'), 'a']),
+            ('title:Help* dog cat', None, ':', [('title', 'Help*'), 'dog', 'cat']),
+            ('title:Help* "dog cat"', None, ':', [('title', 'Help*'), 'dog cat']),
+            ('a:b:c d:e:f', None, ':', [('a', 'b', 'c'), ('d', 'e', 'f')]),
+            ('a:b:c:d', None, ':', [('a', 'b', 'c', 'd')]),
+            ('a:"b:c":d', None, ':', [('a', 'b:c', 'd')]),
 
-            (u'-a:b:d', None, u':', [(M, u'a', u'b', u'd')]),
-            (u'"-a:b:d"', None, u':', [(u'-a:b:d')]),
-            (u'-"a:b:d"', None, u':', [(M, u'a:b:d')]),
-            (u'-a:"b:c":"d e f g"', None, u':', [(M, u'a', u'b:c', u'd e f g')]),
-            (u'+-a:b:d', None, u':', [(P, u'-a', u'b', u'd')]),
-            (u'-"+a:b:d"', None, u':', [(M, u'+a:b:d')]),
+            ('-a:b:d', None, ':', [(M, 'a', 'b', 'd')]),
+            ('"-a:b:d"', None, ':', [('-a:b:d')]),
+            ('-"a:b:d"', None, ':', [(M, 'a:b:d')]),
+            ('-a:"b:c":"d e f g"', None, ':', [(M, 'a', 'b:c', 'd e f g')]),
+            ('+-a:b:d', None, ':', [(P, '-a', 'b', 'd')]),
+            ('-"+a:b:d"', None, ':', [(M, '+a:b:d')]),
             # bit of a weird case...
-            (u'-+"a:b:d"', None, u':', [(M, u'+"a', u'b', u'd"')]),
-            (u'-a:"b:c" a +b', None, u':', [(M, u'a', u'b:c'), u'a', (P, u'b')]),
+            ('-+"a:b:d"', None, ':', [(M, '+"a', 'b', 'd"')]),
+            ('-a:"b:c" a +b', None, ':', [(M, 'a', 'b:c'), 'a', (P, 'b')]),
         ]
 
         def _check(args, sep, kwsep, expected):
@@ -494,20 +494,20 @@ class TestParamParsing:
         UCE = wikiutil.BracketUnexpectedCloseError
         MCE = wikiutil.BracketMissingCloseError
         tests = [
-            (u'("a", "b", "c"', u',', None, MCE),
-            (u'("a"("b", "c")', u',', None, MCE),
-            (u'("a"<"b", "c")>', u',', None, UCE),
-            (u')("a" ("b" "c"))', None, None, UCE),
-            (u'("a", ("b", "c">))', u',', None, UCE),
-            (u'("a", ("b", <"c">>))', u',', None, UCE),
-            (u'(<(<)>)>', u',', None, UCE),
+            ('("a", "b", "c"', ',', None, MCE),
+            ('("a"("b", "c")', ',', None, MCE),
+            ('("a"<"b", "c")>', ',', None, UCE),
+            (')("a" ("b" "c"))', None, None, UCE),
+            ('("a", ("b", "c">))', ',', None, UCE),
+            ('("a", ("b", <"c">>))', ',', None, UCE),
+            ('(<(<)>)>', ',', None, UCE),
         ]
 
         def _check(args, sep, kwsep, err):
             py.test.raises(err,
                            wikiutil.parse_quoted_separated_ext,
                            args, sep, kwsep,
-                           brackets=(u'<>', u'()'))
+                           brackets=('<>', '()'))
 
         for test in tests:
             yield [_check] + list(test)
@@ -521,16 +521,16 @@ class TestArgGetters:
             (None, None, True, True),
 
             # some real values
-            (u'0', None, None, False),
-            (u'1', None, None, True),
-            (u'false', None, None, False),
-            (u'true', None, None, True),
-            (u'FALSE', None, None, False),
-            (u'TRUE', None, None, True),
-            (u'no', None, None, False),
-            (u'yes', None, None, True),
-            (u'NO', None, None, False),
-            (u'YES', None, None, True),
+            ('0', None, None, False),
+            ('1', None, None, True),
+            ('false', None, None, False),
+            ('true', None, None, True),
+            ('FALSE', None, None, False),
+            ('TRUE', None, None, True),
+            ('no', None, None, False),
+            ('yes', None, None, True),
+            ('NO', None, None, False),
+            ('YES', None, None, True),
         ]
         for arg, name, default, expected in tests:
             assert wikiutil.get_bool(self.request, arg, name, default) == expected
@@ -549,10 +549,10 @@ class TestArgGetters:
         py.test.raises(TypeError, wikiutil.get_bool, self.request, {})
 
         # any value not convertable to boolean raises ValueError
-        py.test.raises(ValueError, wikiutil.get_bool, self.request, u'')
-        py.test.raises(ValueError, wikiutil.get_bool, self.request, u'42')
-        py.test.raises(ValueError, wikiutil.get_bool, self.request, u'wrong')
-        py.test.raises(ValueError, wikiutil.get_bool, self.request, u'"True"') # must not be quoted!
+        py.test.raises(ValueError, wikiutil.get_bool, self.request, '')
+        py.test.raises(ValueError, wikiutil.get_bool, self.request, '42')
+        py.test.raises(ValueError, wikiutil.get_bool, self.request, 'wrong')
+        py.test.raises(ValueError, wikiutil.get_bool, self.request, '"True"') # must not be quoted!
 
     def testGetInt(self):
         tests = [
@@ -562,9 +562,9 @@ class TestArgGetters:
             (None, None, 42, 42),
 
             # some real values
-            (u'0', None, None, 0),
-            (u'42', None, None, 42),
-            (u'-23', None, None, -23),
+            ('0', None, None, 0),
+            ('42', None, None, 42),
+            ('-23', None, None, -23),
         ]
         for arg, name, default, expected in tests:
             assert wikiutil.get_int(self.request, arg, name, default) == expected
@@ -583,10 +583,10 @@ class TestArgGetters:
         py.test.raises(TypeError, wikiutil.get_int, self.request, {})
 
         # any value not convertable to int raises ValueError
-        py.test.raises(ValueError, wikiutil.get_int, self.request, u'')
-        py.test.raises(ValueError, wikiutil.get_int, self.request, u'23.42')
-        py.test.raises(ValueError, wikiutil.get_int, self.request, u'wrong')
-        py.test.raises(ValueError, wikiutil.get_int, self.request, u'"4711"') # must not be quoted!
+        py.test.raises(ValueError, wikiutil.get_int, self.request, '')
+        py.test.raises(ValueError, wikiutil.get_int, self.request, '23.42')
+        py.test.raises(ValueError, wikiutil.get_int, self.request, 'wrong')
+        py.test.raises(ValueError, wikiutil.get_int, self.request, '"4711"') # must not be quoted!
 
     def testGetFloat(self):
         tests = [
@@ -596,18 +596,18 @@ class TestArgGetters:
             (None, None, 42.23, 42.23),
 
             # some real values
-            (u'0', None, None, 0),
-            (u'42.23', None, None, 42.23),
-            (u'-23.42', None, None, -23.42),
-            (u'-23.42E3', None, None, -23.42E3),
-            (u'23.42E-3', None, None, 23.42E-3),
+            ('0', None, None, 0),
+            ('42.23', None, None, 42.23),
+            ('-23.42', None, None, -23.42),
+            ('-23.42E3', None, None, -23.42E3),
+            ('23.42E-3', None, None, 23.42E-3),
         ]
         for arg, name, default, expected in tests:
             assert wikiutil.get_float(self.request, arg, name, default) == expected
 
     def testGetFloatRaising(self):
         # wrong default type
-        py.test.raises(AssertionError, wikiutil.get_float, self.request, None, None, u'42')
+        py.test.raises(AssertionError, wikiutil.get_float, self.request, None, None, '42')
 
         # anything except None or unicode raises TypeError
         py.test.raises(TypeError, wikiutil.get_float, self.request, True)
@@ -619,9 +619,9 @@ class TestArgGetters:
         py.test.raises(TypeError, wikiutil.get_float, self.request, {})
 
         # any value not convertable to int raises ValueError
-        py.test.raises(ValueError, wikiutil.get_float, self.request, u'')
-        py.test.raises(ValueError, wikiutil.get_float, self.request, u'wrong')
-        py.test.raises(ValueError, wikiutil.get_float, self.request, u'"47.11"') # must not be quoted!
+        py.test.raises(ValueError, wikiutil.get_float, self.request, '')
+        py.test.raises(ValueError, wikiutil.get_float, self.request, 'wrong')
+        py.test.raises(ValueError, wikiutil.get_float, self.request, '"47.11"') # must not be quoted!
 
     def testGetComplex(self):
         tests = [
@@ -631,26 +631,26 @@ class TestArgGetters:
             (None, None, 42.23, 42.23),
 
             # some real values
-            (u'0', None, None, 0),
-            (u'42.23', None, None, 42.23),
-            (u'-23.42', None, None, -23.42),
-            (u'-23.42E3', None, None, -23.42E3),
-            (u'23.42E-3', None, None, 23.42E-3),
-            (u'23.42E-3+3.04j', None, None, 23.42E-3+3.04j),
-            (u'3.04j', None, None, 3.04j),
-            (u'-3.04j', None, None, -3.04j),
-            (u'23.42E-3+3.04i', None, None, 23.42E-3+3.04j),
-            (u'3.04i', None, None, 3.04j),
-            (u'-3.04i', None, None, -3.04j),
-            (u'-3', None, None, -3L),
-            (u'-300000000000000000000', None, None, -300000000000000000000L),
+            ('0', None, None, 0),
+            ('42.23', None, None, 42.23),
+            ('-23.42', None, None, -23.42),
+            ('-23.42E3', None, None, -23.42E3),
+            ('23.42E-3', None, None, 23.42E-3),
+            ('23.42E-3+3.04j', None, None, 23.42E-3+3.04j),
+            ('3.04j', None, None, 3.04j),
+            ('-3.04j', None, None, -3.04j),
+            ('23.42E-3+3.04i', None, None, 23.42E-3+3.04j),
+            ('3.04i', None, None, 3.04j),
+            ('-3.04i', None, None, -3.04j),
+            ('-3', None, None, -3),
+            ('-300000000000000000000', None, None, -300000000000000000000),
         ]
         for arg, name, default, expected in tests:
             assert wikiutil.get_complex(self.request, arg, name, default) == expected
 
     def testGetComplexRaising(self):
         # wrong default type
-        py.test.raises(AssertionError, wikiutil.get_complex, self.request, None, None, u'42')
+        py.test.raises(AssertionError, wikiutil.get_complex, self.request, None, None, '42')
 
         # anything except None or unicode raises TypeError
         py.test.raises(TypeError, wikiutil.get_complex, self.request, True)
@@ -663,24 +663,24 @@ class TestArgGetters:
         py.test.raises(TypeError, wikiutil.get_complex, self.request, {})
 
         # any value not convertable to int raises ValueError
-        py.test.raises(ValueError, wikiutil.get_complex, self.request, u'')
-        py.test.raises(ValueError, wikiutil.get_complex, self.request, u'3jj')
-        py.test.raises(ValueError, wikiutil.get_complex, self.request, u'3Ij')
-        py.test.raises(ValueError, wikiutil.get_complex, self.request, u'3i-3i')
-        py.test.raises(ValueError, wikiutil.get_complex, self.request, u'wrong')
-        py.test.raises(ValueError, wikiutil.get_complex, self.request, u'"47.11"') # must not be quoted!
+        py.test.raises(ValueError, wikiutil.get_complex, self.request, '')
+        py.test.raises(ValueError, wikiutil.get_complex, self.request, '3jj')
+        py.test.raises(ValueError, wikiutil.get_complex, self.request, '3Ij')
+        py.test.raises(ValueError, wikiutil.get_complex, self.request, '3i-3i')
+        py.test.raises(ValueError, wikiutil.get_complex, self.request, 'wrong')
+        py.test.raises(ValueError, wikiutil.get_complex, self.request, '"47.11"') # must not be quoted!
 
     def testGetUnicode(self):
         tests = [
             # default testing for None value
             (None, None, None, None),
-            (None, None, u'', u''),
-            (None, None, u'abc', u'abc'),
+            (None, None, '', ''),
+            (None, None, 'abc', 'abc'),
 
             # some real values
-            (u'', None, None, u''),
-            (u'abc', None, None, u'abc'),
-            (u'"abc"', None, None, u'"abc"'),
+            ('', None, None, ''),
+            ('abc', None, None, 'abc'),
+            ('"abc"', None, None, '"abc"'),
         ]
         for arg, name, default, expected in tests:
             assert wikiutil.get_unicode(self.request, arg, name, default) == expected
@@ -717,19 +717,19 @@ class TestExtensionInvoking:
     def _test_invoke_float_required(self, i=wikiutil.required_arg(float)):
         assert i == 1.4
 
-    def _test_invoke_choice(self, a, choice=[u'a', u'b', u'c']):
+    def _test_invoke_choice(self, a, choice=['a', 'b', 'c']):
         assert a == 7
-        assert choice == u'a'
+        assert choice == 'a'
 
-    def _test_invoke_choicet(self, a, choice=(u'a', u'b', u'c')):
+    def _test_invoke_choicet(self, a, choice=('a', 'b', 'c')):
         assert a == 7
-        assert choice == u'a'
+        assert choice == 'a'
 
-    def _test_invoke_choice_required(self, i=wikiutil.required_arg((u'b', u'a'))):
-        assert i == u'a'
+    def _test_invoke_choice_required(self, i=wikiutil.required_arg(('b', 'a'))):
+        assert i == 'a'
 
     def _test_trailing(self, a, _trailing_args=[]):
-        assert _trailing_args == [u'a']
+        assert _trailing_args == ['a']
 
     def _test_arbitrary_kw(self, expect, _kwargs={}):
         assert _kwargs == expect
@@ -744,71 +744,71 @@ class TestExtensionInvoking:
             assert i == 1 or i is None
 
         ief = wikiutil.invoke_extension_function
-        ief(self.request, self._test_invoke_bool, u'False')
-        ief(self.request, self._test_invoke_bool, u'b=False')
-        ief(self.request, _test_invoke_int, u'1')
-        ief(self.request, _test_invoke_int, u'i=1')
-        ief(self.request, self._test_invoke_bool_def, u'False, False')
-        ief(self.request, self._test_invoke_bool_def, u'b=False, v=False')
-        ief(self.request, self._test_invoke_bool_def, u'False')
-        ief(self.request, self._test_invoke_int_None, u'i=1')
-        ief(self.request, self._test_invoke_int_None, u'i=')
-        ief(self.request, self._test_invoke_int_None, u'')
+        ief(self.request, self._test_invoke_bool, 'False')
+        ief(self.request, self._test_invoke_bool, 'b=False')
+        ief(self.request, _test_invoke_int, '1')
+        ief(self.request, _test_invoke_int, 'i=1')
+        ief(self.request, self._test_invoke_bool_def, 'False, False')
+        ief(self.request, self._test_invoke_bool_def, 'b=False, v=False')
+        ief(self.request, self._test_invoke_bool_def, 'False')
+        ief(self.request, self._test_invoke_int_None, 'i=1')
+        ief(self.request, self._test_invoke_int_None, 'i=')
+        ief(self.request, self._test_invoke_int_None, '')
         py.test.raises(ValueError, ief, self.request,
-                       self._test_invoke_int_None, u'x')
+                       self._test_invoke_int_None, 'x')
         py.test.raises(ValueError, ief, self.request,
-                       self._test_invoke_int_None, u'""')
+                       self._test_invoke_int_None, '""')
         py.test.raises(ValueError, ief, self.request,
-                       self._test_invoke_int_None, u'i=""')
+                       self._test_invoke_int_None, 'i=""')
         py.test.raises(ValueError, ief, self.request,
-                       _test_invoke_int_fixed, u'a=7', [7, 8])
-        ief(self.request, _test_invoke_int_fixed, u'i=1', [7, 8])
+                       _test_invoke_int_fixed, 'a=7', [7, 8])
+        ief(self.request, _test_invoke_int_fixed, 'i=1', [7, 8])
         py.test.raises(ValueError, ief, self.request,
-                       _test_invoke_int_fixed, u'i=""', [7, 8])
-        ief(self.request, _test_invoke_int_fixed, u'i=', [7, 8])
+                       _test_invoke_int_fixed, 'i=""', [7, 8])
+        ief(self.request, _test_invoke_int_fixed, 'i=', [7, 8])
 
         for choicefn in (self._test_invoke_choice, self._test_invoke_choicet):
-            ief(self.request, choicefn, u'', [7])
-            ief(self.request, choicefn, u'choice=a', [7])
-            ief(self.request, choicefn, u'choice=', [7])
-            ief(self.request, choicefn, u'choice="a"', [7])
+            ief(self.request, choicefn, '', [7])
+            ief(self.request, choicefn, 'choice=a', [7])
+            ief(self.request, choicefn, 'choice=', [7])
+            ief(self.request, choicefn, 'choice="a"', [7])
             py.test.raises(ValueError, ief, self.request,
-                           choicefn, u'x', [7])
+                           choicefn, 'x', [7])
             py.test.raises(ValueError, ief, self.request,
-                           choicefn, u'choice=x', [7])
+                           choicefn, 'choice=x', [7])
 
-        ief(self.request, self._test_invoke_float_None, u'i=1.4')
-        ief(self.request, self._test_invoke_float_None, u'i=')
-        ief(self.request, self._test_invoke_float_None, u'')
-        ief(self.request, self._test_invoke_float_None, u'1.4')
+        ief(self.request, self._test_invoke_float_None, 'i=1.4')
+        ief(self.request, self._test_invoke_float_None, 'i=')
+        ief(self.request, self._test_invoke_float_None, '')
+        ief(self.request, self._test_invoke_float_None, '1.4')
         py.test.raises(ValueError, ief, self.request,
-                       self._test_invoke_float_None, u'x')
+                       self._test_invoke_float_None, 'x')
         py.test.raises(ValueError, ief, self.request,
-                       self._test_invoke_float_None, u'""')
+                       self._test_invoke_float_None, '""')
         py.test.raises(ValueError, ief, self.request,
-                       self._test_invoke_float_None, u'i=""')
-        ief(self.request, self._test_trailing, u'a=7, a')
-        ief(self.request, self._test_trailing, u'7, a')
-        ief(self.request, self._test_arbitrary_kw, u'test=x, \xc3=test',
-            [{u'\xc3': 'test', 'test': u'x'}])
-        ief(self.request, self._test_arbitrary_kw, u'test=x, "\xc3"=test',
-            [{u'\xc3': 'test', 'test': u'x'}])
-        ief(self.request, self._test_arbitrary_kw, u'test=x, "7 \xc3"=test',
-            [{u'7 \xc3': 'test', 'test': u'x'}])
-        ief(self.request, self._test_arbitrary_kw, u'test=x, 7 \xc3=test',
-            [{u'7 \xc3': 'test', 'test': u'x'}])
-        ief(self.request, self._test_arbitrary_kw, u'7 \xc3=test, test= x ',
-            [{u'7 \xc3': 'test', 'test': u'x'}])
+                       self._test_invoke_float_None, 'i=""')
+        ief(self.request, self._test_trailing, 'a=7, a')
+        ief(self.request, self._test_trailing, '7, a')
+        ief(self.request, self._test_arbitrary_kw, 'test=x, \xc3=test',
+            [{'\xc3': 'test', 'test': 'x'}])
+        ief(self.request, self._test_arbitrary_kw, 'test=x, "\xc3"=test',
+            [{'\xc3': 'test', 'test': 'x'}])
+        ief(self.request, self._test_arbitrary_kw, 'test=x, "7 \xc3"=test',
+            [{'7 \xc3': 'test', 'test': 'x'}])
+        ief(self.request, self._test_arbitrary_kw, 'test=x, 7 \xc3=test',
+            [{'7 \xc3': 'test', 'test': 'x'}])
+        ief(self.request, self._test_arbitrary_kw, '7 \xc3=test, test= x ',
+            [{'7 \xc3': 'test', 'test': 'x'}])
         py.test.raises(ValueError, ief, self.request,
-                       self._test_invoke_float_required, u'')
-        ief(self.request, self._test_invoke_float_required, u'1.4')
-        ief(self.request, self._test_invoke_float_required, u'i=1.4')
+                       self._test_invoke_float_required, '')
+        ief(self.request, self._test_invoke_float_required, '1.4')
+        ief(self.request, self._test_invoke_float_required, 'i=1.4')
         py.test.raises(ValueError, ief, self.request,
-                       self._test_invoke_choice_required, u'')
-        ief(self.request, self._test_invoke_choice_required, u'a')
-        ief(self.request, self._test_invoke_choice_required, u'i=a')
+                       self._test_invoke_choice_required, '')
+        ief(self.request, self._test_invoke_choice_required, 'a')
+        ief(self.request, self._test_invoke_choice_required, 'i=a')
         py.test.raises(ValueError, ief, self.request,
-                       self._test_invoke_float_required, u',')
+                       self._test_invoke_float_required, ',')
 
     def testConstructors(self):
         ief = wikiutil.invoke_extension_function
@@ -822,16 +822,16 @@ class TestExtensionInvoking:
         class TEST2(TEST1):
             pass
 
-        obj = ief(self.request, TEST1, u'a=7')
+        obj = ief(self.request, TEST1, 'a=7')
         assert isinstance(obj, TEST1)
         assert obj.constructed
-        py.test.raises(ValueError, ief, self.request, TEST1, u'b')
+        py.test.raises(ValueError, ief, self.request, TEST1, 'b')
 
-        obj = ief(self.request, TEST2, u'a=7')
+        obj = ief(self.request, TEST2, 'a=7')
         assert isinstance(obj, TEST1)
         assert isinstance(obj, TEST2)
         assert obj.constructed
-        py.test.raises(ValueError, ief, self.request, TEST2, u'b')
+        py.test.raises(ValueError, ief, self.request, TEST2, 'b')
 
         # old style class
         class TEST3:
@@ -842,23 +842,23 @@ class TestExtensionInvoking:
         class TEST4(TEST3):
             pass
 
-        obj = ief(self.request, TEST3, u'a=7')
+        obj = ief(self.request, TEST3, 'a=7')
         assert isinstance(obj, TEST3)
         assert obj.constructed
-        py.test.raises(ValueError, ief, self.request, TEST3, u'b')
+        py.test.raises(ValueError, ief, self.request, TEST3, 'b')
 
-        obj = ief(self.request, TEST4, u'a=7')
+        obj = ief(self.request, TEST4, 'a=7')
         assert isinstance(obj, TEST3)
         assert isinstance(obj, TEST4)
         assert obj.constructed
-        py.test.raises(ValueError, ief, self.request, TEST4, u'b')
+        py.test.raises(ValueError, ief, self.request, TEST4, 'b')
 
     def testFailing(self):
         ief = wikiutil.invoke_extension_function
 
-        py.test.raises(TypeError, ief, self.request, hex, u'15')
-        py.test.raises(TypeError, ief, self.request, cmp, u'15')
-        py.test.raises(AttributeError, ief, self.request, unicode, u'15')
+        py.test.raises(TypeError, ief, self.request, hex, '15')
+        py.test.raises(TypeError, ief, self.request, cmp, '15')
+        py.test.raises(AttributeError, ief, self.request, str, '15')
 
     def testAllDefault(self):
         ief = wikiutil.invoke_extension_function
@@ -870,15 +870,15 @@ class TestExtensionInvoking:
             assert d == 4
             return True
 
-        assert ief(self.request, has_many_defaults, u'1, 2, 3, 4')
-        assert ief(self.request, has_many_defaults, u'2, 3, 4', [1])
-        assert ief(self.request, has_many_defaults, u'3, 4', [1, 2])
-        assert ief(self.request, has_many_defaults, u'4', [1, 2, 3])
-        assert ief(self.request, has_many_defaults, u'', [1, 2, 3, 4])
-        assert ief(self.request, has_many_defaults, u'd=4,c=3,b=2,a=1')
-        assert ief(self.request, has_many_defaults, u'd=4,c=3,b=2', [1])
-        assert ief(self.request, has_many_defaults, u'd=4,c=3', [1, 2])
-        assert ief(self.request, has_many_defaults, u'd=4', [1, 2, 3])
+        assert ief(self.request, has_many_defaults, '1, 2, 3, 4')
+        assert ief(self.request, has_many_defaults, '2, 3, 4', [1])
+        assert ief(self.request, has_many_defaults, '3, 4', [1, 2])
+        assert ief(self.request, has_many_defaults, '4', [1, 2, 3])
+        assert ief(self.request, has_many_defaults, '', [1, 2, 3, 4])
+        assert ief(self.request, has_many_defaults, 'd=4,c=3,b=2,a=1')
+        assert ief(self.request, has_many_defaults, 'd=4,c=3,b=2', [1])
+        assert ief(self.request, has_many_defaults, 'd=4,c=3', [1, 2])
+        assert ief(self.request, has_many_defaults, 'd=4', [1, 2, 3])
 
     def testInvokeComplex(self):
         ief = wikiutil.invoke_extension_function
@@ -887,26 +887,26 @@ class TestExtensionInvoking:
             assert a == b
             return True
 
-        assert ief(self.request, has_complex, u'3-3i, 3-3j')
-        assert ief(self.request, has_complex, u'2i, 2j')
-        assert ief(self.request, has_complex, u'b=2i, a=2j')
-        assert ief(self.request, has_complex, u'2.007, 2.007')
-        assert ief(self.request, has_complex, u'2.007', [2.007])
-        assert ief(self.request, has_complex, u'b=2.007', [2.007])
+        assert ief(self.request, has_complex, '3-3i, 3-3j')
+        assert ief(self.request, has_complex, '2i, 2j')
+        assert ief(self.request, has_complex, 'b=2i, a=2j')
+        assert ief(self.request, has_complex, '2.007, 2.007')
+        assert ief(self.request, has_complex, '2.007', [2.007])
+        assert ief(self.request, has_complex, 'b=2.007', [2.007])
 
 
 class TestAnchorNames:
     def test_anchor_name_encoding(self):
         tests = [
             # text                    expected output
-            (u'\xf6\xf6ll\xdf\xdf',   'A.2BAPYA9g-ll.2BAN8A3w-'),
-            (u'level 2',              'level_2'),
-            (u'level_2',              'level_2'),
-            (u'',                     'A'),
-            (u'123',                  'A123'),
+            ('\xf6\xf6ll\xdf\xdf',   'A.2BAPYA9g-ll.2BAN8A3w-'),
+            ('level 2',              'level_2'),
+            ('level_2',              'level_2'),
+            ('',                     'A'),
+            ('123',                  'A123'),
             # make sure that a valid anchor is not modified:
-            (u'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:_.-',
-             u'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:_.-')
+            ('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:_.-',
+             'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:_.-')
         ]
         for text, expected in tests:
             yield self._check, text, expected
@@ -971,19 +971,19 @@ class TestNormalizePagename(object):
 
         Assume the default setting
         """
-        test = u'\u0000\u202a\u202b\u202c\u202d\u202e'
-        expected = u''
+        test = '\u0000\u202a\u202b\u202c\u202d\u202e'
+        expected = ''
         result = wikiutil.normalize_pagename(test, self.request.cfg)
         assert result == expected
 
     def testNormalizeSlashes(self):
         """ request: normalize pagename: normalize slashes """
         cases = (
-            (u'/////', u''),
-            (u'/a', u'a'),
-            (u'a/', u'a'),
-            (u'a/////b/////c', u'a/b/c'),
-            (u'a b/////c d/////e f', u'a b/c d/e f'),
+            ('/////', ''),
+            ('/a', 'a'),
+            ('a/', 'a'),
+            ('a/////b/////c', 'a/b/c'),
+            ('a b/////c d/////e f', 'a b/c d/e f'),
             )
         for test, expected in cases:
             result = wikiutil.normalize_pagename(test, self.request.cfg)
@@ -992,13 +992,13 @@ class TestNormalizePagename(object):
     def testNormalizeWhitespace(self):
         """ request: normalize pagename: normalize whitespace """
         cases = (
-            (u'         ', u''),
-            (u'    a', u'a'),
-            (u'a    ', u'a'),
-            (u'a     b     c', u'a b c'),
-            (u'a   b  /  c    d  /  e   f', u'a b/c d/e f'),
+            ('         ', ''),
+            ('    a', 'a'),
+            ('a    ', 'a'),
+            ('a     b     c', 'a b c'),
+            ('a   b  /  c    d  /  e   f', 'a b/c d/e f'),
             # All 30 unicode spaces
-            (config.chars_spaces, u''),
+            (config.chars_spaces, ''),
             )
         for test, expected in cases:
             result = wikiutil.normalize_pagename(test, self.request.cfg)
@@ -1011,11 +1011,11 @@ class TestNormalizePagename(object):
         normalized, order is important!
         """
         cases = (
-            (u'         ', u''),
-            (u'  a', u'a'),
-            (u'a  ', u'a'),
-            (u'a  b  c', u'a b c'),
-            (u'a  b  /  c  d  /  e  f', u'a b/c d/e f'),
+            ('         ', ''),
+            ('  a', 'a'),
+            ('a  ', 'a'),
+            ('a  b  c', 'a b c'),
+            ('a  b  /  c  d  /  e  f', 'a b/c d/e f'),
             )
         for test, expected in cases:
             result = wikiutil.normalize_pagename(test, self.request.cfg)
@@ -1030,9 +1030,9 @@ class TestGroupPages(object):
         """
         cases = (
             # current acl chars
-            (u'Name,:Group', u'NameGroup'),
+            ('Name,:Group', 'NameGroup'),
             # remove than normalize spaces
-            (u'Name ! @ # $ % ^ & * ( ) + Group', u'Name Group'),
+            ('Name ! @ # $ % ^ & * ( ) + Group', 'Name Group'),
             )
         for test, expected in cases:
             # validate we are testing valid group names

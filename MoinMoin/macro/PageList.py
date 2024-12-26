@@ -19,7 +19,7 @@ def execute(macro, args):
     case = 0
 
     # If called with empty or no argument, default to regex search for .+, the full page list.
-    needle = wikiutil.get_unicode(macro.request, args, 'needle', u'regex:.+')
+    needle = wikiutil.get_unicode(macro.request, args, 'needle', 'regex:.+')
 
     return fs_execute(macro, needle, titlesearch=True, case=case)
 

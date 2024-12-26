@@ -29,7 +29,7 @@ class Failure(Result):
         self.recipient = None
 
     def __str__(self):
-        return self.reason or u""
+        return self.reason or ""
 
 
 class Success(Result):
@@ -175,7 +175,7 @@ def filter_subscriber_list(event, subscribers, for_jabber):
 
     # Filter the list by removing users who don't want to receive
     # notifications about this type of event
-    for lang in subscribers.keys():
+    for lang in list(subscribers.keys()):
         userlist = []
 
         if for_jabber:

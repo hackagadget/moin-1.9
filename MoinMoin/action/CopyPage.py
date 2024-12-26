@@ -26,7 +26,7 @@ class CopyPage(ActionBase):
         _ = self._
         self.form_trigger = 'copy'
         self.form_trigger_label = _('Copy Page')
-        filterfn = re.compile(ur"^%s/.*$" % re.escape(pagename), re.U).match
+        filterfn = re.compile(r"^%s/.*$" % re.escape(pagename), re.U).match
         pages = request.rootpage.getPageList(user='', exists=1, filter=filterfn)
         subpagenames = request.rootpage.getPageList(user='', exists=1, filter=filterfn)
         self.subpages = subpagenames
@@ -52,9 +52,9 @@ class CopyPage(ActionBase):
             return False, _('TextCha: Wrong answer! Go back and try again...')
 
         form = self.form
-        newpagename = form.get('newpagename', u'')
+        newpagename = form.get('newpagename', '')
         newpagename = wikiutil.normalize_pagename(newpagename, self.cfg)
-        comment = form.get('comment', u'')
+        comment = form.get('comment', '')
         comment = wikiutil.clean_input(comment)
 
         self.page = PageEditor(self.request, self.pagename)

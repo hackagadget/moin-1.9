@@ -130,10 +130,10 @@ General syntax: moin [options] account check [check-options]
 
     def disableUser(self, uid):
         u = self.users[uid]
-        print " %-20s %-30r %-35r" % (uid, u.name, u.email),
+        print(" %-20s %-30r %-35r" % (uid, u.name, u.email), end=' ')
         keepthis = self.hasmagicpage(uid)
         if keepthis:
-            print "- keeping (magicpage)!"
+            print("- keeping (magicpage)!")
             u.save() # update timestamp, so this will be latest next run
         elif not u.disabled: # only disable once
             u.disabled = 1
@@ -143,9 +143,9 @@ General syntax: moin [options] account check [check-options]
             u.subscribed_pages = "" # avoid using email
             if self.options.save:
                 u.save()
-                print "- disabled."
+                print("- disabled.")
             else:
-                print "- would be disabled."
+                print("- would be disabled.")
 
     def getsortvalue(self, uid, user):
         return float(user.last_saved) # when user did last SAVE of his account data
@@ -163,34 +163,34 @@ General syntax: moin [options] account check [check-options]
         # show what will be kept
         uid = sortlist[-1][1]
         u = self.users[uid]
-        print " %-20s %-30r %-35r - keeping%s!" % (uid, u.name, u.email, self.hasmagicpage(uid) and " (magicpage)" or "")
+        print(" %-20s %-30r %-35r - keeping%s!" % (uid, u.name, u.email, self.hasmagicpage(uid) and " (magicpage)" or ""))
 
     def make_users_unique(self):
-        for name, uids in self.names.items():
+        for name, uids in list(self.names.items()):
             if len(uids) > 1:
                 self.process(uids)
 
     def make_emails_unique(self):
-        for email, uids in self.emails.items():
+        for email, uids in list(self.emails.items()):
             if len(uids) > 1:
                 self.process(uids)
 
     def make_WikiNames(self):
-        for uid, u in self.users.items():
+        for uid, u in list(self.users.items()):
             if u.disabled:
                 continue
             if not wikiutil.isStrictWikiname(u.name):
                 newname = u.name.capwords().replace(" ", "").replace("-", "")
                 if not wikiutil.isStrictWikiname(newname):
-                    print " %-20s %-30r - no WikiName, giving up" % (uid, u.name)
+                    print(" %-20s %-30r - no WikiName, giving up" % (uid, u.name))
                 else:
-                    print " %-20s %-30r - no WikiName -> %r" % (uid, u.name, newname)
+                    print(" %-20s %-30r - no WikiName -> %r" % (uid, u.name, newname))
                     if self.options.save:
                         u.name = newname
                         u.save()
 
     def remove_passwords(self):
-        for uid, u in self.users.items():
+        for uid, u in list(self.users.items()):
             # user.User already clears the old cleartext passwords on loading,
             # so nothing to do here!
             if self.options.save:
@@ -198,7 +198,7 @@ General syntax: moin [options] account check [check-options]
                 # already. and we would not trust it anyway, so we don't WANT
                 # to do that either!
                 # Just save the account data without cleartext password:
-                print " %-20s %-25s - saving" % (uid, u.name)
+                print(" %-20s %-25s - saving" % (uid, u.name))
                 u.save()
 
     def mainloop(self):

@@ -307,7 +307,7 @@ class scram(uh.HasRounds, uh.HasRawSalt, uh.HasRawChecksum, uh.GenericHandler):
             algs = self._norm_algs(algs)
         elif digest_map is not None:
             # derive algs list from digest map (if present).
-            algs = self._norm_algs(digest_map.keys())
+            algs = self._norm_algs(list(digest_map.keys()))
         elif self.use_defaults:
             algs = list(self.default_algs)
             assert self._norm_algs(algs) == algs, "invalid default algs: %r" % (algs,)

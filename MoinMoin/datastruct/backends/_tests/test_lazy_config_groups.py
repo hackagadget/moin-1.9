@@ -14,10 +14,10 @@ from MoinMoin._tests import wikiconfig
 
 class TestLazyConfigGroups(GroupsBackendTest):
 
-    test_groups = {u'EditorGroup': [u'John', u'JoeDoe', u'Editor1'],
-                   u'AdminGroup': [u'Admin1', u'Admin2', u'John'],
-                   u'OtherGroup': [u'SomethingOther'],
-                   u'EmptyGroup': []}
+    test_groups = {'EditorGroup': ['John', 'JoeDoe', 'Editor1'],
+                   'AdminGroup': ['Admin1', 'Admin2', 'John'],
+                   'OtherGroup': ['SomethingOther'],
+                   'EmptyGroup': []}
 
     expanded_groups = test_groups
 
@@ -40,15 +40,15 @@ class TestCompositeAndLazyConfigGroups(GroupsBackendTest):
     class Config(wikiconfig.Config):
 
         def groups(self, request):
-            config_groups = {u'EditorGroup': [u'AdminGroup', u'John', u'JoeDoe', u'Editor1', u'John'],
-                             u'RecursiveGroup': [u'Something', u'OtherRecursiveGroup'],
-                             u'OtherRecursiveGroup': [u'RecursiveGroup', u'Anything', u'NotExistingGroup'],
-                             u'ThirdRecursiveGroup': [u'ThirdRecursiveGroup', u'Banana'],
-                             u'CheckNotExistingGroup': [u'NotExistingGroup']}
+            config_groups = {'EditorGroup': ['AdminGroup', 'John', 'JoeDoe', 'Editor1', 'John'],
+                             'RecursiveGroup': ['Something', 'OtherRecursiveGroup'],
+                             'OtherRecursiveGroup': ['RecursiveGroup', 'Anything', 'NotExistingGroup'],
+                             'ThirdRecursiveGroup': ['ThirdRecursiveGroup', 'Banana'],
+                             'CheckNotExistingGroup': ['NotExistingGroup']}
 
-            lazy_groups = {u'AdminGroup': [u'Admin1', u'Admin2', u'John'],
-                           u'OtherGroup': [u'SomethingOther'],
-                           u'EmptyGroup': []}
+            lazy_groups = {'AdminGroup': ['Admin1', 'Admin2', 'John'],
+                           'OtherGroup': ['SomethingOther'],
+                           'EmptyGroup': []}
 
             return CompositeGroups(request,
                                    ConfigGroups(request, config_groups),

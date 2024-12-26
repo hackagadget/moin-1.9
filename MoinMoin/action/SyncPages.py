@@ -10,7 +10,7 @@
 
 import re
 import traceback
-import StringIO # not relevant for speed, so we do not need cStringIO
+import io # not relevant for speed, so we do not need cStringIO
 
 
 from MoinMoin import wikiutil
@@ -35,7 +35,7 @@ class ActionStatus(Exception):
 
 
 class ActionClass(object):
-    INFO, WARN, ERROR = zip(range(3), ("", "<!>", "/!\\")) # used for logging
+    INFO, WARN, ERROR = list(zip(list(range(3)), ("", "<!>", "/!\\"))) # used for logging
 
     def __init__(self, pagename, request):
         self.request = request
@@ -44,7 +44,7 @@ class ActionClass(object):
         self.status = []
         self.rollback = set()
 
-    def log_status(self, level, message=u"", substitutions=(), raw_suffix=u""):
+    def log_status(self, level, message="", substitutions=(), raw_suffix=""):
         """ Appends the message with a given importance level to the internal log. """
         if isinstance(message, str):
             message = message.decode("utf-8")
@@ -66,13 +66,13 @@ class ActionClass(object):
                 page_name = func()
                 self.log_status(self.INFO, _("Rolled back changes to the page %s."), (page_name, ))
             except Exception:
-                temp_file = StringIO.StringIO()
+                temp_file = io.StringIO()
                 traceback.print_exc(file=temp_file)
                 self.log_status(self.ERROR, _("Exception while calling rollback function:"), raw_suffix=temp_file.getvalue())
 
     def generate_log_table(self):
         """ Transforms self.status into a user readable table. """
-        table_line = u"|| %(smiley)s || %(message)s%(raw_suffix)s ||"
+        table_line = "|| %(smiley)s || %(message)s%(raw_suffix)s ||"
         table = []
 
         for line in self.status:
@@ -80,11 +80,11 @@ class ActionClass(object):
             if message:
                 if substitutions:
                     macro_args = [message] + list(substitutions)
-                    message = u"<<GetText2(|%s)>>" % (packLine(macro_args), )
+                    message = "<<GetText2(|%s)>>" % (packLine(macro_args), )
                 else:
-                    message = u"<<GetText(%s)>>" % (message, )
+                    message = "<<GetText(%s)>>" % (message, )
             else:
-                message = u""
+                message = ""
             table.append(table_line % {"smiley": level[1],
                                        "message": message,
                                        "raw_suffix": raw_suffix.replace("\n", "<<BR>>")})
@@ -121,7 +121,7 @@ class ActionClass(object):
         """ Does some fixup on the parameters. """
         # merge the pageList case into the pageMatch case
         if params["pageList"] is not None:
-            params["pageMatch"] = u'|'.join([r'^%s$' % re.escape(name)
+            params["pageMatch"] = '|'.join([r'^%s$' % re.escape(name)
                                              for name in params["pageList"]])
 
         if params["pageMatch"] is not None:
@@ -206,24 +206,25 @@ class ActionClass(object):
             local = MoinLocalWiki(self.request, params["localPrefix"], params["pageList"])
             try:
                 remote = MoinRemoteWiki(self.request, params["remoteWiki"], params["remotePrefix"], params["pageList"], name, password, verbose=debug)
-            except (UnsupportedWikiException, NotAllowedException), (msg, ):
+            except (UnsupportedWikiException, NotAllowedException) as xxx_todo_changeme:
+                (msg, ) = xxx_todo_changeme.args
                 raise ActionStatus(msg, "error")
 
             if not remote.valid:
                 raise ActionStatus(_("The ''remoteWiki'' is unknown.", wiki=True), "error")
-        except ActionStatus, e:
+        except ActionStatus as e:
             self.request.theme.add_msg(*e.args)
         else:
             try:
                 try:
                     self.sync(params, local, remote)
-                except Exception, e:
-                    temp_file = StringIO.StringIO()
+                except Exception as e:
+                    temp_file = io.StringIO()
                     traceback.print_exc(file=temp_file)
                     self.log_status(self.ERROR, _("A severe error occurred:"), raw_suffix=temp_file.getvalue())
                     raise
                 else:
-                    self.request.theme.add_msg(u"%s" % (_("Synchronisation finished. Look below for the status messages."), ), "info")
+                    self.request.theme.add_msg("%s" % (_("Synchronisation finished. Look below for the status messages."), ), "info")
             finally:
                 self.call_rollback_funcs()
                 # XXX aquire readlock on self.page
@@ -303,7 +304,7 @@ class ActionClass(object):
                     return
 
                 current_page = PageEditor(self.request, local_pagename) # YYY direct access
-                comment = u"Local Merge - %r" % (remote.get_interwiki_name() or remote.get_iwid())
+                comment = "Local Merge - %r" % (remote.get_interwiki_name() or remote.get_iwid())
 
                 tags = TagStore(current_page)
 
@@ -455,7 +456,7 @@ class ActionClass(object):
                 new_local_rev = current_page.get_real_rev() # YYY direct access
 
                 def rollback_local_change(): # YYY direct local access
-                    comment = u"Wikisync rollback"
+                    comment = "Wikisync rollback"
                     rev = new_local_rev - 1
                     revstr = '%08d' % rev
                     oldpg = Page(self.request, sp.local_name, rev=rev)

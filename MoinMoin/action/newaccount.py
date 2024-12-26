@@ -64,7 +64,7 @@ space between words. Group page name is not allowed.""", wiki=True) % wikiutil.e
     # Encode password
     try:
         theuser.enc_password = user.encodePassword(request.cfg, password)
-    except UnicodeError, err:
+    except UnicodeError as err:
         # Should never happen
         return "Can't encode password: %s" % wikiutil.escape(str(err))
 
@@ -150,7 +150,7 @@ def _create_form(request):
     td.append(html.INPUT(type="submit", name="create",
                          value=_('Create Profile')))
 
-    return unicode(ret)
+    return str(ret)
 
 def execute(pagename, request):
     found = False
@@ -168,7 +168,7 @@ def execute(pagename, request):
     _ = request.getText
     form = request.form
 
-    submitted = form.has_key('create')
+    submitted = 'create' in form
 
     if submitted: # user pressed create button
         request.theme.add_msg(_create_user(request), "dialog")

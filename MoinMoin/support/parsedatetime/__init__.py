@@ -23,7 +23,7 @@ Parse human-readable date/time text.
 Requires Python 2.7 or later
 """
 
-from __future__ import with_statement, absolute_import, unicode_literals
+
 
 import re
 import time
@@ -368,7 +368,7 @@ class Calendar(object):
         # realunit = next((key for key, values in self.ptc.units.items()
         #                  if any(imap(units.__contains__, values))), None)
         realunit = units
-        for key, values in self.ptc.units.items():
+        for key, values in list(self.ptc.units.items()):
             if units in values:
                 realunit = key
                 break
@@ -2428,7 +2428,7 @@ class Constants(object):
             self.locale.re_values['decimal_mark'] = \
                 re.escape(self.locale.decimal_mark)
 
-            units = [unit for units in self.locale.units.values()
+            units = [unit for units in list(self.locale.units.values())
                      for unit in units]  # flatten
             units.sort(key=len, reverse=True)  # longest first
             self.locale.re_values['units'] = re_join(units)
@@ -2781,7 +2781,7 @@ class Constants(object):
 
         values = {}
 
-        for key, default in defaults.items():
+        for key, default in list(defaults.items()):
             values[key] = source.get(key, default)
 
         return (values['yr'], values['mth'], values['dy'],

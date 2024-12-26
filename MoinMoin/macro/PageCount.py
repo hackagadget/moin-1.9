@@ -21,7 +21,7 @@ def macro_PageCount(macro, exists=None):
     exists = wikiutil.get_unicode(request, exists, 'exists')
     # Check input
     only_existing = False
-    if exists == u'exists':
+    if exists == 'exists':
         only_existing = True
     elif exists:
         raise ValueError("Wrong argument: %r" % exists)

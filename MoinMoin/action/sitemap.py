@@ -37,7 +37,7 @@ def sitemap_url(request, page):
         lastmod = now()
 
     # page's changefreq, priority and lastmod depends on page type / name
-    if pagename in [u"RecentChanges", u"TitleIndex", ]:
+    if pagename in ["RecentChanges", "TitleIndex", ]:
         # important dynamic pages with macros
         changefreq = "hourly"
         priority = "0.9"
@@ -87,7 +87,7 @@ def execute(pagename, request):
     except ValueError:
         underlay = 1
     pages = request.rootpage.getPageDict(include_underlay=underlay)
-    pagelist = pages.keys()
+    pagelist = list(pages.keys())
     pagelist.sort()
     for name in pagelist:
         result.append(sitemap_url(request, pages[name]))

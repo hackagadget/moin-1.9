@@ -16,12 +16,12 @@ except ImportError:
 
 class TestWikiAnalyzer(object):
 
-    word = u'HelpOnMoinTesting'
-    words = {word.lower(): u'',
-             u'help': u'',
-             u'on': u'',
-             u'moin': u'',
-             u'testing': u''}
+    word = 'HelpOnMoinTesting'
+    words = {word.lower(): '',
+             'help': '',
+             'on': '',
+             'moin': '',
+             'testing': ''}
 
     def setup_class(self):
         self.analyzer = WikiAnalyzer(request=self.request, language=self.request.cfg.language_default)
@@ -39,12 +39,12 @@ class TestWikiAnalyzer(object):
 
 class TestWikiAnalyzerStemmed(TestWikiAnalyzer):
 
-    word = u'HelpOnMoinTesting'
-    words = {word.lower(): u'helponmointest',
-             u'help': u'',
-             u'on': u'',
-             u'moin': u'',
-             u'testing': u'test'}
+    word = 'HelpOnMoinTesting'
+    words = {word.lower(): 'helponmointest',
+             'help': '',
+             'on': '',
+             'moin': '',
+             'testing': 'test'}
 
     class Config(wikiconfig.Config):
 
@@ -53,30 +53,30 @@ class TestWikiAnalyzerStemmed(TestWikiAnalyzer):
 
 class TestWikiAnalyzerSeveralWords(TestWikiAnalyzer):
 
-    word = u'HelpOnMoinTesting OtherWikiWord'
-    words = {u'helponmointesting': u'',
-             u'help': u'',
-             u'on': u'',
-             u'moin': u'',
-             u'testing': u'',
-             u'otherwikiword': u'',
-             u'other': u'',
-             u'wiki': u'',
-             u'word': u''}
+    word = 'HelpOnMoinTesting OtherWikiWord'
+    words = {'helponmointesting': '',
+             'help': '',
+             'on': '',
+             'moin': '',
+             'testing': '',
+             'otherwikiword': '',
+             'other': '',
+             'wiki': '',
+             'word': ''}
 
 
 class TestWikiAnalyzerStemmedSeveralWords(TestWikiAnalyzer):
 
-    word = u'HelpOnMoinTesting OtherWikiWord'
-    words = {u'helponmointesting': u'helponmointest',
-             u'help': u'',
-             u'on': u'',
-             u'moin': u'',
-             u'testing': u'test',
-             u'otherwikiword': u'',
-             u'other': u'',
-             u'wiki': u'',
-             u'word': u''}
+    word = 'HelpOnMoinTesting OtherWikiWord'
+    words = {'helponmointesting': 'helponmointest',
+             'help': '',
+             'on': '',
+             'moin': '',
+             'testing': 'test',
+             'otherwikiword': '',
+             'other': '',
+             'wiki': '',
+             'word': ''}
 
     class Config(wikiconfig.Config):
 
@@ -85,11 +85,11 @@ class TestWikiAnalyzerStemmedSeveralWords(TestWikiAnalyzer):
 
 class TestWikiAnalyzerStemmedHelpOnEditing(TestWikiAnalyzer):
 
-    word = u'HelpOnEditing'
-    words = {u'helponediting': u'helponedit',
-             u'help': u'',
-             u'on': u'',
-             u'editing': u'edit'}
+    word = 'HelpOnEditing'
+    words = {'helponediting': 'helponedit',
+             'help': '',
+             'on': '',
+             'editing': 'edit'}
 
     class Config(wikiconfig.Config):
 
@@ -98,10 +98,10 @@ class TestWikiAnalyzerStemmedHelpOnEditing(TestWikiAnalyzer):
 
 class TestWikiAnalyzerStemmedCategoryHomepage(TestWikiAnalyzer):
 
-    word = u'CategoryHomepage'
-    words = {u'categoryhomepage': u'categoryhomepag',
-             u'category': u'categori',
-             u'homepage': u'homepag'}
+    word = 'CategoryHomepage'
+    words = {'categoryhomepage': 'categoryhomepag',
+             'category': 'categori',
+             'homepage': 'homepag'}
 
     class Config(wikiconfig.Config):
 

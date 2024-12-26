@@ -90,21 +90,21 @@ class Theme(ThemeBase):
             self.emit_custom_html(self.cfg.page_header1),
 
             # Header
-            u'<div id="header">',
+            '<div id="header">',
             self.searchform(d),
             self.logo(),
             self.username(d),
-            u'<h1 id="locationline">',
+            '<h1 id="locationline">',
             self.interwiki(d),
             self.title_with_separators(d),
-            u'</h1>',
+            '</h1>',
             self.trail(d),
             self.navibar(d),
             #u'<hr id="pageline">',
-            u'<div id="pageline"><hr style="display:none;"></div>',
+            '<div id="pageline"><hr style="display:none;"></div>',
             self.msg(d),
             self.editbar(d),
-            u'</div>',
+            '</div>',
 
             # Post header custom html (not recommended)
             self.emit_custom_html(self.cfg.page_header2),
@@ -112,7 +112,7 @@ class Theme(ThemeBase):
             # Start of page
             self.startPage(),
         ]
-        return u'\n'.join(html)
+        return '\n'.join(html)
 
     def editorheader(self, d, **kw):
         """ Assemble wiki header for editor
@@ -126,12 +126,12 @@ class Theme(ThemeBase):
             self.emit_custom_html(self.cfg.page_header1),
 
             # Header
-            u'<div id="header">',
-            u'<h1 id="locationline">',
+            '<div id="header">',
+            '<h1 id="locationline">',
             self.title_with_separators(d),
-            u'</h1>',
+            '</h1>',
             self.msg(d),
-            u'</div>',
+            '</div>',
 
             # Post header custom html (not recommended)
             self.emit_custom_html(self.cfg.page_header2),
@@ -139,7 +139,7 @@ class Theme(ThemeBase):
             # Start of page
             self.startPage(),
         ]
-        return u'\n'.join(html)
+        return '\n'.join(html)
 
     def footer(self, d, **keywords):
         """ Assemble wiki footer
@@ -159,16 +159,16 @@ class Theme(ThemeBase):
             self.emit_custom_html(self.cfg.page_footer1),
 
             # Footer
-            u'<div id="footer">',
+            '<div id="footer">',
             self.editbar(d),
             self.credits(d),
             self.showversion(d, **keywords),
-            u'</div>',
+            '</div>',
 
             # Post footer custom html
             self.emit_custom_html(self.cfg.page_footer2),
             ]
-        return u'\n'.join(html)
+        return '\n'.join(html)
 
     def username(self, d):
         """ Assemble the username / userprefs link
@@ -213,8 +213,8 @@ class Theme(ThemeBase):
                 userlinks.append(d['page'].link_to(request, text=_("Login"),
                                                    querystr=query, id='login', rel='nofollow'))
 
-        userlinks_html = u'<span class="sep"> | </span>'.join(userlinks)
-        html = u'<div id="username">%s</div>' % userlinks_html
+        userlinks_html = '<span class="sep"> | </span>'.join(userlinks)
+        html = '<div id="username">%s</div>' % userlinks_html
         return html
 
     def trail(self, d):
@@ -250,7 +250,7 @@ class Theme(ThemeBase):
                     title = self.shortenPagename(title)
                     link = page.link_to(request, title)
                     items.append(link)
-                html = u'<div id="pagetrail">%s</div>' % u'<span class="sep"> &raquo; </span>'.join(items)
+                html = '<div id="pagetrail">%s</div>' % '<span class="sep"> &raquo; </span>'.join(items)
         return html
 
     def interwiki(self, d):
@@ -264,9 +264,9 @@ class Theme(ThemeBase):
             page = wikiutil.getFrontPage(self.request)
             text = self.request.cfg.interwikiname or 'Self'
             link = page.link_to(self.request, text=text, rel='nofollow')
-            html = u'<span id="interwiki">%s<span class="sep">: </span></span>' % link
+            html = '<span id="interwiki">%s<span class="sep">: </span></span>' % link
         else:
-            html = u''
+            html = ''
         return html
 
 def execute(request):

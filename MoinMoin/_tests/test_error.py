@@ -17,26 +17,26 @@ class TestEncoding(object):
 
     def testCreateWithUnicode(self):
         """ error: create with unicode """
-        err = error.Error(u'טעות')
-        assert unicode(err) == u'טעות'
+        err = error.Error('טעות')
+        assert str(err) == 'טעות'
         assert str(err) == 'טעות'
 
     def testCreateWithEncodedString(self):
         """ error: create with encoded string """
         err = error.Error('טעות')
-        assert unicode(err) == u'טעות'
+        assert str(err) == 'טעות'
         assert str(err) == 'טעות'
 
     def testCreateWithObject(self):
         """ error: create with any object """
         class Foo:
             def __unicode__(self):
-                return u'טעות'
+                return 'טעות'
             def __str__(self):
                 return 'טעות'
 
         err = error.Error(Foo())
-        assert unicode(err) == u'טעות'
+        assert str(err) == 'טעות'
         assert str(err) == 'טעות'
 
     def testAccessLikeDict(self):

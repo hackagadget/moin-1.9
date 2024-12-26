@@ -99,7 +99,7 @@ def get_machine_id():
             import winreg as wr
         except ImportError:
             try:
-                import _winreg as wr
+                import winreg as wr
             except ImportError:
                 wr = None
 

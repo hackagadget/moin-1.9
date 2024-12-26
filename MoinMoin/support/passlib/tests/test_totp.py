@@ -11,7 +11,7 @@ import time as _time
 # site
 # pkg
 from passlib import exc
-from passlib.utils.compat import unicode, u
+from passlib.utils.compat import str, u
 from passlib.tests.utils import TestCase, time_call
 # subject
 from passlib import totp as totp_module
@@ -878,7 +878,7 @@ class TotpTest(TestCase):
         time = self.randtime()
         result = otp.generate(time)
         token = result.token
-        self.assertIsInstance(token, unicode)
+        self.assertIsInstance(token, str)
         start_time = result.counter * 30
 
         # should generate same token for next 29s

@@ -10,7 +10,7 @@ Additionally, we check that the files have no crlf (Windows style) line endings.
 
 import os, re, time, stat
 
-import pep8
+from . import pep8
 
 from MoinMoin.conftest import moindir
 
@@ -46,7 +46,7 @@ try:
         x = xattr.xattr(path)
         try:
             mt = x.get('user.moin-pep8-tested-mtime')
-            mt = long(mt)
+            mt = int(mt)
             return mtime > mt
         except IOError:
             # probably not supported

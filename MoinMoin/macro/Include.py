@@ -18,7 +18,7 @@ Dependencies = ["time"] # works around MoinMoinBugs/TableOfContentsLacksLinks
 
 generates_headings = True
 
-import re, StringIO
+import re, io
 from MoinMoin import wikiutil
 from MoinMoin.Page import Page
 
@@ -104,7 +104,7 @@ def execute(macro, text, args_re=re.compile(_args_re_pattern), title_re=re.compi
         if not request.user.may.read(inc_name):
             continue
         if inc_name in this_page._macroInclude_pagelist:
-            result.append(u'<p><strong class="error">Recursive include of "%s" forbidden</strong></p>' % (inc_name, ))
+            result.append('<p><strong class="error">Recursive include of "%s" forbidden</strong></p>' % (inc_name, ))
             continue
         if skipitems:
             skipitems -= 1
@@ -201,7 +201,7 @@ def execute(macro, text, args_re=re.compile(_args_re_pattern), title_re=re.compi
             this_page._macroInclude_pagelist.get(inc_name, 0) + 1
 
         # output the included page
-        strfile = StringIO.StringIO()
+        strfile = io.StringIO()
         request.redirect(strfile)
         try:
             inc_page.send_page(content_only=True,

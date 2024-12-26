@@ -299,7 +299,7 @@ class BaseDict(object, DictMixin):
         return self._backend._retrieve_items(self.name)
 
     def __repr__(self):
-        return "<%r name=%r items=%r>" % (self.__class__, self.name, self._dict.items())
+        return "<%r name=%r items=%r>" % (self.__class__, self.name, list(self._dict.items()))
 
 
 class BaseDictsBackend(object):

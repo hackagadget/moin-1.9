@@ -15,7 +15,7 @@ class Formatter(FormatterBase):
         Send plain text data.
     """
 
-    hardspace = u' '
+    hardspace = ' '
 
     def __init__(self, request, **kw):
         FormatterBase.__init__(self, request, **kw)
@@ -36,22 +36,22 @@ class Formatter(FormatterBase):
         self._paragraph_skip_begin = True
 
     def startDocument(self, pagename):
-        line = u'\n'.rjust(len(pagename) + 2, u'*')
-        return self.wrap(u"%s %s \n%s" % (line, pagename, line))
+        line = '\n'.rjust(len(pagename) + 2, '*')
+        return self.wrap("%s %s \n%s" % (line, pagename, line))
 
     def endContent(self):
         return self.flush(True)
 
     def sysmsg(self, on, **kw):
-        return self.wrap((u'\n\n*** ', u' ***\n\n')[not on])
+        return self.wrap(('\n\n*** ', ' ***\n\n')[not on])
 
     def pagelink(self, on, pagename='', page=None, **kw):
         FormatterBase.pagelink(self, on, pagename, page, **kw)
         if on:
             if not self._textbuf or self._textbuf[-1] in ('\n', ' '):
-                result = self.wrap(u'<')
+                result = self.wrap('<')
             else:
-                result = self.wrap(u' <')
+                result = self.wrap(' <')
             self.text_on(True)
             self.add_missing_space()
             return result
@@ -63,23 +63,23 @@ class Formatter(FormatterBase):
                 pagename = pagename.replace('/', '.')
             pagename += '.txt'
             if linktext == orig_pagename:
-                return self.wrap(u'%s>' % pagename)
+                return self.wrap('%s>' % pagename)
             else:
-                return self.wrap(u'%s> [%s]' % (linktext, pagename))
+                return self.wrap('%s> [%s]' % (linktext, pagename))
 
     def interwikilink(self, on, interwiki='', pagename='', **kw):
         if on:
             self.add_missing_space()
-            self._url = u"%s:%s" % (interwiki, pagename)
+            self._url = "%s:%s" % (interwiki, pagename)
             self.text_on()
-            return u''
+            return ''
         else:
             text = self._text
             self.text_off()
             if text == self._url:
                 result = ''
             else:
-                result = self.wrap(u' [%s]' % (self._url))
+                result = self.wrap(' [%s]' % (self._url))
             self._url = None
             return result
 
@@ -88,14 +88,14 @@ class Formatter(FormatterBase):
             self.add_missing_space()
             self._url = url
             self.text_on()
-            return u''
+            return ''
         else:
             text = self._text
             self.text_off()
             if text == self._url or 'mailto:' + text == self._url:
                 result = ''
             else:
-                result = self.wrap(u' [%s]' % (self._url))
+                result = self.wrap(' [%s]' % (self._url))
             self._url = None
             return result
 
@@ -103,13 +103,13 @@ class Formatter(FormatterBase):
         if on:
             if 'title' in kw and kw['title']:
                 if kw['title'] != url:
-                    return self.wrap(u'[attachment:%s ' % url)
-            return self.wrap(u'[attachment:')
+                    return self.wrap('[attachment:%s ' % url)
+            return self.wrap('[attachment:')
         return self.wrap(']')
 
     def attachment_image(self, url, **kw):
         title = ''
-        for a in (u'title', u'html__title', u'alt', u'html_alt'):
+        for a in ('title', 'html__title', 'alt', 'html_alt'):
             if a in kw:
                 title = ':' + kw[a]
         return self.wrap("[image:%s%s]" % (url, title))
@@ -126,7 +126,7 @@ class Formatter(FormatterBase):
 
     def rule(self, size=0, **kw):
         size = min(size, 10)
-        ch = u"---~=*+#####"[size]
+        ch = "---~=*+#####"[size]
         self.paragraph_begin()
         result = self.wrap((ch * (79 - self._indent)))
         self.paragraph_end()
@@ -135,15 +135,15 @@ class Formatter(FormatterBase):
     def strong(self, on, **kw):
         if on:
             self.add_missing_space()
-        return self.wrap(u'*')
+        return self.wrap('*')
 
     def emphasis(self, on, **kw):
         if on:
             self.add_missing_space()
-        return self.wrap(u'/')
+        return self.wrap('/')
 
     def highlight(self, on, **kw):
-        return u''
+        return ''
 
     def number_list(self, on, type=None, start=None, **kw):
         if on:
@@ -213,26 +213,26 @@ class Formatter(FormatterBase):
 
     def sup(self, on, **kw):
         if on:
-            return self.wrap(u'^')
+            return self.wrap('^')
         else:
             return ''
 
     def sub(self, on, **kw):
-        return self.wrap(u'_')
+        return self.wrap('_')
 
     def strike(self, on, **kw):
         if on:
             self.add_missing_space()
-        return self.wrap(u'__')
+        return self.wrap('__')
 
     def code(self, on, **kw):
         if on:
             self.add_missing_space()
-        return self.wrap(u"'")
+        return self.wrap("'")
 
     def preformatted(self, on, **kw):
         FormatterBase.preformatted(self, on)
-        snip = u'%s\n' % u'---%<'.ljust(78 - self._indent, u'-')
+        snip = '%s\n' % '---%<'.ljust(78 - self._indent, '-')
         if on:
             self.paragraph_begin()
             return self.wrap(snip)
@@ -246,16 +246,16 @@ class Formatter(FormatterBase):
     def small(self, on, **kw):
         if on:
             self.add_missing_space()
-        return u''
+        return ''
 
     def big(self, on, **kw):
         if on:
             self.add_missing_space()
-        return u''
+        return ''
 
     def code_area(self, on, code_id, code_type='code', show=0, start=-1,
                   step=-1, msg=None):
-        snip = u'%s\n' % u'---CodeArea'.ljust(78 - self._indent, u'-')
+        snip = '%s\n' % '---CodeArea'.ljust(78 - self._indent, '-')
         if on:
             self.paragraph_begin()
             self._in_code_area = 1
@@ -270,12 +270,12 @@ class Formatter(FormatterBase):
             return result
 
     def code_line(self, on):
-        res = u''
+        res = ''
         if not on or (on and self._in_code_line):
-            res += u'\n'
+            res += '\n'
         if on:
             if self._code_area_state[0] > 0:
-                res += u' %4d  ' % self._code_area_state[3]
+                res += ' %4d  ' % self._code_area_state[3]
                 self._code_area_state[3] += self._code_area_state[2]
         self._in_code_line = on != 0
         return self.wrap(res)
@@ -296,7 +296,7 @@ class Formatter(FormatterBase):
         return ''
 
     def linebreak(self, preformatted=1):
-        return self.wrap(u'\n')
+        return self.wrap('\n')
 
     def smiley(self, text):
         return self.wrap(text)
@@ -308,11 +308,11 @@ class Formatter(FormatterBase):
             result = ''
         else:
             if depth == 1:
-                ch = u'='
+                ch = '='
             else:
-                ch = u'-'
+                ch = '-'
 
-            result = u'\n%s\n' % (ch * len(self._text))
+            result = '\n%s\n' % (ch * len(self._text))
             self.text_off()
             result = self.wrap(result)
             self.paragraph_end()
@@ -355,7 +355,7 @@ class Formatter(FormatterBase):
             self._table_column_max_len = []
             result = self.flush(True)
         else:
-            result = u''
+            result = ''
             col_widths = self.fix_col_widths()
             for row in self._table:
                 result += self.get_table_sep(col_widths)
@@ -399,7 +399,7 @@ class Formatter(FormatterBase):
     def table_row(self, on, attrs={}, **kw):
         if on:
             self._table.append([])
-        return u''
+        return ''
 
     def table_cell(self, on, attrs={}, **kw):
         if on:
@@ -432,24 +432,24 @@ class Formatter(FormatterBase):
                     self._table_column_max_len[colnum] = max_line_len
             self._table[rownum].append(self._text)
             self.text_off()
-        return u''
+        return ''
 
     def underline(self, on, **kw):
-        return self.wrap(u'_')
+        return self.wrap('_')
 
     def definition_list(self, on, **kw):
         if on:
             self.paragraph_begin()
         else:
             self.paragraph_end()
-        return u''
+        return ''
 
     def definition_term(self, on, compact=0, **kw):
-        result = u''
+        result = ''
         #if not compact:
         #    result = result + u'\n'
         if not on:
-            result = result + u':'
+            result = result + ':'
         return self.wrap(result)
 
     def definition_desc(self, on, **kw):
@@ -463,7 +463,7 @@ class Formatter(FormatterBase):
         return ''
 
     def image(self, src=None, **kw):
-        for a in (u'title', u'html__title', u'alt', u'html_alt'):
+        for a in ('title', 'html__title', 'alt', 'html_alt'):
             if a in kw:
                 return self.wrap(kw[a] + ' [' + src + ']')
         return self.wrap('[' + src + ']')

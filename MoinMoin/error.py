@@ -39,13 +39,13 @@ class Error(Exception):
     def __unicode__(self):
         """ Return unicode error message """
         if isinstance(self.message, str):
-            return unicode(self.message, config.charset)
+            return str(self.message, config.charset)
         else:
-            return unicode(self.message)
+            return str(self.message)
 
     def __str__(self):
         """ Return encoded message """
-        if isinstance(self.message, unicode):
+        if isinstance(self.message, str):
             return self.message.encode(config.charset)
         else:
             return str(self.message)

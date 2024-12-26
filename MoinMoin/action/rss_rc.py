@@ -8,7 +8,7 @@
     @copyright: 2006-2007 MoinMoin:ThomasWaldmann
     @license: GNU GPL, see COPYING for details.
 """
-import StringIO, re, time
+import io, re, time
 from MoinMoin import wikixml, config, wikiutil
 from MoinMoin.logfile import editlog
 from MoinMoin.util import timefuncs
@@ -170,40 +170,40 @@ def execute(pagename, request):
             logo = request.getQualifiedURL(logo.group(1))
 
         # prepare output
-        out = StringIO.StringIO()
+        out = io.StringIO()
         handler = RssGenerator(out)
 
         # start SAX stream
         handler.startDocument()
         handler._write(
-            u'<!--\n'
-            u'    Add an "items=nnn" URL parameter to get more than the \n'
-            u'    default %(def_max_items)d items. You cannot get more than \n'
-            u'    %(items_limit)d items though.\n'
-            u'    \n'
-            u'    Add "unique=1" to get a list of changes where page names are unique,\n'
-            u'    i.e. where only the latest change of each page is reflected.\n'
-            u'    \n'
-            u'    Add "diffs=1" to add change diffs to the description of each items.\n'
-            u'    \n'
-            u'    Add "ddiffs=1" to link directly to the diff (good for FeedReader).\n'
-            u'    \n'
-            u'    Add "lines=nnn" to change maximum number of diff/body lines \n'
-            u'    to show. Cannot be more than %(lines_limit)d.\n'
-            u'    \n'
-            u'    Add "show_att=1" to show items related to attachments.\n'
-            u'    \n'
-            u'    Add "page=pattern" to show feed only for specific pages.\n'
-            u'    Pattern can be empty (it would match to all pages), \n'
-            u'    can start with circumflex (it would be interpreted as \n'
-            u'    regular expression in this case), end with slash (for \n'
-            u'    getting feed for page tree) or point to specific page (if \n'
-            u'    none of the above can be applied).\n'
-            u'    \n'
-            u'    Current settings: items=%(max_items)i, unique=%(unique)i, \n'
-            u'    diffs=%(diffs)i, ddiffs=%(ddiffs)i, lines=%(max_lines)i, \n'
-            u'    show_att=%(show_att)i\n'
-            u'-->\n' % locals()
+            '<!--\n'
+            '    Add an "items=nnn" URL parameter to get more than the \n'
+            '    default %(def_max_items)d items. You cannot get more than \n'
+            '    %(items_limit)d items though.\n'
+            '    \n'
+            '    Add "unique=1" to get a list of changes where page names are unique,\n'
+            '    i.e. where only the latest change of each page is reflected.\n'
+            '    \n'
+            '    Add "diffs=1" to add change diffs to the description of each items.\n'
+            '    \n'
+            '    Add "ddiffs=1" to link directly to the diff (good for FeedReader).\n'
+            '    \n'
+            '    Add "lines=nnn" to change maximum number of diff/body lines \n'
+            '    to show. Cannot be more than %(lines_limit)d.\n'
+            '    \n'
+            '    Add "show_att=1" to show items related to attachments.\n'
+            '    \n'
+            '    Add "page=pattern" to show feed only for specific pages.\n'
+            '    Pattern can be empty (it would match to all pages), \n'
+            '    can start with circumflex (it would be interpreted as \n'
+            '    regular expression in this case), end with slash (for \n'
+            '    getting feed for page tree) or point to specific page (if \n'
+            '    none of the above can be applied).\n'
+            '    \n'
+            '    Current settings: items=%(max_items)i, unique=%(unique)i, \n'
+            '    diffs=%(diffs)i, ddiffs=%(ddiffs)i, lines=%(max_lines)i, \n'
+            '    show_att=%(show_att)i\n'
+            '-->\n' % locals()
             )
 
         # emit channel description
@@ -213,7 +213,7 @@ def execute(pagename, request):
         handler.simpleNode('title', cfg.sitename)
         page = Page(request, pagename)
         handler.simpleNode('link', full_url(request, page))
-        handler.simpleNode('description', u'RecentChanges at %s' % cfg.sitename)
+        handler.simpleNode('description', 'RecentChanges at %s' % cfg.sitename)
         if logo:
             handler.simpleNode('image', None, {
                 (handler.xmlns['rdf'], 'resource'): logo,
@@ -277,7 +277,7 @@ def execute(pagename, request):
                         handler.simpleNode('link', attach_url(request,
                             cur_pagename, filename, do='view'))
 
-                    comment = _(u"Upload of attachment '%(filename)s'.") % {
+                    comment = _("Upload of attachment '%(filename)s'.") % {
                         'filename': filename}
 
                 elif action == 'ATTDEL':
@@ -285,7 +285,7 @@ def execute(pagename, request):
                         handler.simpleNode('link', full_url(request, page,
                             querystr={'action': 'AttachFile'}))
 
-                    comment = _(u"Attachment '%(filename)s' deleted.") % {
+                    comment = _("Attachment '%(filename)s' deleted.") % {
                         'filename': filename}
 
                 elif action == 'ATTDRW':
@@ -293,19 +293,19 @@ def execute(pagename, request):
                         handler.simpleNode('link', attach_url(request,
                             cur_pagename, filename, do='view'))
 
-                    comment = _(u"Drawing '%(filename)s' saved.") % {
+                    comment = _("Drawing '%(filename)s' saved.") % {
                         'filename': filename}
 
             elif action.startswith('SAVE'):
                 if action == 'SAVE/REVERT':
                     to_rev = int(item.extra)
-                    comment = (_(u"Revert to revision %(rev)d.") % {
+                    comment = (_("Revert to revision %(rev)d.") % {
                         'rev': to_rev}) + "<br />" \
                         + _("Comment:") + " " + comment
 
                 elif action == 'SAVE/RENAME':
                     show_diff = 0
-                    comment = (_(u"Renamed from '%(oldpagename)s'.") % {
+                    comment = (_("Renamed from '%(oldpagename)s'.") % {
                         'oldpagename': item.extra}) + "<br />" \
                         + _("Comment:") + " " + comment
                     if item.pagename in pagename_map:
@@ -316,7 +316,7 @@ def execute(pagename, request):
                         pagename_map[item.extra] = item.pagename
 
                 elif action == 'SAVENEW':
-                    comment = _(u"New page:\n") + comment
+                    comment = _("New page:\n") + comment
 
                 item_rev = int(item.rev)
 
@@ -348,7 +348,7 @@ def execute(pagename, request):
                     lines = '\n'.join(lines)
                     lines = wikiutil.escape(lines)
 
-                    comment = u'%s\n<pre>\n%s\n</pre>\n' % (comment, lines)
+                    comment = '%s\n<pre>\n%s\n</pre>\n' % (comment, lines)
 
                 if not ddiffs:
                     handler.simpleNode('link', full_url(request, page))

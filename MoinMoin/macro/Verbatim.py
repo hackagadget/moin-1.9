@@ -8,5 +8,5 @@
 
 Dependencies = []
 
-def macro_Verbatim(macro, text=u''):
+def macro_Verbatim(macro, text=''):
     return macro.formatter.escapedText(text)

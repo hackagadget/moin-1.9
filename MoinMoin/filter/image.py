@@ -11,5 +11,5 @@ def execute(indexobj, filename):
 
         TODO: maybe extract comments or time stamps from jpegs and png.
     """
-    return u""
+    return ""
 

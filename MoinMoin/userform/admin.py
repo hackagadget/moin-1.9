@@ -34,7 +34,7 @@ def do_user_browser(request):
     class UserAccount(object):
         # namedtuple is >= 2.6 :-(
         def __init__(self, **kw):
-            for k, v in kw.items():
+            for k, v in list(kw.items()):
                 setattr(self, k, v)
         def __repr__(self):
             return "<UserAccount %r>" % self.__dict__
@@ -85,7 +85,7 @@ def do_user_browser(request):
         ret.append(html.INPUT(type='hidden', name='key', value="disabled"))
         ret.append(html.INPUT(type='hidden', name='val', value=val))
         ret.append(html.INPUT(type='submit', name='userprofile', value=text))
-        enable_disable_link = unicode(unicode(ret))
+        enable_disable_link = str(str(ret))
 
         # creates the POST data for recoverpass
         url = request.page.url(request)
@@ -95,7 +95,7 @@ def do_user_browser(request):
         ret.append(html.INPUT(type='hidden', name='account_sendmail', value="1"))
         ret.append(html.INPUT(type='hidden', name='sysadm', value="users"))
         ret.append(html.INPUT(type='submit', name='recoverpass', value=_('Mail account data')))
-        recoverpass_link =  unicode(unicode(ret))
+        recoverpass_link =  str(str(ret))
 
         if account.email:
             email_link = (request.formatter.url(1, 'mailto:' + account.email, css='mailto') +

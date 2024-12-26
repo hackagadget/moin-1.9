@@ -10,7 +10,7 @@
     @license: GNU GPL, see COPYING for details
 """
 
-import StringIO, time
+import io, time
 
 from MoinMoin import wikiutil
 from MoinMoin.Page import Page
@@ -293,7 +293,7 @@ class SearchResults(object):
                             min(self.estimated_hits[1] - hitsFrom,
                                 request.cfg.search_results_per_page),
                     'bs': formatter.strong(1), 'be': formatter.strong(0)},
-            u' (%s %s)' % (''.join([formatter.strong(1),
+            ' (%s %s)' % (''.join([formatter.strong(1),
                 formatter.text("%.2f" % self.elapsed),
                 formatter.strong(0)]),
                 formatter.text(_("seconds"))),
@@ -363,7 +363,7 @@ class SearchResults(object):
                 if info:
                     matchInfo = self.formatInfo(f, page)
 
-                info_for_hits = u''
+                info_for_hits = ''
                 if hitsInfo:
                     info_for_hits = self.formatHitInfoBar(page)
 
@@ -505,11 +505,11 @@ class SearchResults(object):
             # in the context, we increase the index, and will not show
             # same match again on a separate line.
 
-            output.append(f.text(u'...'))
+            output.append(f.text('...'))
 
             # Get the index of the first match completely within the
             # context.
-            for j in xrange(0, len(matches)):
+            for j in range(0, len(matches)):
                 if matches[j].start >= start:
                     break
 
@@ -533,7 +533,7 @@ class SearchResults(object):
             # Add text after last match and finish the line
             if match.end < end:
                 output.append(f.text(body[match.end:end]))
-            output.append(f.text(u'...'))
+            output.append(f.text('...'))
             output.append(f.linebreak(preformatted=0))
 
             # Increase line and point to the next match
@@ -568,7 +568,7 @@ class SearchResults(object):
         header = page.page.getPageHeader()
         start = len(header)
         # Find first match after start
-        for i in xrange(len(matches)):
+        for i in range(len(matches)):
             if matches[i].start >= start and \
                     isinstance(matches[i], TextMatch):
                 return i, start
@@ -711,11 +711,11 @@ class SearchResults(object):
             textlinks.append('')
 
         # list of pages to be shown
-        page_range = range(*(
+        page_range = list(range(*(
             cur_page - 5 < 0 and
                 (0, pages > 10 and 10 or pages) or
                 (cur_page - 5, cur_page + 6 > pages and
-                    pages or cur_page + 6)))
+                    pages or cur_page + 6))))
         textlinks.extend([''.join([
                 i != cur_page and f.url(1, href=page_url(i)) or '',
                 f.text(str(i+1)),
@@ -791,8 +791,8 @@ class SearchResults(object):
         @param formatter: the formatter instance to use
         @param page: the current page instance
         """
-        template = u' . . . %s %s'
-        template = u"%s%s%s" % (formatter.span(1, css_class="info"),
+        template = ' . . . %s %s'
+        template = "%s%s%s" % (formatter.span(1, css_class="info"),
                                 template,
                                 formatter.span(0))
         # Count number of unique matches in text of all types
@@ -819,7 +819,7 @@ class SearchResults(object):
         @param request: current request
         @param formatter: the formatter instance to use
         """
-        self.buffer = StringIO.StringIO()
+        self.buffer = io.StringIO()
         self.formatter = formatter
         self.request = request
         # Use 1 match, 2 matches...

@@ -144,9 +144,9 @@ class Rules:
                            self.escape, self.char]
         if wiki_words:
             import unicodedata
-            up_case = u''.join(unichr(i) for i in xrange(sys.maxunicode)
-                               if unicodedata.category(unichr(i))=='Lu')
-            self.wiki = ur'''(?P<wiki>[%s]\w+[%s]\w+)''' % (up_case, up_case)
+            up_case = ''.join(chr(i) for i in range(sys.maxunicode)
+                               if unicodedata.category(chr(i))=='Lu')
+            self.wiki = r'''(?P<wiki>[%s]\w+[%s]\w+)''' % (up_case, up_case)
             inline_elements.insert(3, self.wiki)
         self.inline_re = c('|'.join(inline_elements), re.X | re.U)
 
@@ -194,7 +194,7 @@ class Parser:
         else:
             # this url is escaped, we render it as text
             if self.text is None:
-                self.text = DocNode('text', self.cur, u'')
+                self.text = DocNode('text', self.cur, '')
             self.text.content += groups.get('url_target')
     _url_target_repl = _url_repl
     _url_proto_repl = _url_repl
@@ -253,8 +253,8 @@ class Parser:
         DocNode('separator', self.cur)
 
     def _item_repl(self, groups):
-        bullet = groups.get('item_head', u'')
-        text = groups.get('item_text', u'')
+        bullet = groups.get('item_head', '')
+        text = groups.get('item_text', '')
         if bullet[-1] == '#':
             kind = 'number_list'
         else:
@@ -282,7 +282,7 @@ class Parser:
     _item_head_repl = _item_repl
 
     def _list_repl(self, groups):
-        text = groups.get('list', u'')
+        text = groups.get('list', '')
         self.rules.item_re.sub(self._replace, text)
 
     def _head_repl(self, groups):
@@ -301,7 +301,7 @@ class Parser:
         if self.cur.kind in ('document', 'section', 'blockquote'):
             self.cur = DocNode('paragraph', self.cur)
         else:
-            text = u' ' + text
+            text = ' ' + text
         self.parse_inline(text)
         if groups.get('break') and self.cur.kind in ('paragraph',
             'emphasis', 'strong', 'code'):
@@ -328,7 +328,7 @@ class Parser:
             else:
                 cell = m.group('head')
                 self.cur = DocNode('table_head', tr)
-                self.text = DocNode('text', self.cur, u'')
+                self.text = DocNode('text', self.cur, '')
                 self.text.content = cell.strip('=')
         self.cur = tb
         self.text = None
@@ -336,7 +336,7 @@ class Parser:
     def _pre_repl(self, groups):
         self.cur = self._upto(self.cur, ('document', 'section', 'blockquote'))
         kind = groups.get('pre_kind', None)
-        text = groups.get('pre_text', u'')
+        text = groups.get('pre_text', '')
         def remove_tilde(m):
             return m.group('indent') + m.group('rest')
         text = self.rules.pre_escape_re.sub(remove_tilde, text)
@@ -351,7 +351,7 @@ class Parser:
         self.cur = self._upto(self.cur, ('document', 'section', 'blockquote'))
 
     def _code_repl(self, groups):
-        DocNode('code', self.cur, groups.get('code_text', u'').strip())
+        DocNode('code', self.cur, groups.get('code_text', '').strip())
         self.text = None
     _code_text_repl = _code_repl
     _code_head_repl = _code_repl
@@ -376,19 +376,19 @@ class Parser:
 
     def _escape_repl(self, groups):
         if self.text is None:
-            self.text = DocNode('text', self.cur, u'')
-        self.text.content += groups.get('escaped_char', u'')
+            self.text = DocNode('text', self.cur, '')
+        self.text.content += groups.get('escaped_char', '')
 
     def _char_repl(self, groups):
         if self.text is None:
-            self.text = DocNode('text', self.cur, u'')
-        self.text.content += groups.get('char', u'')
+            self.text = DocNode('text', self.cur, '')
+        self.text.content += groups.get('char', '')
 
     def _replace(self, match):
         """Invoke appropriate _*_repl method. Called for every matched group."""
 
         groups = match.groupdict()
-        for name, text in groups.iteritems():
+        for name, text in groups.items():
             if text is not None:
                 replace = getattr(self, '_%s_repl' % name)
                 replace(groups)

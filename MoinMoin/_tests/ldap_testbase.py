@@ -40,7 +40,7 @@ SLAPD_EXECUTABLE = 'slapd'  # filename of LDAP server executable - if it is not
                             # in your PATH, you have to give full path/filename.
 
 import os, shutil, tempfile, time, base64, md5
-from StringIO import StringIO
+from io import StringIO
 import signal
 import subprocess
 
@@ -64,7 +64,7 @@ def check_environ():
         rc = p.wait()
         if pid and rc == 1:
             slapd = True  # it works
-    except OSError, err:
+    except OSError as err:
         import errno
         if not (err.errno == errno.ENOENT or
                 (err.errno == 3 and os.name == 'nt')):
@@ -115,7 +115,7 @@ class Slapd(object):
                 try:
                     lo.simple_bind_s('', '')
                     started = True
-                except ldap.SERVER_DOWN, err:
+                except ldap.SERVER_DOWN as err:
                     time.sleep(0.1)
                 else:
                     break
@@ -190,7 +190,7 @@ class LdapEnvironment(object):
             'rootdn': self.rootdn,
             'rootpw': rootpw,
         }
-        if isinstance(slapd_config, unicode):
+        if isinstance(slapd_config, str):
             slapd_config = slapd_config.encode(self.coding)
         self.slapd_conf = os.path.join(self.ldap_dir, "slapd.conf")
         f = open(self.slapd_conf, 'w')

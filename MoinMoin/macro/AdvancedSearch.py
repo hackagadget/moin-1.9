@@ -108,11 +108,11 @@ def advanced_ui(macro):
     # language selection
     searchedlang = form_get(request, 'language')
     langs = dict([(lang, lmeta['x-language-in-english'])
-        for lang, lmeta in languages.items()])
+        for lang, lmeta in list(languages.items())])
     userlang = macro.request.lang
     lang_select = makeSelection('language',
             [('', _('any language')),
-            (userlang, langs[userlang])] + sorted(langs.items(), key=lambda i: i[1]),
+            (userlang, langs[userlang])] + sorted(list(langs.items()), key=lambda i: i[1]),
             searchedlang, 3, True)
 
     # mimetype selection
@@ -137,14 +137,14 @@ def advanced_ui(macro):
             txt[0],
             f.table_cell(0),
             f.table_cell(1, colspan=2),
-            unicode(txt[1]),
+            str(txt[1]),
             txt[2],
             f.table_cell(0),
             f.table_row(0),
             ]) for txt in (
-                (_('Categories'), unicode(c_select), ''),
-                (_('Language'), unicode(lang_select), ''),
-                (_('File Type'), unicode(mt_select), ''),
+                (_('Categories'), str(c_select), ''),
+                (_('Language'), str(lang_select), ''),
+                (_('File Type'), str(mt_select), ''),
                 ('', html.INPUT(type='checkbox', name='titlesearch',
                     value='1', checked=form_get(request, 'titlesearch', escaped=True),
                     id='titlesearch'),
@@ -172,21 +172,21 @@ def advanced_ui(macro):
 
     # the dialogue
     return f.rawHTML('\n'.join([
-        u'<form method="get" action="%s">' % macro.request.href(macro.request.formatter.page.page_name),
-        u'<div>',
-        u'<input type="hidden" name="action" value="fullsearch">',
-        u'<input type="hidden" name="advancedsearch" value="1">',
+        '<form method="get" action="%s">' % macro.request.href(macro.request.formatter.page.page_name),
+        '<div>',
+        '<input type="hidden" name="action" value="fullsearch">',
+        '<input type="hidden" name="advancedsearch" value="1">',
         f.table(1, attrs={'tableclass': 'advancedsearch'}),
         search_boxes,
         search_options,
         f.table_row(1),
         f.table_cell(1, attrs={'class': 'submit', 'colspan': '3'}),
-        u'<input type="submit" value="%s">' % _('Go get it!'),
+        '<input type="submit" value="%s">' % _('Go get it!'),
         f.table_cell(0),
         f.table_row(0),
         f.table(0),
-        u'</div>',
-        u'</form>',
+        '</div>',
+        '</form>',
     ]))
 
 

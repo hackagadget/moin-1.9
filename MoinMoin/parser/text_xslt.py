@@ -16,7 +16,7 @@
 """
 
 # cStringIO cannot be used because it doesn't handle Unicode.
-import StringIO
+import io
 
 from MoinMoin import caching, config, wikiutil, Page
 
@@ -80,7 +80,7 @@ class Parser:
                         self.supportedSchemes.append(base_scheme)
 
                 # setting up vars for xslt Processor
-                out_file = StringIO.StringIO()
+                out_file = io.StringIO()
                 wiki_resolver = MoinResolver(
                                     handlers={self.base_scheme: self._resolve_page, },
                                     base_scheme=self.base_scheme)
@@ -98,11 +98,11 @@ class Parser:
                 result = out_file.getvalue().decode('utf-8')
                 result = self.parse_result(result) # hook, for extending this parser
 
-            except FtException, msg:
+            except FtException as msg:
                 etype = "XSLT"
-            except Uri.UriException, msg:
+            except Uri.UriException as msg:
                 etype = "XSLT"
-            except IOError, msg:
+            except IOError as msg:
                 etype = "I/O"
 
             if msg:
@@ -111,7 +111,7 @@ class Parser:
                 text = text.replace('\n', '<br>\n')
                 text = text.replace(' ', '&nbsp;')
                 before = _('%(errortype)s processing error') % {'errortype': etype, }
-                title = u"<strong>%s: %s</strong><p>" % (before, msg)
+                title = "<strong>%s: %s</strong><p>" % (before, msg)
                 self.request.write(title)
                 self.request.write(text.decode(config.charset))
             else:
@@ -128,7 +128,7 @@ class Parser:
             pagename = uri[len(base_uri):]
             page = Page.Page(self.request, pagename)
             if page.exists():
-                result = StringIO.StringIO(page.getPageText().encode(config.charset))
+                result = io.StringIO(page.getPageText().encode(config.charset))
             else:
                 raise Uri.UriException(Uri.UriException.RESOURCE_ERROR, loc=uri,
                                        msg='Page does not exist')

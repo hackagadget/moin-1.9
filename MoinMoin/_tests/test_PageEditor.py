@@ -19,7 +19,7 @@ from MoinMoin._tests import become_trusted, create_page, nuke_page
 
 class TestExpandVars(object):
     """PageEditor: testing page editor"""
-    pagename = u'AutoCreatedMoinMoinTemporaryTestPage'
+    pagename = 'AutoCreatedMoinMoinTemporaryTestPage'
 
     _tests = (
         # Variable,             Expanded
@@ -44,8 +44,8 @@ class TestExpandUserName(object):
 
     Set user name during tests.
     """
-    pagename = u'AutoCreatedMoinMoinTemporaryTestPage'
-    variable = u'@USERNAME@'
+    pagename = 'AutoCreatedMoinMoinTemporaryTestPage'
+    variable = '@USERNAME@'
 
     def setup_method(self, method):
         self.page = PageEditor(self.request, self.pagename)
@@ -61,7 +61,7 @@ class TestExpandUserName(object):
 
 class TestExpandCamelCaseName(TestExpandUserName):
 
-    name = u'UserName'
+    name = 'UserName'
 
     def testExpandCamelCaseUserName(self):
         """ PageEditor: expand @USERNAME@ CamelCase """
@@ -70,17 +70,17 @@ class TestExpandCamelCaseName(TestExpandUserName):
 
 class TestExpandExtendedName(TestExpandUserName):
 
-    name = u'user name'
+    name = 'user name'
 
     def testExtendedNamesEnabled(self):
         """ PageEditor: expand @USERNAME@ extended name - enabled """
-        assert self.expand() == u'[[%s]]' % self.name
+        assert self.expand() == '[[%s]]' % self.name
 
 
 class TestExpandMailto(TestExpandUserName):
 
-    variable = u'@MAILTO@'
-    name = u'user name'
+    variable = '@MAILTO@'
+    name = 'user name'
     email = 'user@example.com'
 
     def setup_method(self, method):
@@ -97,13 +97,13 @@ class TestExpandMailto(TestExpandUserName):
 
     def testMailto(self):
         """ PageEditor: expand @MAILTO@ """
-        assert self.expand() == u'<<MailTo(%s)>>' % self.email
+        assert self.expand() == '<<MailTo(%s)>>' % self.email
 
 
 class TestExpandPrivateVariables(TestExpandUserName):
 
-    variable = u'@ME@'
-    name = u'AutoCreatedMoinMoinTemporaryTestUser'
+    variable = '@ME@'
+    name = 'AutoCreatedMoinMoinTemporaryTestUser'
     dictPage = name + '/MyDict'
     shouldDeleteTestPage = True
 
@@ -141,9 +141,9 @@ class TestExpandPrivateVariables(TestExpandUserName):
             os.mkdir(revisionsDir)
             current = '00000001'
             file(os.path.join(path, 'current'), 'w').write('%s\n' % current)
-            text = u' ME:: %s\n' % self.name
+            text = ' ME:: %s\n' % self.name
             file(os.path.join(revisionsDir, current), 'w').write(text)
-        except Exception, err:
+        except Exception as err:
             py.test.skip("Can not be create test page: %s" % err)
 
     def deleteCaches(self):
@@ -169,7 +169,7 @@ class TestSave(object):
 
     def teardown_method(self, method):
         self.request.cfg.event_handlers = self.old_handlers
-        nuke_page(self.request, u'AutoCreatedMoinMoinTemporaryTestPageFortestSave')
+        nuke_page(self.request, 'AutoCreatedMoinMoinTemporaryTestPageFortestSave')
 
     def testSaveAbort(self):
         """Test if saveText() is interrupted if PagePreSave event handler returns Abort"""
@@ -178,8 +178,8 @@ class TestSave(object):
             from MoinMoin.events import Abort
             return Abort("This is just a test")
 
-        pagename = u'AutoCreatedMoinMoinTemporaryTestPageFortestSave'
-        testtext = u'ThisIsSomeStupidTestPageText!'
+        pagename = 'AutoCreatedMoinMoinTemporaryTestPageFortestSave'
+        testtext = 'ThisIsSomeStupidTestPageText!'
 
         self.request.cfg.event_handlers = [handler]
 
@@ -191,7 +191,7 @@ class TestSave(object):
         editor = PageEditor(self.request, pagename)
         editor.saveText(testtext, 0)
 
-        print "PageEditor can't save a page if Abort is returned from PreSave event handlers"
+        print("PageEditor can't save a page if Abort is returned from PreSave event handlers")
         page = Page(self.request, pagename)
         assert page.body != testtext
 
@@ -202,14 +202,14 @@ class TestSaveACLChange(object):
         acl_rights_before = 'Trusted:read,write,delete,revert'
         acl_rights_default = 'All:read,write'
 
-    pagename = u'PageACLTest'
-    oldtext = u'''\
+    pagename = 'PageACLTest'
+    oldtext = '''\
 ## foo
 #lang en
 
 foo
 '''
-    newtext = u'''\
+    newtext = '''\
 ## foo
 #acl -All:write Default
 #lang en
@@ -241,23 +241,23 @@ class TestDictPageDeletion(object):
         simple test if it is possible to delete a Dict page after creation
         """
         become_trusted(self.request)
-        pagename = u'SomeDict'
+        pagename = 'SomeDict'
         page = PageEditor(self.request, pagename, do_editor_backup=0)
-        body = u"This is an example text"
+        body = "This is an example text"
         page.saveText(body, 0)
 
         success_i, result = page.deletePage()
 
-        expected = u'Page "SomeDict" was successfully deleted!'
+        expected = 'Page "SomeDict" was successfully deleted!'
 
         assert result == expected
 
 class TestCopyPage(object):
 
-    pagename = u'AutoCreatedMoinMoinTemporaryTestPage'
-    copy_pagename = u'AutoCreatedMoinMoinTemporaryCopyTestPage'
+    pagename = 'AutoCreatedMoinMoinTemporaryTestPage'
+    copy_pagename = 'AutoCreatedMoinMoinTemporaryCopyTestPage'
     shouldDeleteTestPage = True
-    text = u'Example'
+    text = 'Example'
 
     def setup_method(self, method):
         self.savedValid = self.request.user.valid
@@ -289,7 +289,7 @@ class TestCopyPage(object):
             file(os.path.join(path, 'current'), 'w').write('%s\n' % current)
 
             file(os.path.join(revisionsDir, current), 'w').write(self.text)
-        except Exception, err:
+        except Exception as err:
             py.test.skip("Can not be create test page: %s" % err)
 
     def deleteTestPage(self):
@@ -312,7 +312,7 @@ class TestCopyPage(object):
         """
         Tests copying a page without write rights
         """
-        self.text = u'#acl SomeUser:read,write,delete All:read\n'
+        self.text = '#acl SomeUser:read,write,delete All:read\n'
         self.createTestPage()
         result, msg = PageEditor(self.request, self.pagename).copyPage(self.copy_pagename)
         revision = Page(self.request, self.copy_pagename).current_rev()
@@ -322,7 +322,7 @@ class TestCopyPage(object):
         """
         Tests copying a page without read rights
         """
-        self.text = u'#acl SomeUser:read,write,delete All:\n'
+        self.text = '#acl SomeUser:read,write,delete All:\n'
         self.createTestPage()
         result, msg = PageEditor(self.request, self.pagename).copyPage(self.copy_pagename)
         revision = Page(self.request, self.copy_pagename).current_rev()

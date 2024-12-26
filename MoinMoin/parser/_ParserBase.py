@@ -126,8 +126,8 @@ class ParserBase:
     tabwidth = 4
 
     # for dirty tricks, see comment in format():
-    STARTL, STARTL_RE = u"^\n", ur"\^\n"
-    ENDL, ENDL_RE = u"\n$", ur"\n\$"
+    STARTL, STARTL_RE = "^\n", r"\^\n"
+    ENDL, ENDL_RE = "\n$", r"\n\$"
     LINESEP = ENDL + STARTL
 
     def __init__(self, raw, request, **kw):
@@ -251,7 +251,7 @@ class ParserBase:
 
     def format_match(self, formatter, match):
         result = []
-        for n, hit in match.groupdict().items():
+        for n, hit in list(match.groupdict().items()):
             if hit is None:
                 continue
             r = self._formatting_rules_n2r[n]

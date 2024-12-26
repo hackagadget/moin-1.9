@@ -6,8 +6,8 @@
     @license: GNU GPL, see COPYING for details.
 """
 
-import logging, xmlrpclib, Queue
-from SimpleXMLRPCServer import SimpleXMLRPCServer
+import logging, xmlrpc.client, queue
+from xmlrpc.server import SimpleXMLRPCServer
 from threading import Thread
 
 import jabberbot.commands as cmd
@@ -32,7 +32,7 @@ def _xmlrpc_decorator(function):
         _ = lambda x: x
 
         self.token = None
-        self.multicall = xmlrpclib.MultiCall(self.connection)
+        self.multicall = xmlrpc.client.MultiCall(self.connection)
         jid = command.jid
         if type(jid) is not list:
             jid = [jid]
@@ -46,15 +46,15 @@ def _xmlrpc_decorator(function):
                 function(self, command)
                 self.commands_out.put_nowait(command)
 
-            except xmlrpclib.Fault, fault:
+            except xmlrpc.client.Fault as fault:
                 msg = _("Your request has failed. The reason is:\n%(error)s")
                 self.log.error(str(fault))
                 self.report_error(jid, msg, {'error': fault.faultString})
-            except xmlrpclib.Error, err:
+            except xmlrpc.client.Error as err:
                 msg = _("A serious error occurred while processing your request:\n%(error)s")
                 self.log.error(str(err))
                 self.report_error(jid, msg, {'error': str(err)})
-            except Exception, exc:
+            except Exception as exc:
                 msg = _("An internal error has occurred, please contact the administrator.")
                 self.log.critical(str(exc))
                 self.report_error(jid, msg)
@@ -113,7 +113,7 @@ class XMLRPCClient(Thread):
             try:
                 command = self.commands_in.get(True, 2)
                 self.execute_command(command)
-            except Queue.Empty:
+            except queue.Empty:
                 pass
 
     def stop(self):
@@ -121,7 +121,7 @@ class XMLRPCClient(Thread):
         self.stopping = True
 
     def create_connection(self):
-        return xmlrpclib.ServerProxy(self.url, allow_none=True, verbose=self.config.verbose)
+        return xmlrpc.client.ServerProxy(self.url, allow_none=True, verbose=self.config.verbose)
 
     def execute_command(self, command):
         """Execute commands coming from the XMPP component"""
@@ -149,7 +149,7 @@ class XMLRPCClient(Thread):
         _ = lambda x: x
 
         cmddata = {'text': text, 'data': data}
-        report = cmd.NotificationCommandI18n(jid, cmddata, msg_type=u"chat", async=False)
+        report = cmd.NotificationCommandI18n(jid, cmddata, msg_type="chat", async=False)
         self.commands_out.put_nowait(report)
 
     def get_auth_token(self, jid):
@@ -187,11 +187,11 @@ class XMLRPCClient(Thread):
 
         if not self.token:
             result = self.multicall()[0]
-            token_result = u"FAILURE"
+            token_result = "FAILURE"
         else:
             token_result, result = self.multicall()
 
-        if token_result != u"SUCCESS":
+        if token_result != "SUCCESS":
             self.warn_no_credentials(jid)
 
         return result
@@ -222,7 +222,7 @@ class XMLRPCClient(Thread):
         _ = lambda x: x
 
         cmd_data = {'text': _("This command may take a while to complete, please be patient...")}
-        info = cmd.NotificationCommandI18n([command.jid], cmd_data, async=False, msg_type=u"chat")
+        info = cmd.NotificationCommandI18n([command.jid], cmd_data, async=False, msg_type="chat")
         self.commands_out.put_nowait(info)
 
         self.multicall.getAllPages()
@@ -246,7 +246,7 @@ class XMLRPCClient(Thread):
         _ = lambda x: x
 
         cmd_data = {'text': _("This command may take a while to complete, please be patient...")}
-        info = cmd.NotificationCommandI18n([command.jid], cmd_data, async=False, msg_type=u"chat")
+        info = cmd.NotificationCommandI18n([command.jid], cmd_data, async=False, msg_type="chat")
         self.commands_out.put_nowait(info)
 
         c = command
@@ -266,12 +266,12 @@ class XMLRPCClient(Thread):
 
         if type(data) == bool and data:
             cmd_data = {'text': _("Page has been reverted.")}
-        elif isinstance(str, data) or isinstance(unicode, data):
+        elif isinstance(str, data) or isinstance(str, data):
             cmd_data = {'text': _("Revert failed: %(reason)s" % {'reason': data})}
         else:
             cmd_data = {'text': _("Revert failed.")}
 
-        info = cmd.NotificationCommandI18n([command.jid], cmd_data, async=False, msg_type=u"chat")
+        info = cmd.NotificationCommandI18n([command.jid], cmd_data, async=False, msg_type="chat")
         self.commands_out.put_nowait(info)
 
     do_revert = _xmlrpc_decorator(do_revert)
@@ -279,16 +279,16 @@ class XMLRPCClient(Thread):
     def get_language_by_jid(self, command):
         """Returns language of the a user identified by the given JID"""
 
-        server = xmlrpclib.ServerProxy(self.config.wiki_url + "?action=xmlrpc2")
+        server = xmlrpc.client.ServerProxy(self.config.wiki_url + "?action=xmlrpc2")
         language = "en"
 
         try:
             language = server.getUserLanguageByJID(command.jid)
-        except xmlrpclib.Fault, fault:
+        except xmlrpc.client.Fault as fault:
             self.log.error(str(fault))
-        except xmlrpclib.Error, err:
+        except xmlrpc.client.Error as err:
             self.log.error(str(err))
-        except Exception, exc:
+        except Exception as exc:
             self.log.critical(str(exc))
 
         command.language = language
@@ -328,7 +328,7 @@ class XMLRPCServer(Thread):
 
         # Register methods having an "export" attribute as XML RPC functions and
         # decorate them with a check for a shared (wiki-bot) secret.
-        items = self.__class__.__dict__.items()
+        items = list(self.__class__.__dict__.items())
         methods = [(name, func) for (name, func) in items if callable(func)
                    and "export" in func.__dict__]
 
@@ -345,7 +345,7 @@ class XMLRPCServer(Thread):
         """
         def protected_func(secret, *args):
             if secret != self.secret:
-                raise xmlrpclib.Fault(1, "You are not allowed to use this bot!")
+                raise xmlrpc.client.Fault(1, "You are not allowed to use this bot!")
             else:
                 return function(self, *args)
 

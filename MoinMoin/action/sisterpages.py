@@ -56,5 +56,5 @@ def execute(pagename, request):
         pages.sort()
         for pn in pages:
             p = Page(request, pn)
-            entry = u"%s %s\r\n" % (request.getQualifiedURL(p.url(request)), p.page_name)
+            entry = "%s %s\r\n" % (request.getQualifiedURL(p.url(request)), p.page_name)
             request.write(entry.encode('utf-8'))

@@ -13,7 +13,7 @@ except NameError:
     pass
 
 try:
-    import icu as pyicu
+    from . import icu as pyicu
 except ImportError:
     try:
         import PyICU as pyicu

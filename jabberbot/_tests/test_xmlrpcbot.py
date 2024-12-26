@@ -7,7 +7,7 @@
 """
 
 import py
-from Queue import Queue
+from queue import Queue
 
 try:
     import pyxmpp
@@ -25,12 +25,12 @@ class TestXMLRPCBotAPIs:
         self.bot = xmlrpcbot.XMLRPCClient(BotConfig, self.queue_in, self.queue_out)
 
     def testReportError(self):
-        print "report_error() should put a command in the output queue"
+        print("report_error() should put a command in the output queue")
         self.bot.report_error(["dude@example.com"], "Error %(err)s!", data={'err': 'bar!'})
         self.queue_out.get(False)
 
     def testWanrNoCredentials(self):
-        print "warn_no_credentials() should put a command in the output queue"
+        print("warn_no_credentials() should put a command in the output queue")
         self.bot.warn_no_credentials(["dude@example.com"])
         self.queue_out.get(False)
 

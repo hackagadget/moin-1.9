@@ -10,7 +10,7 @@ Dependencies = ['namespace']
 
 from MoinMoin.action import LikePages
 
-def macro_LikePages(macro, text=u'(none)'):
+def macro_LikePages(macro, text='(none)'):
     request = macro.request
     # we don't want to spend much CPU for spiders requesting nonexisting pages
     if not request.isSpiderAgent:
@@ -20,7 +20,7 @@ def macro_LikePages(macro, text=u'(none)'):
         start, end, matches = LikePages.findMatches(pagename, request)
 
         # Render matches
-        if matches and not isinstance(matches, (str, unicode)):
+        if matches and not isinstance(matches, str):
             return request.redirectedOutput(LikePages.showMatches, pagename, request, start, end, matches, False)
         else:
             # if we did not find any similar pages, we just render the text we got as argument:

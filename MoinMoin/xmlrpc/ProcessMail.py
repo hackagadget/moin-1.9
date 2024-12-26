@@ -17,12 +17,12 @@ def execute(xmlrpcobj, secret, mail):
     mail = str(mail)
 
     if request.cfg.secrets['xmlrpc/ProcessMail'] != secret:
-        return u"Invalid password"
+        return "Invalid password"
 
     try:
         mailimport.import_mail_from_string(request, mail)
-    except mailimport.ProcessingError, e:
-        err = u"An error occurred while processing the message: " + str(e.args)
+    except mailimport.ProcessingError as e:
+        err = "An error occurred while processing the message: " + str(e.args)
         logging.error(err)
         return xmlrpcobj._outstr(err)
-    return xmlrpcobj._outstr(u"OK")
+    return xmlrpcobj._outstr("OK")

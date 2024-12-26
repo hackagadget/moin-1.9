@@ -21,7 +21,7 @@ def execute(pagename, request):
         if request.user.unsubscribe(pagename):
             request.theme.add_msg(_('Your subscription to this page has been removed.'), "info")
         else:
-            msg = _("Can't remove regular expression subscription!") + u' ' + \
+            msg = _("Can't remove regular expression subscription!") + ' ' + \
                   _("Edit the subscription regular expressions in your settings.")
             request.theme.add_msg(msg, "error")
     else:

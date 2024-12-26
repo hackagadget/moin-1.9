@@ -14,7 +14,7 @@ class TestEditBarActions(object):
         self.savedValid = self.request.user.valid
         self.savedMailEnabled = self.request.cfg.mail_enabled
         self.request.cfg.mail_enabled = True
-        self.page = Page(self.request, u'FrontPage')
+        self.page = Page(self.request, 'FrontPage')
         self.ThemeBase = ThemeBase(self.request)
 
     def teardown_method(self, method):

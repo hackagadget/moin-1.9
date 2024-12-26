@@ -7,7 +7,7 @@
     @license: GNU GPL, see COPYING for details.
 """
 
-import xmlrpclib
+import xmlrpc.client
 
 from MoinMoin import log
 logging = log.getLogger(__name__)
@@ -40,7 +40,7 @@ class InterwikiAuth(BaseAuth):
         if err or wikitag not in self.trusted_wikis:
             return ContinueLogin(user_obj)
 
-        homewiki = xmlrpclib.ServerProxy(wikiurl + "?action=xmlrpc2")
+        homewiki = xmlrpc.client.ServerProxy(wikiurl + "?action=xmlrpc2")
         auth_token = homewiki.getAuthToken(name, password)
         if not auth_token:
             logging.debug("%r wiki did not return an auth token." % wikitag)
@@ -48,7 +48,7 @@ class InterwikiAuth(BaseAuth):
 
         logging.debug("successfully got an auth token for %r. trying to get user profile data..." % name)
 
-        mc = xmlrpclib.MultiCall(homewiki)
+        mc = xmlrpc.client.MultiCall(homewiki)
         mc.applyAuthToken(auth_token)
         mc.getUserProfile()
         result, account_data = mc()
@@ -65,7 +65,7 @@ class InterwikiAuth(BaseAuth):
 
         # TODO: check remote auth_attribs
         u = user.User(request, name=name, auth_method=self.name, auth_attribs=('name', 'aliasname', 'password', 'email', ))
-        for key, value in account_data.iteritems():
+        for key, value in account_data.items():
             if key not in request.cfg.user_transient_fields:
                 setattr(u, key, value)
         u.valid = True

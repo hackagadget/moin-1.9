@@ -68,7 +68,7 @@ class Marshal:
                            .replace(">", "&gt;"))
 
         elif isinstance(data, dict):
-            for key, value in data.items():
+            for key, value in list(data.items()):
                 add_content(self.__toXML(key, value))
 
         elif isinstance(data, (list, tuple)):

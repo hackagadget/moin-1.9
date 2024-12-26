@@ -6,14 +6,14 @@
                 2007-2008 MoinMoin:ReimarBauer
     @license: GNU GPL, see COPYING for details.
 """
-import os, StringIO
+import os, io
 from MoinMoin.action import AttachFile
 from MoinMoin.PageEditor import PageEditor
 from MoinMoin._tests import become_trusted, create_page, nuke_page
 
 class TestAttachFile:
     """ testing action AttachFile"""
-    pagename = u"AutoCreatedSillyPageToTestAttachments"
+    pagename = "AutoCreatedSillyPageToTestAttachments"
 
     def test_add_attachment(self):
         """Test if add_attachment() works"""
@@ -21,7 +21,7 @@ class TestAttachFile:
         become_trusted(self.request)
         filename = "AutoCreatedSillyAttachment"
 
-        create_page(self.request, self.pagename, u"Foo!")
+        create_page(self.request, self.pagename, "Foo!")
 
         AttachFile.add_attachment(self.request, self.pagename, filename, "Test content", True)
         exists = AttachFile.exists(self.request, self.pagename, filename)
@@ -37,10 +37,10 @@ class TestAttachFile:
 
         filename = "AutoCreatedSillyAttachment.png"
 
-        create_page(self.request, self.pagename, u"FooBar!")
+        create_page(self.request, self.pagename, "FooBar!")
         data = "Test content"
 
-        filecontent = StringIO.StringIO(data)
+        filecontent = io.StringIO(data)
 
         AttachFile.add_attachment(self.request, self.pagename, filename, filecontent, True)
         exists = AttachFile.exists(self.request, self.pagename, filename)

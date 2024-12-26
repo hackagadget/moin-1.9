@@ -19,7 +19,7 @@ Dependencies = ['time'] # do not cache
 
 from MoinMoin.stats import hitcounts
 
-def macro_Hits(macro, all=False, event_type=(u'VIEWPAGE', u'SAVEPAGE')):
+def macro_Hits(macro, all=False, event_type=('VIEWPAGE', 'SAVEPAGE')):
     request = macro.request
     pagename = macro.formatter.page.page_name
 
@@ -28,8 +28,8 @@ def macro_Hits(macro, all=False, event_type=(u'VIEWPAGE', u'SAVEPAGE')):
     else:
         cache_days, cache_views, cache_edits = hitcounts.get_data(pagename, request, filterpage=pagename)
 
-    if event_type == u'VIEWPAGE':
-        return u'%d' % sum(cache_views)
+    if event_type == 'VIEWPAGE':
+        return '%d' % sum(cache_views)
     else:
-        return u'%d' % sum(cache_edits)
+        return '%d' % sum(cache_edits)
 

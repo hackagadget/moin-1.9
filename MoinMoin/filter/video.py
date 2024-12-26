@@ -11,5 +11,5 @@ def execute(indexobj, filename):
 
         TODO: maybe extract some meta information from some popular video formats.
     """
-    return u""
+    return ""
 

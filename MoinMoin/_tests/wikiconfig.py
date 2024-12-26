@@ -17,7 +17,7 @@ from MoinMoin.config.multiconfig import DefaultConfig
 
 
 class Config(DefaultConfig):
-    sitename = u'Developer Test Wiki'
+    sitename = 'Developer Test Wiki'
     logo_string = sitename
 
     _base_dir = os.path.join(os.path.dirname(__file__), '../../tests/wiki')

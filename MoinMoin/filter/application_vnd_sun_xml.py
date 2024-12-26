@@ -21,13 +21,13 @@ def execute(indexobj, filename):
         data = zf.read("content.xml")
         zf.close()
         data = " ".join(rx_stripxml.sub(" ", data).split())
-    except (zipfile.BadZipfile, RuntimeError), err:
+    except (zipfile.BadZipfile, RuntimeError) as err:
         logging.error("%s [%s]" % (str(err), filename))
         data = ""
     try:
         data = data.decode('utf-8')
     except UnicodeDecodeError:
         # protected with password? no valid OpenOffice file?
-        data = u''
+        data = ''
     return data
 

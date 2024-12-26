@@ -7,7 +7,7 @@
 """
 
 import py
-from Queue import Queue
+from queue import Queue
 
 try:
     import pyxmpp
@@ -57,7 +57,7 @@ class TestXMPPBotCommands:
             self.called = False
             self.bot.handle_command(cmd)
             if not self.called:
-                print "The bot should send a notification when %s arrives!" % (cmd.__class__.__name__, )
+                print("The bot should send a notification when %s arrives!" % (cmd.__class__.__name__, ))
                 raise Exception()
 
     def testRosterCommands(self):
@@ -67,7 +67,7 @@ class TestXMPPBotCommands:
         self.bot.handle_command(command)
 
         if not self.called:
-            print "The bot should do something when AddJIDToRosterCommand arrives!"
+            print("The bot should do something when AddJIDToRosterCommand arrives!")
             raise Exception()
 
         self.called = False
@@ -75,13 +75,13 @@ class TestXMPPBotCommands:
         self.bot.handle_command(command)
 
         if not self.called:
-            print "The bot should do something when RemoveJIDFromRosterCommand arrives!"
+            print("The bot should do something when RemoveJIDFromRosterCommand arrives!")
             raise Exception()
 
     def testInternalHelp(self):
         """Check if there's help for every known command"""
 
-        commands = self.bot.internal_commands + self.bot.xmlrpc_commands.values()
+        commands = self.bot.internal_commands + list(self.bot.xmlrpc_commands.values())
         for cmd in commands:
-            print "There should be help on %s command!" % (cmd, )
+            print("There should be help on %s command!" % (cmd, ))
             assert self.bot.help_on("dude@example.com", cmd)

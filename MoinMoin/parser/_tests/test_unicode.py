@@ -24,37 +24,37 @@ class TestParserOutput(object):
             this parser should encode Unicode input to UTF8 as late as possible.
         """
         request = self.request
-        assert not request.cfg.allow_xslt, u'allow_xslt should be disabled'
+        assert not request.cfg.allow_xslt, 'allow_xslt should be disabled'
         errmsg = []
 
         # Some examples to verify with additional stuff
         parser_raw_input = {
-            u'text_html': u'<html><body><h1>%s</h1></body></html>',
-            u'text_irssi': u"[12:01] <RaphaelBosek> %s",
-            u'text_moin_wiki': u'||<#fefefe> %s ||',
-            u'text_python': u'if True: print "%s"',
-            u'text_xslt': u'<?xml version="1.0" encoding="ISO-8859-1"?><!-- %s -->',
+            'text_html': '<html><body><h1>%s</h1></body></html>',
+            'text_irssi': "[12:01] <RaphaelBosek> %s",
+            'text_moin_wiki': '||<#fefefe> %s ||',
+            'text_python': 'if True: print "%s"',
+            'text_xslt': '<?xml version="1.0" encoding="ISO-8859-1"?><!-- %s -->',
         }
 
         # Blacklist for parsers that don't work - this list should be empty !
         parser_blacklist = []
 
         # Create a page if it doesn't exist already.
-        if not u'page' in request.formatter.__dict__ or not request.formatter.page:
-            request.formatter.page = Page(request, u'test_parser_unicode_page')
+        if not 'page' in request.formatter.__dict__ or not request.formatter.page:
+            request.formatter.page = Page(request, 'test_parser_unicode_page')
             # this temporarily fixes an error with page-names, should be fixed at a central place some time
-            request.page = Page(request, u'test_parser_unicode_page')
+            request.page = Page(request, 'test_parser_unicode_page')
 
         # Check all parsers for UNICODE output.
         for parsername in MoinMoin.parser.modules:
             if parsername in parser_blacklist:
                 continue
 
-            module = __import__(u'MoinMoin.parser', globals(), {}, [parsername])
+            module = __import__('MoinMoin.parser', globals(), {}, [parsername])
             parsermodule = getattr(module, parsername)
-            if u'Parser' in parsermodule.__dict__:
+            if 'Parser' in parsermodule.__dict__:
                 # Get the parser_input or use a simple fallback if the parser is not found in parser_raw_input
-                i = parser_raw_input.get(parsername, u'%s') % u'\xC3\x84\xC3\x96\xC3\x9C\xC3\xE2\x82\xAC\x27'
+                i = parser_raw_input.get(parsername, '%s') % '\xC3\x84\xC3\x96\xC3\x9C\xC3\xE2\x82\xAC\x27'
                 p = parsermodule.Parser(i, request)
 
                 # This is the actual request that would produce an exception, which would usually look like the following:
@@ -63,7 +63,7 @@ class TestParserOutput(object):
                 r = request.redirectedOutput(p.format, request.formatter)
 
                 # This assertion will only be triggered, if the parser does not write unicode at all
-                assert isinstance(r, unicode), u'MoinMoin.parser.%s does not write UNICODE data but %s' % (parsername, type(r), )
+                assert isinstance(r, str), 'MoinMoin.parser.%s does not write UNICODE data but %s' % (parsername, type(r), )
 
 coverage_modules = ['MoinMoin.parser']
 

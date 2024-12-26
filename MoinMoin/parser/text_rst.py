@@ -11,8 +11,8 @@
 
 import re
 import new
-import StringIO
-import __builtin__
+import io
+import builtins
 import sys
 
 # docutils imports are below
@@ -29,15 +29,15 @@ Dependencies = [] # this parser just depends on the raw text
 # they requested an unsupported feature of Docutils in MoinMoin.
 def dummyOpen(x, y=None, z=None): return
 
-class dummyIO(StringIO.StringIO):
+class dummyIO(io.StringIO):
     def __init__(self, destination=None, destination_path=None,
                  encoding=None, error_handler='', autoclose=1,
                  handle_io_errors=1, source_path=None):
-        StringIO.StringIO.__init__(self)
+        io.StringIO.__init__(self)
 
 class dummyUrllib2:
     def urlopen(a):
-        return StringIO.StringIO()
+        return io.StringIO()
     urlopen = staticmethod(urlopen)
 
 # # # All docutils imports must be contained below here
@@ -76,7 +76,7 @@ except ImportError:
     html4css1.HTMLTranslator = html4css1.Writer = object
 
 def safe_import(name, globals = None, locals = None, fromlist = None, level = -1):
-    mod = __builtin__.__import__(name, globals, locals, fromlist, level)
+    mod = builtins.__import__(name, globals, locals, fromlist, level)
     if mod:
         mod.open = dummyOpen
         mod.urllib2 = dummyUrllib2
@@ -85,7 +85,7 @@ def safe_import(name, globals = None, locals = None, fromlist = None, level = -1
 # Go through and change all docutils modules to use a dummyOpen and dummyUrllib2
 # module. Also make sure that any docutils imported modules also get the dummy
 # implementations.
-for i in sys.modules.keys():
+for i in list(sys.modules.keys()):
     if i.startswith('docutils') and sys.modules[i]:
         sys.modules[i].open = dummyOpen
         sys.modules[i].urllib2 = dummyUrllib2
@@ -246,7 +246,7 @@ class RawHTMLList(list):
     def append(self, text):
         f = sys._getframe()
         if f.f_back.f_code.co_filename.endswith('html4css1.py'):
-            if isinstance(text, (str, unicode)):
+            if isinstance(text, str):
                 text = self.formatter.rawHTML(text)
         list.append(self, text)
 
@@ -328,7 +328,7 @@ class MoinTranslator(html4css1.HTMLTranslator):
 
     def fixup_wiki_formatting(self, text):
         replacement = {'\n': '', '> ': '>'}
-        for src, dst in replacement.items():
+        for src, dst in list(replacement.items()):
             text = text.replace(src, dst)
         # Fixup extraneous markup
         # Removes any empty span tags
@@ -480,7 +480,7 @@ class MoinTranslator(html4css1.HTMLTranslator):
             # Definition List
             'definition_list': 'definition_list',
         }
-        for rest_func, moin_func in handlers.items():
+        for rest_func, moin_func in list(handlers.items()):
             visit_func, depart_func = self.create_wiki_functor(moin_func)
             visit_func = new.instancemethod(visit_func, self, MoinTranslator)
             depart_func = new.instancemethod(depart_func, self, MoinTranslator)

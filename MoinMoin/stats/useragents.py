@@ -78,7 +78,7 @@ def get_data(request):
         # write results to cache
         cache.update((new_date, data))
 
-    data = [(cnt, ua) for ua, cnt in data.items()]
+    data = [(cnt, ua) for ua, cnt in list(data.items())]
     data.sort()
     data.reverse()
     return data
@@ -106,7 +106,7 @@ def text(pagename, request):
     if total:
         for cnt, ua in data:
             try:
-                ua = wikiutil.escape(unicode(ua))
+                ua = wikiutil.escape(str(ua))
                 agents.addRow((ua, "%.2f" % (100.0 * cnt / total)))
                 cnt_printed += cnt
             except UnicodeError:
@@ -119,7 +119,7 @@ def text(pagename, request):
     return table.render(method="GET")
 
 def draw(pagename, request):
-    import shutil, cStringIO
+    import shutil, io
     from MoinMoin.stats.chart import Chart, ChartData, Color
 
     _ = request.getText
@@ -151,7 +151,7 @@ def draw(pagename, request):
             '<br>'.join([wikiutil.escape(repr(x)) for x in [labels, data]])
 
     # create image
-    image = cStringIO.StringIO()
+    image = io.StringIO()
     c = Chart()
     c.addData(data)
 

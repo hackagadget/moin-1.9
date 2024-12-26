@@ -10,7 +10,7 @@ from warnings import warn
 # site
 # pkg
 from passlib.utils import to_native_str, str_consteq
-from passlib.utils.compat import unicode, u, unicode_or_bytes_types
+from passlib.utils.compat import str, u, unicode_or_bytes_types
 import passlib.utils.handlers as uh
 # local
 __all__ = [
@@ -142,7 +142,7 @@ class unix_disabled(uh.ifc.DisabledHash, uh.MinimalHandler):
         #       * linux may use "!" + hash to disable but preserve original hash
         #       * linux counts empty string as "any password";
         #         this code recognizes it, but treats it the same as "!"
-        if isinstance(hash, unicode):
+        if isinstance(hash, str):
             start = _MARKER_CHARS
         elif isinstance(hash, bytes):
             start = _MARKER_BYTES

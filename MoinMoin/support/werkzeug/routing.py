@@ -327,7 +327,7 @@ class BuildError(RoutingException, LookupError):
                     )
             else:
                 message.append(" Did you mean %r instead?" % self.suggested.endpoint)
-        return u"".join(message)
+        return "".join(message)
 
 
 class WebsocketMismatch(BadRequest):
@@ -844,12 +844,12 @@ class Rule(RuleFactory):
             return
 
         if not (self.is_leaf and self.strict_slashes):
-            reps = u"*" if self.merge_slashes else u"?"
-            tail = u"(?<!/)(?P<__suffix__>/%s)" % reps
+            reps = "*" if self.merge_slashes else "?"
+            tail = "(?<!/)(?P<__suffix__>/%s)" % reps
         else:
-            tail = u""
+            tail = ""
 
-        regex = u"^%s%s$" % (u"".join(regex_parts), tail)
+        regex = "^%s%s$" % ("".join(regex_parts), tail)
         self._regex = re.compile(regex, re.UNICODE)
 
     def match(self, path, method=None):
@@ -1132,17 +1132,17 @@ class Rule(RuleFactory):
     @native_string_result
     def __repr__(self):
         if self.map is None:
-            return u"<%s (unbound)>" % self.__class__.__name__
+            return "<%s (unbound)>" % self.__class__.__name__
         tmp = []
         for is_dynamic, data in self._trace:
             if is_dynamic:
-                tmp.append(u"<%s>" % data)
+                tmp.append("<%s>" % data)
             else:
                 tmp.append(data)
-        return u"<%s %s%s -> %s>" % (
+        return "<%s %s%s -> %s>" % (
             self.__class__.__name__,
-            repr((u"".join(tmp)).lstrip(u"|")).lstrip(u"u"),
-            self.methods is not None and u" (%s)" % u", ".join(self.methods) or u"",
+            repr(("".join(tmp)).lstrip("|")).lstrip("u"),
+            self.methods is not None and " (%s)" % ", ".join(self.methods) or "",
             self.endpoint,
         )
 
@@ -1623,7 +1623,7 @@ class Map(object):
                 )
                 subdomain = "<invalid>"
             else:
-                subdomain = ".".join(filter(None, cur_server_name[:offset]))
+                subdomain = ".".join([_f for _f in cur_server_name[:offset] if _f])
 
         def _get_wsgi_string(name):
             val = environ.get(name)
@@ -1685,8 +1685,8 @@ class MapAdapter(object):
         self.map = map
         self.server_name = to_unicode(server_name)
         script_name = to_unicode(script_name)
-        if not script_name.endswith(u"/"):
-            script_name += u"/"
+        if not script_name.endswith("/"):
+            script_name += "/"
         self.script_name = script_name
         self.subdomain = to_unicode(subdomain)
         self.url_scheme = to_unicode(url_scheme)
@@ -1860,7 +1860,7 @@ class MapAdapter(object):
 
         require_redirect = False
 
-        path = u"%s|%s" % (
+        path = "%s|%s" % (
             self.map.host_matching and self.server_name or self.subdomain,
             path_info and "/%s" % path_info.lstrip("/"),
         )
@@ -1988,7 +1988,7 @@ class MapAdapter(object):
             subdomain = self.subdomain
         else:
             subdomain = to_unicode(subdomain, "ascii")
-        return (subdomain + u"." if subdomain else u"") + self.server_name
+        return (subdomain + "." if subdomain else "") + self.server_name
 
     def get_default_redirect(self, rule, method, values, query_args):
         """A helper that returns the URL to redirect to if it finds one.

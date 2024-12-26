@@ -34,7 +34,7 @@ class Settings(UserPrefBase):
         request = self.request
         form = request.form
 
-        if form.has_key('cancel'):
+        if 'cancel' in form:
             return
 
         if request.method != 'POST':
@@ -112,4 +112,4 @@ space between words. Group page name is not allowed.""", wiki=True) % wikiutil.e
         buttons.append(html.INPUT(type="submit", name="cancel",
                                   value=_('Cancel')))
         self.make_row('', buttons)
-        return unicode(form)
+        return str(form)

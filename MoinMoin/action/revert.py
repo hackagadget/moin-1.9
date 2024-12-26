@@ -52,11 +52,11 @@ class revert(ActionBase):
     def do_action(self):
         """ revert pagename """
         form = self.form
-        comment = form.get('comment', u'')
+        comment = form.get('comment', '')
         comment = wikiutil.clean_input(comment)
 
         if self.request.method != 'POST':
-            return False, u''
+            return False, ''
 
         rev = self.request.rev
         pg = PageEditor(self.request, self.pagename)
@@ -65,8 +65,8 @@ class revert(ActionBase):
             msg = pg.revertPage(rev, comment)
             # make it show the current version...
             self.request.rev = None
-        except PageEditor.SaveError, error:
-            msg = unicode(error)
+        except PageEditor.SaveError as error:
+            msg = str(error)
 
         return True, msg
 

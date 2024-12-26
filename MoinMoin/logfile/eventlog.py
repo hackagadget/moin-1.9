@@ -55,7 +55,7 @@ class EventLog(LogFile):
 
         # Encode values in a query string TODO: use more readable format
         values = wikiutil.makeQueryString(values)
-        self._add(u"%d\t%s\t%s\n" % (mtime_usecs, eventtype, values))
+        self._add("%d\t%s\t%s\n" % (mtime_usecs, eventtype, values))
 
     def parser(self, line):
         """ parse a event-log line into its components """
@@ -64,7 +64,7 @@ class EventLog(LogFile):
         except ValueError:
             # badly formatted line in file, skip it
             return None
-        return long(time_usecs), eventtype, wikiutil.parseQueryString(kvpairs)
+        return int(time_usecs), eventtype, wikiutil.parseQueryString(kvpairs)
 
     def set_filter(self, event_types=None):
         """ optionally filter log for specific event types """

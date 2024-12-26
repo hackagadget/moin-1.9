@@ -7,7 +7,8 @@
 """
 from MoinMoin import user
 from MoinMoin.auth import BaseAuth, CancelLogin, ContinueLogin, MultistageRedirectLogin
-from urllib import urlopen, quote_plus
+from urllib.request import urlopen
+from urllib.parse import quote_plus
 
 class BotBouncer(BaseAuth):
     name = 'botbouncer'

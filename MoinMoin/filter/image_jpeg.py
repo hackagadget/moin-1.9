@@ -26,6 +26,6 @@ def execute(indexobj, filename):
     except (ValueError, TypeError, KeyError): # EXIF throws ValueError on unknown tags
                                               # TypeError on other occassions
                                               # KeyError too
-        data = u''
+        data = ''
     return data
 

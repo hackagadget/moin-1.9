@@ -6,7 +6,7 @@ pdt_locales
 All of the included locale classes shipped with pdt.
 """
 
-from __future__ import absolute_import
+
 from .icu import get_icu
 
 locales = ['de_DE', 'en_AU', 'en_US', 'es', 'nl_NL', 'pt_BR', 'ru_RU', 'fr_FR']

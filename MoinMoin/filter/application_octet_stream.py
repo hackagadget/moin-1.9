@@ -44,7 +44,7 @@ trans_nontext = string.maketrans(non_alnum, ' '*len(non_alnum))
 def execute(indexobj, filename):
     fileext = os.path.splitext(filename)[1]
     if fileext.lower() in blacklist:
-        return u''
+        return ''
     f = file(filename, "rb")
     data = f.read(maxread)
     f.close()

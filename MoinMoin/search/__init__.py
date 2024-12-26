@@ -46,7 +46,7 @@ def _get_searcher(request, query, sort='weight', mtime=None, historysearch=None,
         try:
             from MoinMoin.search.Xapian.search import XapianSearch, IndexDoesNotExistError
             searcher = XapianSearch(request, query, sort, mtime=mtime, historysearch=historysearch)
-        except ImportError, error:
+        except ImportError as error:
             logging.warning("%s. You should either set xapian_search = False in your wiki config or install/upgrade Xapian." % str(error))
         except IndexDoesNotExistError:
             logging.warning("Slow moin search is used because the Xapian index does not exist. You should create it using the moin index build command.")
@@ -57,7 +57,7 @@ def _get_searcher(request, query, sort='weight', mtime=None, historysearch=None,
     return searcher
 
 def _parse_query(query, **kw):
-    if isinstance(query, str) or isinstance(query, unicode):
+    if isinstance(query, str) or isinstance(query, str):
         query = QueryParser(**kw).parse_query(query)
 
     return query

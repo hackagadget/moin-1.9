@@ -17,7 +17,7 @@ url_prefix_static = "."
 logo_html = '<img src="logo.png">'
 HTML_SUFFIX = ".html"
 
-page_template = u'''<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+page_template = '''<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=%(charset)s">
@@ -136,7 +136,7 @@ General syntax: moin [options] export dump [dump-options]
         try:
             os.mkdir(outputdir)
             script.log("Created output directory '%s'!" % outputdir)
-        except OSError, err:
+        except OSError as err:
             if err.errno != errno.EEXIST:
                 script.fatal("Cannot create output directory '%s'!" % outputdir)
 
@@ -199,9 +199,9 @@ General syntax: moin [options] export dump [dump-options]
                     pagehtml = request.redirectedOutput(page.send_page, count_hit=0, content_only=1)
                 except:
                     errcnt = errcnt + 1
-                    print >> sys.stderr, "*** Caught exception while writing page!"
-                    print >> errlog, "~" * 78
-                    print >> errlog, file # page filename
+                    print("*** Caught exception while writing page!", file=sys.stderr)
+                    print("~" * 78, file=errlog)
+                    print(file, file=errlog) # page filename
                     import traceback
                     traceback.print_exc(None, errlog)
             finally:
@@ -230,5 +230,5 @@ General syntax: moin [options] export dump [dump-options]
 
         errlog.close()
         if errcnt:
-            print >> sys.stderr, "*** %d error(s) occurred, see '%s'!" % (errcnt, errfile)
+            print("*** %d error(s) occurred, see '%s'!" % (errcnt, errfile), file=sys.stderr)
 

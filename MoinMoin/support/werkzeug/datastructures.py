@@ -169,7 +169,7 @@ class ImmutableDictMixin(object):
     @classmethod
     def fromkeys(cls, keys, value=None):
         instance = super(cls, cls).__new__(cls)
-        instance.__init__(zip(keys, repeat(value)))
+        instance.__init__(list(zip(keys, repeat(value))))
         return instance
 
     def __reduce_ex__(self, protocol):
@@ -715,11 +715,11 @@ class _omd_bucket(object):
 
     def unlink(self, omd):
         if self.prev:
-            self.prev.next = self.next
-        if self.next:
+            self.prev.next = self.__next__
+        if self.__next__:
             self.next.prev = self.prev
         if omd._first_bucket is self:
-            omd._first_bucket = self.next
+            omd._first_bucket = self.__next__
         if omd._last_bucket is self:
             omd._last_bucket = self.prev
 
@@ -813,14 +813,14 @@ class OrderedMultiDict(MultiDict):
         if multi:
             while ptr is not None:
                 yield ptr.key, ptr.value
-                ptr = ptr.next
+                ptr = ptr.__next__
         else:
             returned_keys = set()
             while ptr is not None:
                 if ptr.key not in returned_keys:
                     returned_keys.add(ptr.key)
                     yield ptr.key, ptr.value
-                ptr = ptr.next
+                ptr = ptr.__next__
 
     def lists(self):
         returned_keys = set()
@@ -829,7 +829,7 @@ class OrderedMultiDict(MultiDict):
             if ptr.key not in returned_keys:
                 yield ptr.key, self.getlist(ptr.key)
                 returned_keys.add(ptr.key)
-            ptr = ptr.next
+            ptr = ptr.__next__
 
     def listvalues(self):
         for _key, values in iterlists(self):
@@ -903,7 +903,7 @@ class OrderedMultiDict(MultiDict):
 
 def _options_header_vkw(value, kw):
     return dump_options_header(
-        value, dict((k.replace("_", "-"), v) for k, v in kw.items())
+        value, dict((k.replace("_", "-"), v) for k, v in list(kw.items()))
     )
 
 
@@ -1191,7 +1191,7 @@ class Headers(object):
     def _validate_value(self, value):
         if not isinstance(value, text_type):
             raise TypeError("Value should be unicode.")
-        if u"\n" in value or u"\r" in value:
+        if "\n" in value or "\r" in value:
             raise ValueError(
                 "Detected newline in header value.  This is "
                 "a potential security problem"
@@ -1332,7 +1332,7 @@ class Headers(object):
             mapping = args[0]
 
             if isinstance(mapping, (Headers, MultiDict)):
-                for key in mapping.keys():
+                for key in list(mapping.keys()):
                     self.setlist(key, mapping.getlist(key))
             elif isinstance(mapping, dict):
                 for key, value in iteritems(mapping):
@@ -2429,7 +2429,7 @@ class HeaderSet(collections_abc.MutableSet):
     def __iter__(self):
         return iter(self._headers)
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self._set)
 
     def __str__(self):
@@ -2690,7 +2690,7 @@ class ContentRange(object):
             return "%s */%s" % (self.units, length)
         return "%s %s-%s/%s" % (self.units, self.start, self.stop - 1, length)
 
-    def __nonzero__(self):
+    def __bool__(self):
         return self.units is not None
 
     __bool__ = __nonzero__
@@ -3079,7 +3079,7 @@ class FileStorage(object):
         except Exception:
             pass
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.filename)
 
     __bool__ = __nonzero__

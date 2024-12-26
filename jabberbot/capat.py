@@ -70,7 +70,7 @@ def hash_iq(stanza, algo='sha-1'):
     @type stanza: pyxmpp.iq.Iq
     """
     stanza = iter(stanza.get_query())
-    stanza.next() # drop first item: whole query
+    next(stanza) # drop first item: whole query
 
     feat = []
     ident = []

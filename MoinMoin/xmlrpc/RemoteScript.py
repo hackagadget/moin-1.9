@@ -18,13 +18,13 @@ def execute(xmlrpcobj, their_secret, argv):
     our_secret = request.cfg.secrets['xmlrpc/RemoteScript']
 
     if our_secret != their_secret:
-        return u"Invalid password"
+        return "Invalid password"
 
     try:
         logging.info("RemoteScript argv: %r" % argv)
         MoinScript(argv).run(showtime=0)
-    except Exception, err:
+    except Exception as err:
         logging.exception('An exception occurred.')
         return xmlrpcobj._outstr(str(err))
-    return xmlrpcobj._outstr(u"OK")
+    return xmlrpcobj._outstr("OK")
 

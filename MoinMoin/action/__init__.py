@@ -128,7 +128,7 @@ class ActionBase:
         _ = self._
 
         if self.error:
-            error_html = u'<p class="error">%s</p>\n' % self.error
+            error_html = '<p class="error">%s</p>\n' % self.error
         else:
             error_html = ''
 
@@ -249,7 +249,7 @@ def do_raw(pagename, request):
             mimetype = None
         Page(request, pagename, rev=rev).send_raw(mimetype=mimetype)
 
-def do_show(pagename, request, content_only=0, count_hit=1, cacheable=1, print_mode=0, mimetype=u'text/html'):
+def do_show(pagename, request, content_only=0, count_hit=1, cacheable=1, print_mode=0, mimetype='text/html'):
     """ show a page, either current revision or the revision given by "rev=" value.
         if count_hit is non-zero, we count the request for statistics.
     """
@@ -274,7 +274,7 @@ def do_format(pagename, request):
         It also does not count in statistics and also does not set the cacheable flag.
         DEPRECATED: remove this action when we don't need it any more for compatibility.
     """
-    do_show(pagename, request, count_hit=0, cacheable=0, mimetype=u'text/plain')
+    do_show(pagename, request, count_hit=0, cacheable=0, mimetype='text/plain')
 
 def do_content(pagename, request):
     """ same as do_show, but we only show the content """
@@ -375,7 +375,7 @@ def get_available_actions(config, page, user):
                 not user.may.delete(page.page_name):
                 # Prevent modification of underlay only pages, or pages
                 # the user can't write and can't delete
-                excluded = [u'RenamePage', u'DeletePage', ] # AttachFile must NOT be here!
+                excluded = ['RenamePage', 'DeletePage', ] # AttachFile must NOT be here!
         return set([action for action in actions if not action in excluded])
 
 

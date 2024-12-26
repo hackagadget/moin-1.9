@@ -41,7 +41,7 @@ class ProcessingError(Exception):
 
 def log(text):
     if debug:
-        print >> sys.stderr, text
+        print(text, file=sys.stderr)
 
 def decode_2044(header):
     """ Decodes header field. See RFC 2044. """
@@ -49,7 +49,7 @@ def decode_2044(header):
     chunks_decoded = []
     for i in chunks:
         chunks_decoded.append(i[0].decode(i[1] or 'ascii'))
-    return u''.join(chunks_decoded).strip()
+    return ''.join(chunks_decoded).strip()
 
 def email_to_markup(request, email):
     """ transform the (realname, mailaddr) tuple we get in email argument to
@@ -123,7 +123,7 @@ def process_message(message):
             elif not part.is_multipart():
                 log("Unknown mail part " + repr((part.get_charsets(), part.get_content_charset(), part.get_content_type(), part.is_multipart(), )))
 
-    return {'text': u"".join(text_data), 'html': u"".join(html_data),
+    return {'text': "".join(text_data), 'html': "".join(html_data),
             'attachments': attachments,
             'target_addrs': target_addrs,
             'to_addrs': to_addrs, 'cc_addrs': cc_addrs, 'bcc_addrs': bcc_addrs, 'envelope_to_addrs': envelope_to_addrs,
@@ -232,7 +232,7 @@ def import_mail_from_message(request, message):
     pagename = d['pagename']
     generate_summary = d['generate_summary']
 
-    comment = u"Mail: '%s'" % (msg['subject'], )
+    comment = "Mail: '%s'" % (msg['subject'], )
 
     page = PageEditor(request, pagename, do_editor_backup=0)
 
@@ -252,7 +252,7 @@ def import_mail_from_message(request, message):
                 new_suffix = "-" + str(i)
                 # add the counter before the file extension
                 if len(components) > 1:
-                    fname = u"%s%s.%s" % (u".".join(components[:-1]), new_suffix, components[-1])
+                    fname = "%s%s.%s" % (".".join(components[:-1]), new_suffix, components[-1])
                 else:
                     fname = att.filename + new_suffix
             try:
@@ -270,21 +270,21 @@ def import_mail_from_message(request, message):
     # build an attachment link table for the page with the e-mail
     # use relative attachment link markup here, so the page can be easily
     # renamed and the links don't break
-    attachment_links = [""] + [u'''[[attachment:%s|%s]]''' % (att, att) for att in attachments]
+    attachment_links = [""] + ['''[[attachment:%s|%s]]''' % (att, att) for att in attachments]
 
     # assemble old page content and new mail body together
     old_content = Page(request, pagename).get_raw_body()
     if old_content:
-        new_content = u"%s\n-----\n" % old_content
+        new_content = "%s\n-----\n" % old_content
     else:
         new_content = ''
 
     #if not (generate_summary and "/" in pagename):
     #generate header in any case:
-    new_content += u"'''Mail: %s (%s, <<DateTime(%s)>>)'''\n\n" % (msg['subject'], email_to_markup(request, msg['from_addr']), msg['date'])
+    new_content += "'''Mail: %s (%s, <<DateTime(%s)>>)'''\n\n" % (msg['subject'], email_to_markup(request, msg['from_addr']), msg['date'])
 
     new_content += d['content']
-    new_content += "\n" + u"\n * ".join(attachment_links)
+    new_content += "\n" + "\n * ".join(attachment_links)
 
     try:
         page.saveText(new_content, 0, comment=comment)
@@ -293,11 +293,11 @@ def import_mail_from_message(request, message):
 
     if generate_summary and "/" in pagename:
         splitted = pagename.split("/")
-        parent_page = u"/".join(splitted[:-1])
+        parent_page = "/".join(splitted[:-1])
         child_page = splitted[-1]
         # here, use relative links also, but we need to include the child_page
         # name in the relative link as the markup gets put onto the parent_page
-        attachment_links = [u'''[[attachment:%s|%s]]''' % ("/%s/%s" % (child_page, att), att) for att in attachments]
+        attachment_links = ['''[[attachment:%s|%s]]''' % ("/%s/%s" % (child_page, att), att) for att in attachments]
         old_content = Page(request, parent_page).get_raw_body().splitlines()
 
         found_table = None
@@ -314,8 +314,8 @@ def import_mail_from_message(request, message):
         # we must repeat them here:
         [_("Date"), _("From"), _("To"), _("Content"), _("Attachments")]
 
-        table_header = (u"\n\n## mail_overview (don't delete this line)\n" +
-                        u"|| '''<<GetText(Date)>> ''' || '''<<GetText(From)>> ''' || '''<<GetText(To)>> ''' || '''<<GetText(Content)>> ''' || '''<<GetText(Attachments)>> ''' ||\n"
+        table_header = ("\n\n## mail_overview (don't delete this line)\n" +
+                        "|| '''<<GetText(Date)>> ''' || '''<<GetText(From)>> ''' || '''<<GetText(To)>> ''' || '''<<GetText(Content)>> ''' || '''<<GetText(Attachments)>> ''' ||\n"
                        )
 
         from_col = email_to_markup(request, msg['from_addr'])
@@ -324,7 +324,7 @@ def import_mail_from_message(request, message):
         subj_col = '[[%s|%s]]' % (pagename, msg['subject'])
         date_col = msg['date']
         attach_col = " ".join(attachment_links)
-        new_line = u'|| <<DateTime(%s)>> || %s || %s || %s || %s ||' % (date_col, from_col, to_col, subj_col, attach_col)
+        new_line = '|| <<DateTime(%s)>> || %s || %s || %s || %s ||' % (date_col, from_col, to_col, subj_col, attach_col)
         if found_table is not None:
             content = "\n".join(old_content[:table_ends] + [new_line] + old_content[table_ends:])
         else:
@@ -344,6 +344,6 @@ if __name__ == "__main__":
 
     try:
         import_mail_from_file(request, infile)
-    except ProcessingError, e:
-        print >> sys.stderr, "An error occurred while processing the message:", e.args
+    except ProcessingError as e:
+        print("An error occurred while processing the message:", e.args, file=sys.stderr)
 

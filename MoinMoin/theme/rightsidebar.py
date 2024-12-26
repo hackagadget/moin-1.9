@@ -19,24 +19,24 @@ class Theme(ThemeBase):
         """ Create wiki panel """
         _ = self.request.getText
         html = [
-            u'<div class="sidepanel">',
-            u'<h1>%s</h1>' % _("Wiki"),
+            '<div class="sidepanel">',
+            '<h1>%s</h1>' % _("Wiki"),
             self.navibar(d),
-            u'</div>',
+            '</div>',
             ]
-        return u'\n'.join(html)
+        return '\n'.join(html)
 
     def pagepanel(self, d):
         """ Create page panel """
         _ = self.request.getText
         if self.shouldShowEditbar(d['page']):
             html = [
-                u'<div class="sidepanel">',
-                u'<h1>%s</h1>' % _("Page"),
+                '<div class="sidepanel">',
+                '<h1>%s</h1>' % _("Page"),
                 self.editbar(d),
-                u'</div>',
+                '</div>',
                 ]
-            return u'\n'.join(html)
+            return '\n'.join(html)
         return ''
 
     def userpanel(self, d):
@@ -44,12 +44,12 @@ class Theme(ThemeBase):
         _ = self.request.getText
 
         html = [
-            u'<div class="sidepanel">',
-            u'<h1>%s</h1>' % _("User"),
+            '<div class="sidepanel">',
+            '<h1>%s</h1>' % _("User"),
             self.username(d),
-            u'</div>'
+            '</div>'
             ]
-        return u'\n'.join(html)
+        return '\n'.join(html)
 
     def header(self, d):
         """
@@ -66,32 +66,32 @@ class Theme(ThemeBase):
             self.emit_custom_html(self.cfg.page_header1),
 
             # Header
-            u'<div id="header">',
+            '<div id="header">',
             self.searchform(d),
             self.logo(),
-            u'<div id="locationline">',
+            '<div id="locationline">',
             self.interwiki(d),
             self.title(d),
-            u'</div>',
+            '</div>',
             self.trail(d),
-            u'</div>',
+            '</div>',
 
             # Custom html below header (not recomended!)
             self.emit_custom_html(self.cfg.page_header2),
 
             # Sidebar
-            u'<div id="sidebar">',
+            '<div id="sidebar">',
             self.wikipanel(d),
             self.pagepanel(d),
             self.userpanel(d),
-            u'</div>',
+            '</div>',
 
             self.msg(d),
 
             # Page
             self.startPage(),
             ]
-        return u'\n'.join(html)
+        return '\n'.join(html)
 
     def editorheader(self, d):
         """
@@ -117,11 +117,11 @@ class Theme(ThemeBase):
             self.emit_custom_html(self.cfg.page_header2),
 
             # Sidebar
-            u'<div id="sidebar">',
+            '<div id="sidebar">',
             self.wikipanel(d),
             self.pagepanel(d),
             self.userpanel(d),
-            u'</div>',
+            '</div>',
 
             self.msg(d),
 
@@ -129,7 +129,7 @@ class Theme(ThemeBase):
             self.startPage(),
             #self.title(d),
             ]
-        return u'\n'.join(html)
+        return '\n'.join(html)
 
     def footer(self, d, **keywords):
         """ Assemble wiki footer
@@ -149,15 +149,15 @@ class Theme(ThemeBase):
             self.emit_custom_html(self.cfg.page_footer1),
 
             # Footer
-            u'<div id="footer">',
+            '<div id="footer">',
             self.credits(d),
             self.showversion(d, **keywords),
-            u'</div>',
+            '</div>',
 
             # Post footer custom html
             self.emit_custom_html(self.cfg.page_footer2),
             ]
-        return u'\n'.join(html)
+        return '\n'.join(html)
 
 
 def execute(request):

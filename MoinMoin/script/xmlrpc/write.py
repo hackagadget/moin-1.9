@@ -6,7 +6,7 @@
     @license: GNU GPL, see COPYING for details.
 """
 
-import xmlrpclib
+import xmlrpc.client
 import sys
 
 from MoinMoin.script import MoinScript
@@ -48,11 +48,11 @@ Note: we automatically append ?action=xmlrpc2 to the target url given.
         pagename = self.argv[3]
 
         # get auth token from server giving username/password
-        s = xmlrpclib.ServerProxy(url)
+        s = xmlrpc.client.ServerProxy(url)
         token = s.getAuthToken(user, passwd)
 
         if not token:
-            print 'Invalid username/password'
+            print('Invalid username/password')
             return
 
         # Verify that the token is valid by using it
@@ -65,7 +65,7 @@ Note: we automatically append ?action=xmlrpc2 to the target url given.
             content = sys.stdin.read()
 
             # build a multicall object that
-            mcall = xmlrpclib.MultiCall(s)
+            mcall = xmlrpc.client.MultiCall(s)
             # first applies the token and
             mcall.applyAuthToken(token)
             # then edits the page

@@ -37,7 +37,7 @@ class TestCaching(object):
 
     def test_persistence_encode(self):
         """ test if cache persists (on disk), use encoded string """
-        test_data = u"üöäÜÖÄß"
+        test_data = "üöäÜÖÄß"
         cache = caching.CacheEntry(self.request, 'test_arena', 'test_key', 'wiki', use_encode=True)
         cache.update(test_data)
         del cache
@@ -63,9 +63,9 @@ class TestCaching(object):
 
     def test_update_needed(self):
         """ test update check) """
-        test_data1 = u'does not matter'
-        test_data2 = u'something else'
-        page_name = u'Caching_TestPage'
+        test_data1 = 'does not matter'
+        test_data2 = 'something else'
+        page_name = 'Caching_TestPage'
         page = PageEditor(self.request, page_name)
         page._write_file(test_data1)
         cache = caching.CacheEntry(self.request, page, 'test_key', 'item')

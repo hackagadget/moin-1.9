@@ -56,7 +56,7 @@ def _create_prefs_page(request, sel=None):
         url = request.page.url(request, {'action': 'userprefs', 'sub': sub})
         lnk = html.LI().append(html.A(href=url).append(html.Text(obj.title)))
         items.append(lnk)
-    return unicode(ret)
+    return str(ret)
 
 
 def _create_page(request, cancel=False):

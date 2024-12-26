@@ -7,7 +7,7 @@
 """
 
 import re
-from StringIO import StringIO
+from io import StringIO
 
 from werkzeug.wrappers import Request as RequestBase
 from werkzeug.wrappers import BaseResponse, ETagResponseMixin, \

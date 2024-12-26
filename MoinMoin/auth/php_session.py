@@ -12,7 +12,7 @@
     @license: GNU GPL, see COPYING for details.
 """
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from MoinMoin import user
 from MoinMoin.auth import _PHPsessionParser, BaseAuth
 
@@ -41,7 +41,7 @@ class PHPSessionAuth(BaseAuth):
 
             # if the next line breaks, then the cache was not filled with the current
             # user information
-            user_info = [value for key, value in known_accounts.items()
+            user_info = [value for key, value in list(known_accounts.items())
                          if value['account_lid'] == username][0]
             name = user_info.get('fullname', '')
             email = user_info.get('email', '')
@@ -53,7 +53,7 @@ class PHPSessionAuth(BaseAuth):
         cookie = kw.get('cookie')
         if not cookie is None:
             for cookiename in cookie:
-                cookievalue = urllib.unquote(cookie[cookiename].value).decode('iso-8859-1')
+                cookievalue = urllib.parse.unquote(cookie[cookiename].value).decode('iso-8859-1')
                 session = _PHPsessionParser.loadSession(cookievalue, path=self.s_path, prefix=self.s_prefix)
                 if session:
                     if "egw" in self.apps and session.get('egw_session', None):

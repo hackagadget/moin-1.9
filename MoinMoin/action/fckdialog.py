@@ -227,7 +227,7 @@ def link_dialog(request):
 
     # list of interwiki names
     interwiki_list = wikiutil.load_wikimap(request)
-    interwiki = interwiki_list.keys()
+    interwiki = list(interwiki_list.keys())
     interwiki.sort()
     iwpreferred = request.cfg.interwiki_preferred[:]
     if not iwpreferred or iwpreferred and iwpreferred[-1] is not None:
@@ -246,7 +246,7 @@ def link_dialog(request):
     scriptname = request.script_root + '/'
     action = scriptname
     basepage = wikiutil.escape(request.page.page_name)
-    request.write(u'''
+    request.write('''
 <!--
  * FCKeditor - The text editor for internet
  * Copyright (C) 2003-2004 Frederico Caldeira Knabben

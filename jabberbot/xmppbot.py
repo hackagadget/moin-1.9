@@ -6,7 +6,7 @@
     @license: GNU GPL, see COPYING for details.
 """
 
-import logging, time, Queue
+import logging, time, queue
 from threading import Thread
 from datetime import timedelta
 
@@ -104,7 +104,7 @@ class Contact:
         max_prio = -129
         selected = None
 
-        for resource in self.resources.itervalues():
+        for resource in self.resources.values():
             # TODO: check RFC for behaviour of 2 resources with the same priority
             if resource['priority'] > max_prio:
                 max_prio = resource['priority']
@@ -118,7 +118,7 @@ class Contact:
         @param resource: resource name
 
         """
-        if self.resources.has_key(resource):
+        if resource in self.resources:
             del self.resources[resource]
         else:
             raise ValueError("No such resource!")
@@ -136,7 +136,7 @@ class Contact:
 
         # If there are no resources the contact is offline, not dnd
         if max_prio_res:
-            return max_prio_res['show'] == u"dnd"
+            return max_prio_res['show'] == "dnd"
         else:
             return False
 
@@ -148,18 +148,18 @@ class Contact:
         @raise ValueError: no resource with given name has been found
 
         """
-        if self.resources.has_key(resource):
+        if resource in self.resources:
             self.resources[resource]['show'] = show
         else:
             raise ValueError("There's no such resource")
 
     def uses_resource(self, resource):
         """Checks if contact uses a given resource"""
-        return self.resources.has_key(resource)
+        return resource in self.resources
 
     def __str__(self):
         retval = "%s (%s) has %d queued messages"
-        res = ", ".join([name + " is " + res['show'] for name, res in self.resources.items()])
+        res = ", ".join([name + " is " + res['show'] for name, res in list(self.resources.items())])
         return retval % (self.jid.as_unicode(), res, len(self.messages))
 
 
@@ -283,7 +283,7 @@ class XMPPBot(Client, Thread):
         @param current_time: current time in seconds
 
         """
-        for jid, contact in self.contacts.items():
+        for jid, contact in list(self.contacts.items()):
             if not contact.is_valid(current_time):
                 del self.contacts[jid]
 
@@ -295,7 +295,7 @@ class XMPPBot(Client, Thread):
 
         """
         language = "en"
-        if isinstance(jid, str) or isinstance(jid, unicode):
+        if isinstance(jid, str) or isinstance(jid, str):
             jid = JID(jid).bare().as_unicode()
         else:
             jid = jid.bare().as_unicode()
@@ -315,7 +315,7 @@ class XMPPBot(Client, Thread):
             command = self.to_commands.get_nowait()
             self.handle_command(command)
             return True
-        except Queue.Empty:
+        except queue.Empty:
             return False
 
     def handle_command(self, command, ignore_dnd=False):
@@ -349,7 +349,7 @@ class XMPPBot(Client, Thread):
         @type contact: Contact
 
         """
-        if contact and contact.supports(jid.resource, u"jabber:x:data"):
+        if contact and contact.supports(jid.resource, "jabber:x:data"):
             self.send_change_form(jid.as_unicode(), cmd_data)
             return
         else:
@@ -366,7 +366,7 @@ class XMPPBot(Client, Thread):
         @type contact: Contact
 
         """
-        if contact and contact.supports(jid.resource, u"jabber:x:data"):
+        if contact and contact.supports(jid.resource, "jabber:x:data"):
             self.send_deleted_form(jid.as_unicode(), cmd_data)
             return
         else:
@@ -383,7 +383,7 @@ class XMPPBot(Client, Thread):
         @type contact: Contact
 
         """
-        if contact and contact.supports(jid.resource, u"jabber:x:data"):
+        if contact and contact.supports(jid.resource, "jabber:x:data"):
             self.send_attached_form(jid.as_unicode(), cmd_data)
             return
         else:
@@ -400,7 +400,7 @@ class XMPPBot(Client, Thread):
         @type contact: Contact
 
         """
-        if contact and contact.supports(jid.resource, u"jabber:x:data"):
+        if contact and contact.supports(jid.resource, "jabber:x:data"):
             self.send_renamed_form(jid.as_unicode(), cmd_data)
             return
         else:
@@ -443,7 +443,7 @@ class XMPPBot(Client, Thread):
         stanza = Presence(to_jid=jid, stanza_type="unsubscribed")
         self.get_stream().send(stanza)
 
-    def send_message(self, jid_text, data, msg_type=u"chat"):
+    def send_message(self, jid_text, data, msg_type="chat"):
         """Sends a message
 
         @param jid_text: JID to send the message to
@@ -456,10 +456,10 @@ class XMPPBot(Client, Thread):
         subject = data.get('subject', '')
         jid = JID(jid_text)
 
-        if data.has_key('url_list') and data['url_list']:
+        if 'url_list' in data and data['url_list']:
             jid_bare = jid.bare().as_unicode()
             contact = self.contacts.get(jid_bare, None)
-            if contact and contact.supports(jid.resource, u'jabber:x:oob'):
+            if contact and contact.supports(jid.resource, 'jabber:x:oob'):
                 use_oob = True
             else:
                 url_strings = ['%s - %s' % (entry['url'], entry['description']) for entry in data['url_list']]
@@ -569,7 +569,7 @@ class XMPPBot(Client, Thread):
         resource = full_jid.resource
 
         # Add URLs as OOB data if it's supported and as separate fields otherwise
-        if bare_jid in self.contacts and self.contacts[bare_jid].supports(resource, u'jabber:x:oob'):
+        if bare_jid in self.contacts and self.contacts[bare_jid].supports(resource, 'jabber:x:oob'):
             url_list = msg_data['url_list']
         else:
             url_list = []
@@ -604,7 +604,7 @@ class XMPPBot(Client, Thread):
                   }
 
         data = {'text': message, 'subject': msg_data.get('subject', '')}
-        self.send_message(jid, data, u"normal")
+        self.send_message(jid, data, "normal")
 
     def send_deleted_form(self, jid, msg_data):
         """Sends a page deleted notification using Data Forms
@@ -636,7 +636,7 @@ class XMPPBot(Client, Thread):
         resource = full_jid.resource
 
         # Add URLs as OOB data if it's supported and as separate fields otherwise
-        if bare_jid in self.contacts and self.contacts[bare_jid].supports(resource, u'jabber:x:oob'):
+        if bare_jid in self.contacts and self.contacts[bare_jid].supports(resource, 'jabber:x:oob'):
             url_list = msg_data['url_list']
         else:
             url_list = []
@@ -670,7 +670,7 @@ class XMPPBot(Client, Thread):
                   }
 
         data = {'text': message, 'subject': msg_data.get('subject', '')}
-        self.send_message(jid, data, u"normal")
+        self.send_message(jid, data, "normal")
 
     def send_attached_form(self, jid, msg_data):
         """Sends a new attachment notification using Data Forms
@@ -707,7 +707,7 @@ class XMPPBot(Client, Thread):
         resource = full_jid.resource
 
         # Add URLs as OOB data if it's supported and as separate fields otherwise
-        if bare_jid in self.contacts and self.contacts[bare_jid].supports(resource, u'jabber:x:oob'):
+        if bare_jid in self.contacts and self.contacts[bare_jid].supports(resource, 'jabber:x:oob'):
             url_list = msg_data['url_list']
         else:
             url_list = []
@@ -740,7 +740,7 @@ class XMPPBot(Client, Thread):
                   }
 
         data = {'text': message, 'subject': msg_data['subject']}
-        self.send_message(jid, data, u"normal")
+        self.send_message(jid, data, "normal")
 
     def send_renamed_form(self, jid, msg_data):
         """Sends a page rename notification using Data Forms
@@ -780,7 +780,7 @@ class XMPPBot(Client, Thread):
         resource = full_jid.resource
 
         # Add URLs as OOB data if it's supported and as separate fields otherwise
-        if bare_jid in self.contacts and self.contacts[bare_jid].supports(resource, u'jabber:x:oob'):
+        if bare_jid in self.contacts and self.contacts[bare_jid].supports(resource, 'jabber:x:oob'):
             url_list = msg_data['url_list']
         else:
             url_list = []
@@ -814,7 +814,7 @@ class XMPPBot(Client, Thread):
                   }
 
         data = {'text': message, 'subject': msg_data['subject']}
-        self.send_message(jid, data, u"normal")
+        self.send_message(jid, data, "normal")
 
     def send_user_created_text(self, jid, msg_data):
         """Sends a simple, text page user-created-notification
@@ -829,7 +829,7 @@ class XMPPBot(Client, Thread):
         message = _("%(text)s") % {'text': msg_data['text']}
 
         data = {'text': message, 'subject': msg_data['subject']}
-        self.send_message(jid, data, u"normal")
+        self.send_message(jid, data, "normal")
 
     def handle_page_info(self, command):
         """Handles GetPageInfo commands
@@ -843,16 +843,16 @@ class XMPPBot(Client, Thread):
             command.data['author'] = command.data['author'][5:]
 
         datestr = str(command.data['lastModified'])
-        command.data['lastModified'] = u"%(year)s-%(month)s-%(day)s at %(time)s" % {
+        command.data['lastModified'] = "%(year)s-%(month)s-%(day)s at %(time)s" % {
                     'year': datestr[:4],
                     'month': datestr[4:6],
                     'day': datestr[6:8],
                     'time': datestr[9:17],
         }
 
-        if command.presentation == u"text":
+        if command.presentation == "text":
             self.send_pageinfo_text(command)
-        elif command.presentation == u"dataforms":
+        elif command.presentation == "dataforms":
             self.send_pageinfo_form(command)
 
         else:
@@ -990,16 +990,16 @@ Current version: %(version)s""") % {
 
         form = forms.Form(form_node)
 
-        if form.type != u"submit":
+        if form.type != "submit":
             return
 
         if "action" in form:
             action = form["action"].value
-            if action == u"search":
+            if action == "search":
                 self.handle_search_form(jid, form)
             else:
                 data = {'text': _('The form you submitted was invalid!'), 'subject': _('Invalid data')}
-                self.send_message(jid.as_unicode(), data, u"normal")
+                self.send_message(jid.as_unicode(), data, "normal")
         elif "options" in form:
             option = form["options"].value
 
@@ -1038,7 +1038,7 @@ Current version: %(version)s""") % {
         for field in required_fields:
             if field not in form:
                 data = {'text': _('The form you submitted was invalid!'), 'subject': _('Invalid data')}
-                self.send_message(jid.as_unicode(), data, u"normal")
+                self.send_message(jid.as_unicode(), data, "normal")
 
         case_sensitive = form['case'].value
         regexp_terms = form['regexp'].value
@@ -1108,11 +1108,11 @@ Current version: %(version)s""") % {
 
             # Assume that outsiders know what they are doing. Clients that don't support
             # data forms should display a warning passed in message <body>.
-            if jid not in self.contacts or self.contacts[jid].supports(resource, u"jabber:x:data"):
+            if jid not in self.contacts or self.contacts[jid].supports(resource, "jabber:x:data"):
                 self.send_search_form(sender)
             else:
                 msg = {'text': _("This command requires a client supporting Data Forms.")}
-                self.send_message(sender, msg, u"")
+                self.send_message(sender, msg, "")
         else:
             # For unknown command return a generic help message
             return self.reply_help(sender)
@@ -1158,7 +1158,7 @@ as it's received.""")
         else:
             if command in self.xmlrpc_commands:
                 classobj = self.xmlrpc_commands[command]
-                help_str = _(u"%(command)s - %(description)s\n\nUsage: %(command)s %(params)s")
+                help_str = _("%(command)s - %(description)s\n\nUsage: %(command)s %(params)s")
                 return help_str % {'command': command,
                                    'description': classobj.description,
                                    'params': classobj.parameter_list,
@@ -1259,7 +1259,7 @@ The call should look like:\n\n%(command)s %(params)s")
 
         show = presence.get_show()
         if show is None:
-            show = u'available'
+            show = 'available'
 
         priority = presence.get_priority()
         jid = presence.get_from_jid()
@@ -1333,7 +1333,7 @@ The call should look like:\n\n%(command)s %(params)s")
                 self.add_to_disco_wait(ver_algo, jid)
             else:
                 # use cached capabilities
-                self.log.debug(u"%s: using cached capabilities." % jid.as_unicode())
+                self.log.debug("%s: using cached capabilities." % jid.as_unicode())
                 payload = cache_item.value
                 self.set_support(jid, payload)
 
@@ -1415,13 +1415,13 @@ The call should look like:\n\n%(command)s %(params)s")
                     # we can trust this 'ver' string
                     self.disco_result_right(ver_algo, payload)
                 else:
-                    self.log.debug(u"%s: 'ver' and hash do not match! (legacy client?)" % jid.as_unicode())
+                    self.log.debug("%s: 'ver' and hash do not match! (legacy client?)" % jid.as_unicode())
                     self.disco_result_wrong(ver_algo)
 
             self.set_support(jid, payload)
 
         else:
-            self.log.debug(u"%s is unavailable but sends service discovery response." % jid.as_unicode())
+            self.log.debug("%s is unavailable but sends service discovery response." % jid.as_unicode())
             # such situation is handled by check_if_waiting
 
     def disco_result_right(self, ver_algo, payload):
@@ -1481,7 +1481,7 @@ The call should look like:\n\n%(command)s %(params)s")
                     self.disco_result_wrong(ver_algo)
             else:
                 # this should never happen
-                self.log.debug(u"disco_wait: keeping empty entry at (%s, %s) !" % ver_algo)
+                self.log.debug("disco_wait: keeping empty entry at (%s, %s) !" % ver_algo)
 
     def set_support(self, jid, payload):
         """Searches service discovery results for support for
@@ -1493,11 +1493,11 @@ The call should look like:\n\n%(command)s %(params)s")
         """
         supports = payload.xpathEval('//*[@var="jabber:x:oob"]')
         if supports:
-            self.contacts[jid.bare().as_unicode()].set_supports(jid.resource, u"jabber:x:oob")
+            self.contacts[jid.bare().as_unicode()].set_supports(jid.resource, "jabber:x:oob")
 
         supports = payload.xpathEval('//*[@var="jabber:x:data"]')
         if supports:
-            self.contacts[jid.bare().as_unicode()].set_supports(jid.resource, u"jabber:x:data")
+            self.contacts[jid.bare().as_unicode()].set_supports(jid.resource, "jabber:x:data")
 
     def send_queued_messages(self, contact, ignore_dnd=False):
         """Sends messages queued for the contact
@@ -1521,7 +1521,7 @@ The call should look like:\n\n%(command)s %(params)s")
         msg = _("Hello there! I'm a MoinMoin Notification Bot. Available commands:\
 \n\n%(internal)s\n%(xmlrpc)s")
         internal = ", ".join(self.internal_commands)
-        xmlrpc = ", ".join(self.xmlrpc_commands.keys())
+        xmlrpc = ", ".join(list(self.xmlrpc_commands.keys()))
 
         return msg % {'internal': internal, 'xmlrpc': xmlrpc}
 
@@ -1597,15 +1597,15 @@ The call should look like:\n\n%(command)s %(params)s")
                     return
 
             action = cmd_data.get('action', '')
-            if action == u'page_changed':
+            if action == 'page_changed':
                 self.handle_changed_action(cmd_data, jid, contact)
-            elif action == u'page_deleted':
+            elif action == 'page_deleted':
                 self.handle_deleted_action(cmd_data, jid, contact)
-            elif action == u'file_attached':
+            elif action == 'file_attached':
                 self.handle_attached_action(cmd_data, jid, contact)
-            elif action == u'page_renamed':
+            elif action == 'page_renamed':
                 self.handle_renamed_action(cmd_data, jid, contact)
-            elif action == u'user_created':
+            elif action == 'user_created':
                 self.handle_user_created_action(cmd_data, jid, contact)
             else:
                 self.send_message(jid, cmd_data, command.msg_type)
@@ -1626,7 +1626,7 @@ The call should look like:\n\n%(command)s %(params)s")
 
         results = [{'description': result[0], 'url': result[2]} for result in command.data]
 
-        if command.presentation == u"text":
+        if command.presentation == "text":
             for warning in warnings:
                 self.send_message(command.jid, {'text': warning})
 
@@ -1634,7 +1634,7 @@ The call should look like:\n\n%(command)s %(params)s")
                 return
 
             data = {'text': _('Following pages match your search criteria:'), 'url_list': results}
-            self.send_message(command.jid, data, u"chat")
+            self.send_message(command.jid, data, "chat")
         else:
             form_title = _("Search results").encode("utf-8")
             help_form = _("Submit this form to perform a wiki search").encode("utf-8")
@@ -1649,7 +1649,7 @@ The call should look like:\n\n%(command)s %(params)s")
 
             for no, result in enumerate(results):
                 field_name = "url%d" % (no, )
-                form.add_field(name=field_name, value=unicode(result["url"]), label=result["description"].encode("utf-8"), field_type="text-single")
+                form.add_field(name=field_name, value=str(result["url"]), label=result["description"].encode("utf-8"), field_type="text-single")
 
             # Selection of a following action
             form.add_field(name="options", field_type="list-single", options=[do_nothing, search_again], label=action_label)
@@ -1666,7 +1666,7 @@ The call should look like:\n\n%(command)s %(params)s")
 
     def _handle_get_page(self, command, ignore_dnd):
         _ = self.get_text(command.jid)
-        msg = _(u"""Here's the page "%(pagename)s" that you've requested:\n\n%(data)s""")
+        msg = _("""Here's the page "%(pagename)s" that you've requested:\n\n%(data)s""")
 
         cmd_data = {'text': msg % {'pagename': command.pagename, 'data': command.data}}
         self.send_message(command.jid, cmd_data)
@@ -1674,7 +1674,7 @@ The call should look like:\n\n%(command)s %(params)s")
     def _handle_get_page_list(self, command, ignore_dnd):
         _ = self.get_text(command.jid)
         msg = _("That's the list of pages accesible to you:\n\n%s")
-        pagelist = u"\n".join(command.data)
+        pagelist = "\n".join(command.data)
 
         self.send_message(command.jid, {'text': msg % (pagelist, )})
 

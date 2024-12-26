@@ -43,7 +43,7 @@ except NameError:
     pass
 
 
-HEADER = u"""\
+HEADER = """\
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
   "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -69,7 +69,7 @@ HEADER = u"""\
   <body style="background-color: #fff">
     <div class="debugger">
 """
-FOOTER = u"""\
+FOOTER = """\
       <div class="footer">
         Brought to you by <strong class="arthur">DON'T PANIC</strong>, your
         friendly Werkzeug powered traceback interpreter.
@@ -96,7 +96,7 @@ FOOTER = u"""\
 
 PAGE_HTML = (
     HEADER
-    + u"""\
+    + """\
 <h1>%(exception_type)s</h1>
 <div class="detail">
   <p class="errormsg">%(exception)s</p>
@@ -135,7 +135,7 @@ PAGE_HTML = (
 
 CONSOLE_HTML = (
     HEADER
-    + u"""\
+    + """\
 <h1>Interactive Console</h1>
 <div class="explanation">
 In this console you can execute Python expressions in the context of the
@@ -146,7 +146,7 @@ application.  The initial namespace was created by the debugger automatically.
     + FOOTER
 )
 
-SUMMARY_HTML = u"""\
+SUMMARY_HTML = """\
 <div class="%(classes)s">
   %(title)s
   <ul>%(frames)s</ul>
@@ -154,7 +154,7 @@ SUMMARY_HTML = u"""\
 </div>
 """
 
-FRAME_HTML = u"""\
+FRAME_HTML = """\
 <div class="frame" id="frame-%(id)d">
   <h4>File <cite class="filename">"%(filename)s"</cite>,
       line <em class="line">%(lineno)s</em>,
@@ -163,7 +163,7 @@ FRAME_HTML = u"""\
 </div>
 """
 
-SOURCE_LINE_HTML = u"""\
+SOURCE_LINE_HTML = """\
 <tr class="%(classes)s">
   <td class=lineno>%(lineno)s</td>
   <td>%(code)s</td>
@@ -225,7 +225,7 @@ class Line(object):
 
     def render(self):
         return SOURCE_LINE_HTML % {
-            "classes": u" ".join(self.classes),
+            "classes": " ".join(self.classes),
             "lineno": self.lineno,
             "code": escape(self.code),
         }
@@ -280,7 +280,7 @@ class Traceback(object):
         """Log the ASCII traceback into a file object."""
         if logfile is None:
             logfile = sys.stderr
-        tb = self.plaintext.rstrip() + u"\n"
+        tb = self.plaintext.rstrip() + "\n"
         logfile.write(to_native(tb, "utf-8", "replace"))
 
     def paste(self):
@@ -293,7 +293,7 @@ class Traceback(object):
             }
         ).encode("utf-8")
         try:
-            from urllib2 import urlopen
+            from urllib.request import urlopen
         except ImportError:
             from urllib.request import urlopen
         rv = urlopen("https://api.github.com/gists", data=data)
@@ -315,19 +315,19 @@ class Traceback(object):
 
         if include_title:
             if self.is_syntax_error:
-                title = u"Syntax Error"
+                title = "Syntax Error"
             else:
-                title = u"Traceback <em>(most recent call last)</em>:"
+                title = "Traceback <em>(most recent call last)</em>:"
 
         if self.is_syntax_error:
-            description_wrapper = u"<pre class=syntaxerror>%s</pre>"
+            description_wrapper = "<pre class=syntaxerror>%s</pre>"
         else:
-            description_wrapper = u"<blockquote>%s</blockquote>"
+            description_wrapper = "<blockquote>%s</blockquote>"
 
         return SUMMARY_HTML % {
-            "classes": u" ".join(classes),
-            "title": u"<h3>%s</h3>" % title if title else u"",
-            "frames": u"\n".join(frames),
+            "classes": " ".join(classes),
+            "title": "<h3>%s</h3>" % title if title else "",
+            "frames": "\n".join(frames),
             "description": description_wrapper % escape(self.exception),
         }
 
@@ -350,7 +350,7 @@ class Traceback(object):
 
     @cached_property
     def plaintext(self):
-        return u"\n".join([group.render_text() for group in self.groups])
+        return "\n".join([group.render_text() for group in self.groups])
 
     @property
     def id(self):
@@ -370,13 +370,13 @@ class Group(object):
         if not PY2:
             if exc_value.__cause__ is not None:
                 self.info = (
-                    u"The above exception was the direct cause of the"
-                    u" following exception"
+                    "The above exception was the direct cause of the"
+                    " following exception"
                 )
             elif exc_value.__context__ is not None:
                 self.info = (
-                    u"During handling of the above exception, another"
-                    u" exception occurred"
+                    "During handling of the above exception, another"
+                    " exception occurred"
                 )
 
         self.frames = []
@@ -426,26 +426,26 @@ class Group(object):
     def render(self, mark_lib=True):
         out = []
         if self.info is not None:
-            out.append(u'<li><div class="exc-divider">%s:</div>' % self.info)
+            out.append('<li><div class="exc-divider">%s:</div>' % self.info)
         for frame in self.frames:
             out.append(
-                u"<li%s>%s"
+                "<li%s>%s"
                 % (
-                    u' title="%s"' % escape(frame.info) if frame.info else u"",
+                    ' title="%s"' % escape(frame.info) if frame.info else "",
                     frame.render(mark_lib=mark_lib),
                 )
             )
-        return u"\n".join(out)
+        return "\n".join(out)
 
     def render_text(self):
         out = []
         if self.info is not None:
-            out.append(u"\n%s:\n" % self.info)
-        out.append(u"Traceback (most recent call last):")
+            out.append("\n%s:\n" % self.info)
+        out.append("Traceback (most recent call last):")
         for frame in self.frames:
             out.append(frame.render_text())
         out.append(self.exception)
-        return u"\n".join(out)
+        return "\n".join(out)
 
 
 class Frame(object):
@@ -489,11 +489,11 @@ class Frame(object):
     @cached_property
     def is_library(self):
         return any(
-            self.filename.startswith(path) for path in sysconfig.get_paths().values()
+            self.filename.startswith(path) for path in list(sysconfig.get_paths().values())
         )
 
     def render_text(self):
-        return u'  File "%s", line %s, in %s\n    %s' % (
+        return '  File "%s", line %s, in %s\n    %s' % (
             self.filename,
             self.lineno,
             self.function_name,
@@ -617,7 +617,7 @@ class Frame(object):
         try:
             return self.sourcelines[self.lineno - 1]
         except IndexError:
-            return u""
+            return ""
 
     @cached_property
     def console(self):

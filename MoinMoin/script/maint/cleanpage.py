@@ -73,9 +73,9 @@ General syntax: moin [options] maint cleanpage [cleanpage-options]
             pagedir = os.path.join(pagesdir, p)
             status = self.qualify(pagedir)
             if status in ['trash', 'empty', ]:
-                print "mv '%s' trash # %s" % (pagedir, status)
+                print("mv '%s' trash # %s" % (pagedir, status))
             elif status in ['deleted', ]:
-                print "mv '%s' deleted # %s" % (pagedir, status)
+                print("mv '%s' deleted # %s" % (pagedir, status))
             else:
-                print "# %s: '%s'" % (status, pagedir)
+                print("# %s: '%s'" % (status, pagedir))
 

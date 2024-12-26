@@ -31,7 +31,7 @@
 """
 
 import os.path
-import cPickle
+import pickle
 import re
 
 from MoinMoin import  Page
@@ -76,7 +76,7 @@ class Parser(XsltParser):
 
         assert os.path.isfile(abs_db_compiled_xsl)
 
-        self.processor.appendStylesheetInstance(cPickle.load(file(abs_db_compiled_xsl, 'rb')))
+        self.processor.appendStylesheetInstance(pickle.load(file(abs_db_compiled_xsl, 'rb')))
 
     def parse_result(self, result):
         """
@@ -177,7 +177,7 @@ def _compile_xsl(XSLT_FILE, XSLT_COMPILED_FILE):
     # Pickled stylesheet will be self.abs_db_compiled_xsl file
     db_root = db_processor.stylesheet.root
     fw = file(XSLT_COMPILED_FILE, 'wb')
-    cPickle.dump(db_root, fw) # , protocol=2)
+    pickle.dump(db_root, fw) # , protocol=2)
     fw.close()
 
 

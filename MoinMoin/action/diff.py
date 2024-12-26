@@ -27,19 +27,19 @@ def execute(pagename, request):
     try:
         date = request.values['date']
         try:
-            date = long(date) # must be long for py 2.2.x
-        except StandardError:
+            date = int(date) # must be long for py 2.2.x
+        except Exception:
             date = 0
     except KeyError:
         date = 0
 
     try:
         rev1 = int(request.values.get('rev1', -1))
-    except StandardError:
+    except Exception:
         rev1 = 0
     try:
         rev2 = int(request.values.get('rev2', 0))
-    except StandardError:
+    except Exception:
         rev2 = 0
 
     if rev1 == -1 and rev2 == 0:
@@ -123,7 +123,7 @@ def execute(pagename, request):
     page_url = wikiutil.escape(currentpage.url(request), True)
 
     def enabled(val):
-        return not val and u' disabled="disabled"' or u''
+        return not val and ' disabled="disabled"' or ''
 
     revert_html = ""
     if request.user.may.revert(pagename):
@@ -204,9 +204,9 @@ def execute(pagename, request):
 }
 
     rev_info_old_html = rev_info_html % {
-        'rev_first_link': rev_nav_link(oldrev > 1, 1, newrev, u'\u21e4', 'diff-first-link diff-old-rev', _('Diff with oldest revision in left pane'), _("No older revision available for diff")),
-        'rev_prev_link': rev_nav_link(oldrev > 1, prev_oldrev, newrev, u'\u2190', 'diff-prev-link diff-old-rev', _('Diff with older revision in left pane'), _("No older revision available for diff")),
-        'rev_next_link': rev_nav_link((oldrev < currentrev) and (next_oldrev < newrev), next_oldrev, newrev, u'\u2192', 'diff-next-link diff-old-rev', _('Diff with newer revision in left pane'), _("Can't change to revision newer than in right pane")),
+        'rev_first_link': rev_nav_link(oldrev > 1, 1, newrev, '\u21e4', 'diff-first-link diff-old-rev', _('Diff with oldest revision in left pane'), _("No older revision available for diff")),
+        'rev_prev_link': rev_nav_link(oldrev > 1, prev_oldrev, newrev, '\u2190', 'diff-prev-link diff-old-rev', _('Diff with older revision in left pane'), _("No older revision available for diff")),
+        'rev_next_link': rev_nav_link((oldrev < currentrev) and (next_oldrev < newrev), next_oldrev, newrev, '\u2192', 'diff-next-link diff-old-rev', _('Diff with newer revision in left pane'), _("Can't change to revision newer than in right pane")),
         'rev_last_link': '',
         'rev': oldrev,
         'rev_size': oldpage.size(),
@@ -217,9 +217,9 @@ def execute(pagename, request):
 
     rev_info_new_html = rev_info_html % {
         'rev_first_link': '',
-        'rev_prev_link': rev_nav_link((newrev > 1) and (oldrev < prev_newrev), oldrev, prev_newrev, u'\u2190', 'diff-prev-link diff-new-rev', _('Diff with older revision in right pane'), _("Can't change to revision older than revision in left pane")),
-        'rev_next_link': rev_nav_link(newrev < currentrev, oldrev, next_newrev, u'\u2192', 'diff-next-link diff-new-rev', _('Diff with newer revision in right pane'), _("No newer revision available for diff")),
-        'rev_last_link': rev_nav_link(newrev < currentrev, oldrev, currentrev, u'\u21e5', 'diff-last-link diff-old-rev', _('Diff with newest revision in right pane'), _("No newer revision available for diff")),
+        'rev_prev_link': rev_nav_link((newrev > 1) and (oldrev < prev_newrev), oldrev, prev_newrev, '\u2190', 'diff-prev-link diff-new-rev', _('Diff with older revision in right pane'), _("Can't change to revision older than revision in left pane")),
+        'rev_next_link': rev_nav_link(newrev < currentrev, oldrev, next_newrev, '\u2192', 'diff-next-link diff-new-rev', _('Diff with newer revision in right pane'), _("No newer revision available for diff")),
+        'rev_last_link': rev_nav_link(newrev < currentrev, oldrev, currentrev, '\u21e5', 'diff-last-link diff-old-rev', _('Diff with newest revision in right pane'), _("No newer revision available for diff")),
         'rev': newrev,
         'rev_size': newpage.size(),
         'rev_author': newlog.getEditor(request) or _('N/A'),

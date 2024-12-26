@@ -21,7 +21,7 @@ from MoinMoin.action import AttachFile
 # Usually the tests run as anonymous user, but for some stuff, you
 # need more privs...
 
-def become_valid(request, username=u"ValidUser"):
+def become_valid(request, username="ValidUser"):
     """ modify request.user to make the user valid.
         Note that a valid user will only be in ACL special group "Known", if
         we have a user profile for this user as the ACL system will check if
@@ -34,7 +34,7 @@ def become_valid(request, username=u"ValidUser"):
     request.user.valid = 1
 
 
-def become_trusted(request, username=u"TrustedUser"):
+def become_trusted(request, username="TrustedUser"):
     """ modify request.user to make the user valid and trusted, so it is in acl group Trusted """
     become_valid(request, username)
     request.user.auth_method = request.cfg.auth_methods_trusted[0]
@@ -48,7 +48,7 @@ def become_superuser(request):
         Note: being superuser is completely unrelated to ACL rights,
               especially it is not related to ACL admin rights.
     """
-    su_name = u"SuperUser"
+    su_name = "SuperUser"
     become_trusted(request, su_name)
     if su_name not in request.cfg.superuser:
         request.cfg.superuser.append(su_name)
@@ -103,7 +103,7 @@ def nuke_page(request, pagename):
 def create_random_string_list(length=14, count=10):
     """ creates a list of random strings """
     chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    return [u"%s" % random_string(length, chars) for counter in range(count)]
+    return ["%s" % random_string(length, chars) for counter in range(count)]
 
 def make_macro(request, page):
     """ creates the macro """

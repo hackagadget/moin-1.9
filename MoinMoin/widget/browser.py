@@ -20,10 +20,10 @@ def _compare(idx, text):
     try:
         decimal_string = txt
         decimal_value = float(decimal_string)
-        txt = u""
+        txt = ""
     except ValueError:
         decimal_value = float('Infinity')
-        decimal_string = u""
+        decimal_string = ""
     return (decimal_value, decimal_string, txt)
 
 def sort_table(rows, sort_columns=None, reverse=None):
@@ -113,7 +113,7 @@ class DataBrowserWidget(base.Widget):
             selected = ' selected'
         else:
             selected = ''
-        assert(isinstance(item, basestring))
+        assert(isinstance(item, str))
         if ntitem is None:
             ntitem = item
         return '<option value="%s"%s>%s</option>' % (
@@ -126,7 +126,7 @@ class DataBrowserWidget(base.Widget):
             given by idx
         """
         self.data.reset()
-        row = self.data.next()
+        row = next(self.data)
         # [empty] is a special already
         unique = ['']
 
@@ -140,7 +140,7 @@ class DataBrowserWidget(base.Widget):
                 option = option[1]
             if not option in unique:
                 unique.append(option)
-            row = self.data.next()
+            row = next(self.data)
 
         # fill in the empty field we left blank
         del unique[0]
@@ -205,7 +205,7 @@ class DataBrowserWidget(base.Widget):
 
         # add data
         self.data.reset()
-        row = self.data.next()
+        row = next(self.data)
         if row is not None:
             filters = [None] * len(row)
 
@@ -225,9 +225,9 @@ class DataBrowserWidget(base.Widget):
                 for idx in range(len(row)):
                     if filters[idx]:
                         if isinstance(row[idx], tuple):
-                            data = unicode(row[idx][1])
+                            data = str(row[idx][1])
                         else:
-                            data = unicode(row[idx])
+                            data = str(row[idx])
                         if data != '' and filters[idx] == self._notempty:
                             continue
                         if data == '' and filters[idx] == self._empty:
@@ -243,15 +243,15 @@ class DataBrowserWidget(base.Widget):
                         continue
                     cell_attrs = {'class': 'column%d' % idx}
                     if isinstance(row[idx], tuple):
-                        result.append(fmt.table_cell(1, cell_attrs, abbr=unicode(row[idx][1])))
-                        result.append(unicode(row[idx][0]))
+                        result.append(fmt.table_cell(1, cell_attrs, abbr=str(row[idx][1])))
+                        result.append(str(row[idx][0]))
                     else:
                         result.append(fmt.table_cell(1, cell_attrs))
-                        result.append(unicode(row[idx]))
+                        result.append(str(row[idx]))
                     result.append(fmt.table_cell(0))
                 result.append(fmt.table_row(0))
 
-            row = self.data.next()
+            row = next(self.data)
 
         result.append(fmt.table(0))
         result.append(fmt.div(0))

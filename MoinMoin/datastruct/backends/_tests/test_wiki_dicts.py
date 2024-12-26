@@ -35,18 +35,18 @@ Next line has key with empty value
  Empty string::\x20
  Last:: last item
 '''
-        create_page(request, u'SomeTestDict', text)
+        create_page(request, 'SomeTestDict', text)
 
         text = """
  One:: 1
  Two:: 2
 """
-        create_page(request, u'SomeOtherTestDict', text)
+        create_page(request, 'SomeOtherTestDict', text)
 
     def teardown_class(self):
         become_trusted(self.request)
-        nuke_page(self.request, u'SomeTestDict')
-        nuke_page(self.request, u'SomeOtherTestDict')
+        nuke_page(self.request, 'SomeTestDict')
+        nuke_page(self.request, 'SomeOtherTestDict')
 
 
 coverage_modules = ['MoinMoin.datastruct.backends.wiki_dicts']

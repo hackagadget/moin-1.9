@@ -14,16 +14,16 @@ from MoinMoin.script import MoinScript
 # there are pages that are rather expensive to render, thus we
 # disallow reading them for anon users / bots / crawlers via ACL:
 SLOWPAGES = set([
-        u"PageHits",
-        u"PageSize",
-        u"WordIndex",  # we keep TitleIndex, though
-        u"EditedSystemPages",
-        u"WantedPages",
-        u"OrphanedPages",
-        u"AbandonedPages",
-        u"EventStats/HitCounts",
-        u"EventStats/Languages",
-        u"EventStats/UserAgents",
+        "PageHits",
+        "PageSize",
+        "WordIndex",  # we keep TitleIndex, though
+        "EditedSystemPages",
+        "WantedPages",
+        "OrphanedPages",
+        "AbandonedPages",
+        "EventStats/HitCounts",
+        "EventStats/Languages",
+        "EventStats/UserAgents",
 ])
 
 
@@ -109,11 +109,11 @@ General syntax: moin [options] maint globaledit [globaledit-options]
         if not master_lines:
             master_lines = ['##master-page:Unknown-Page', '##master-date:Unknown-Date', ]
 
-        cold = [u"## Please edit system and help pages ONLY in the moinmaster wiki! For more",
-                u"## information, please see MoinMaster:MoinPagesEditorGroup.",
+        cold = ["## Please edit system and help pages ONLY in the moinmaster wiki! For more",
+                "## information, please see MoinMaster:MoinPagesEditorGroup.",
         ]
-        cnew = [u"## Please edit system and help pages ONLY in the master wiki!",
-                u"## For more information, please see MoinMoin:MoinDev/Translation.",
+        cnew = ["## Please edit system and help pages ONLY in the master wiki!",
+                "## For more information, please see MoinMoin:MoinDev/Translation.",
         ]
         for c in cold + cnew:
             if c in comment_lines:
@@ -158,6 +158,6 @@ General syntax: moin [options] maint globaledit [globaledit-options]
                 origtext = p.get_raw_body()
                 changedtext = self.do_edit(pagename, origtext)
                 if changedtext and changedtext != origtext:
-                    print "Writing %s ..." % repr(pagename)
+                    print("Writing %s ..." % repr(pagename))
                     p._write_file(changedtext)
 

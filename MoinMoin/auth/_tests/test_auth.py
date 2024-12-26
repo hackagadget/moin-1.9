@@ -122,7 +122,7 @@ class TestAnonSession(AuthTest):
 
             assert not request.session.is_new
 
-            trail_expected.append(unicode(pagename))
+            trail_expected.append(str(pagename))
 
             # Requested pagenames get into trail?
             assert 'trail' in request.session
@@ -137,8 +137,8 @@ class TestHttpAuthSession(AuthTest):
 
     def testHttpAuthSession(self):
         """ run some requests with http auth, check whether session works """
-        username = u'HttpAuthTestUser'
-        auth_info = u'%s:%s' % (username, u'testpass')
+        username = 'HttpAuthTestUser'
+        auth_info = '%s:%s' % (username, 'testpass')
         auth_header = 'Basic %s' % auth_info.encode('base64')
         cookie = ''
         trail_expected = []
@@ -188,7 +188,7 @@ class TestHttpAuthSession(AuthTest):
                 first = False
                 continue
 
-            trail_expected.append(unicode(pagename))
+            trail_expected.append(str(pagename))
 
             # Requested pagenames get into trail?
             assert 'trail' in request.session
@@ -203,8 +203,8 @@ class TestMoinAuthSession(AuthTest):
     def testMoinAuthSession(self):
         """ run some requests with MoinAuth, check whether session works """
         from MoinMoin.user import User
-        username = u'MoinAuthTestUser'
-        password = u'ßecretß'
+        username = 'MoinAuthTestUser'
+        password = 'ßecretß'
         User(self.request, name=username, password=password).save() # create user
         trail_expected = []
         first = True
@@ -262,7 +262,7 @@ class TestMoinAuthSession(AuthTest):
                 first = False
                 continue
 
-            trail_expected.append(unicode(pagename))
+            trail_expected.append(str(pagename))
 
             # Requested pagenames get into trail?
             assert 'trail' in request.session

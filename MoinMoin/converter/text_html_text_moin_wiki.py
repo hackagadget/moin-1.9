@@ -8,7 +8,7 @@
 
 import re, os
 import xml.dom.minidom # HINT: the nodes in parse result tree need .has_key(), "x in ..." does not work
-import urlparse
+import urllib.parse
 from xml.dom import Node
 
 from MoinMoin import config, wikiutil
@@ -22,7 +22,7 @@ interwiki_re = re.compile(WikiParser.interwiki_rule, re.VERBOSE|re.UNICODE)
 # Permission to copy in any form is granted for use with
 # conforming SGML systems and applications as defined in
 # ISO 8879, provided this notice is included in all copies.
-dtd = ur'''
+dtd = r'''
 <!DOCTYPE html [
 <!ENTITY nbsp   "&#32;">  <!-- no-break space = non-breaking space, U+00A0, convert to U+0020 -->
 <!ENTITY iexcl  "&#161;"> <!-- inverted exclamation mark, U+00A1 ISOnum -->
@@ -609,7 +609,7 @@ class convert_tree(visitor):
             if class_ == "gap":
                 before = self.new_line_dont_remove
             style = listitem.getAttribute("style")
-            if re.match(ur"list-style-type:\s*none", style, re.I):
+            if re.match(r"list-style-type:\s*none", style, re.I):
                 markup = ". "
                 # set markup with white space when list element containes table
                 for i in listitem.childNodes:
@@ -780,7 +780,7 @@ class convert_tree(visitor):
             return
 
         # unsupported tags
-        if name in (u'title', u'meta', u'style'):
+        if name in ('title', 'meta', 'style'):
             return
 
         if name in ('h1', 'h2', 'h3', 'h4', 'h5', 'h6', ): # headers are not allowed here (e.g. inside a ul li),
@@ -1350,7 +1350,7 @@ class convert_tree(visitor):
         else:
             desc = ''
 
-        params = ','.join(['%s="%s"' % (k, v) for k, v in attrs.items()])
+        params = ','.join(['%s="%s"' % (k, v) for k, v in list(attrs.items())])
                            # if k in ('width', 'height', )])
         if params:
             params = '|' + params
@@ -1369,7 +1369,7 @@ class convert_tree(visitor):
         markup = ''
         data = attrs.pop('data', None)
         if data:
-            scheme, netloc, path, params, query, fragment = urlparse.urlparse(data)
+            scheme, netloc, path, params, query, fragment = urllib.parse.urlparse(data)
             args = url_decode(query)
             action = args.get("action")
             attachname = args.get("target")
@@ -1389,7 +1389,7 @@ class convert_tree(visitor):
                 desc = '|' + desc
 
             # Exlude 'type' attribute cause it generates a 'key already present' error.
-            params = ','.join(['%s="%s"' % (k, v) for k, v in attrs.items() if not k in ('type', )])
+            params = ','.join(['%s="%s"' % (k, v) for k, v in list(attrs.items()) if not k in ('type', )])
             if params:
                 params = '|' + params
                 if not desc:
@@ -1403,7 +1403,7 @@ class convert_tree(visitor):
 def get_attrs(node):
     """ get the attributes of <node> into an easy-to-use dict """
     attrs = {}
-    for attr_name in node.attributes.keys():
+    for attr_name in list(node.attributes.keys()):
         # get attributes of style element
         if attr_name == "style":
             for style_element in node.attributes.get(attr_name).nodeValue.split(';'):
@@ -1418,11 +1418,11 @@ def get_attrs(node):
 
 
 def parse(request, text):
-    text = u'<?xml version="1.0"?>%s%s' % (dtd, text)
+    text = '<?xml version="1.0"?>%s%s' % (dtd, text)
     text = text.encode(config.charset)
     try:
         return xml.dom.minidom.parseString(text)
-    except xml.parsers.expat.ExpatError, msg:
+    except xml.parsers.expat.ExpatError as msg:
         # this sometimes crashes when it should not, so save the stuff to analyze it:
         logname = os.path.join(request.cfg.data_dir, "expaterror.log")
         f = file(logname, "w")
@@ -1435,22 +1435,22 @@ def convert(request, pagename, text):
     # Due to expat needing explicitly set namespaces, we set these here to allow pasting
     # from Word / Excel without issues.
     # If you encounter 'ExpatError: unbound prefix', try adding the namespace to the list.
-    namespace = [u'xmlns:o="urn:schemas-microsoft-com:office:office"',
-                 u'xmlns:x="urn:schemas-microsoft-com:office:excel"',
-                 u'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"',
-                 u'xmlns:c="urn:schemas-microsoft-com:office:component:spreadsheet"',
-                 u'xmlns:s="uuid:BDC6E3F0-6DA3-11d1-A2A3-00AA00C14882"',
-                 u'xmlns:dt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"',
-                 u'xmlns:rs="urn:schemas-microsoft-com:rowset"',
-                 u'xmlns:z="#RowsetSchema"',
-                 u'xmlns:x2="http://schemas.microsoft.com/office/excel/2003/xml"',
-                 u'xmlns:sl="http://schemas.microsoft.com/schemaLibrary/2003/core"',
-                 u'xmlns:aml="http://schemas.microsoft.com/aml/2001/core"',
-                 u'xmlns:w="http://schemas.microsoft.com/office/word/2003/wordml"',
-                 u'xmlns:wx="http://schemas.microsoft.com/office/word/2003/auxHint"',
-                 u'xmlns:w10="urn:schemas-microsoft-com:office:word"',
-                 u'xmlns:v="urn:schemas-microsoft-com:office:vml"']
-    text = u'<page %s>%s</page>' % (' '.join(namespace), text)
+    namespace = ['xmlns:o="urn:schemas-microsoft-com:office:office"',
+                 'xmlns:x="urn:schemas-microsoft-com:office:excel"',
+                 'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"',
+                 'xmlns:c="urn:schemas-microsoft-com:office:component:spreadsheet"',
+                 'xmlns:s="uuid:BDC6E3F0-6DA3-11d1-A2A3-00AA00C14882"',
+                 'xmlns:dt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"',
+                 'xmlns:rs="urn:schemas-microsoft-com:rowset"',
+                 'xmlns:z="#RowsetSchema"',
+                 'xmlns:x2="http://schemas.microsoft.com/office/excel/2003/xml"',
+                 'xmlns:sl="http://schemas.microsoft.com/schemaLibrary/2003/core"',
+                 'xmlns:aml="http://schemas.microsoft.com/aml/2001/core"',
+                 'xmlns:w="http://schemas.microsoft.com/office/word/2003/wordml"',
+                 'xmlns:wx="http://schemas.microsoft.com/office/word/2003/auxHint"',
+                 'xmlns:w10="urn:schemas-microsoft-com:office:word"',
+                 'xmlns:v="urn:schemas-microsoft-com:office:vml"']
+    text = '<page %s>%s</page>' % (' '.join(namespace), text)
     tree = parse(request, text)
     strip_whitespace().do(tree)
     text = convert_tree(request, pagename).do(tree)

@@ -28,8 +28,8 @@ def add_urls(stanza, data):
         raise TypeError("Stanza must be either of type Presence or Message!")
 
     for piece in data:
-        x_elem = stanza.add_new_content(u"jabber:x:oob", u"x")
-        url = x_elem.newChild(None, u"url", None)
-        desc = x_elem.newChild(None, u"desc", None)
+        x_elem = stanza.add_new_content("jabber:x:oob", "x")
+        url = x_elem.newChild(None, "url", None)
+        desc = x_elem.newChild(None, "desc", None)
         url.addContent(piece['url'].encode("utf-8"))
         desc.addContent(piece['description'].encode("utf-8"))

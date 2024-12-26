@@ -113,7 +113,7 @@ class TestBugDefaultPasswd(LDAPTstBase):
             that default password or an empty password.
         """
 
-        nuke_user(self.request, u'usera')
+        nuke_user(self.request, 'usera')
 
         # do a LDAPAuth login (as a side effect, this autocreates the user profile):
         u1 = handle_login(self.request, None, username='usera', password='usera')

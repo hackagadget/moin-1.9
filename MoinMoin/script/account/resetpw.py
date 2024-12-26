@@ -7,7 +7,7 @@ MoinMoin - change or reset the password of a user account
 @license: GNU GPL, see COPYING for details.
 """
 
-from __future__ import with_statement
+
 
 import sys
 
@@ -118,7 +118,7 @@ newpassword:
 
         notify = self.options.notify
         if notify and not request.cfg.mail_enabled:
-            print "This wiki is not enabled for mail processing. The --notify option requires this. Aborting..."
+            print("This wiki is not enabled for mail processing. The --notify option requires this. Aborting...")
             sys.exit(1)
 
         skip_invalid = self.options.skip_invalid
@@ -140,16 +140,16 @@ newpassword:
                              notify=notify, skip_invalid=skip_invalid,
                              subject=subject,
                              text_intro=text_intro, text_msg=text_msg, text_data=text_data)
-            except Fault, err:
-                print str(err)
+            except Fault as err:
+                print(str(err))
         elif self.options.uname:
             try:
                 set_password(request, newpass, uname=self.options.uname,
                              notify=notify, skip_invalid=skip_invalid,
                              subject=subject,
                              text_intro=text_intro, text_msg=text_msg, text_data=text_data)
-            except Fault, err:
-                print str(err)
+            except Fault as err:
+                print(str(err))
         elif self.options.all_users:
             uids = sorted(getUserList(request))
             total = len(uids)
@@ -160,5 +160,5 @@ newpassword:
                                  notify=notify, skip_invalid=skip_invalid,
                                  subject=subject,
                                  text_intro=text_intro, text_msg=text_msg, text_data=text_data)
-                except Fault, err:
-                    print str(err)
+                except Fault as err:
+                    print(str(err))

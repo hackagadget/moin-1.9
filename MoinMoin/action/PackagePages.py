@@ -10,7 +10,7 @@
                 2007-2009 MoinMoin:ReimarBauer
     @license: GNU GPL, see COPYING for details.
 """
-import cStringIO
+import io
 import os
 import zipfile
 from datetime import datetime
@@ -57,7 +57,7 @@ class PackagePages:
                 raise ActionError
 
             self.package()
-        except ActionError, e:
+        except ActionError as e:
             return self.page.send_page()
 
     def package(self):
@@ -65,8 +65,8 @@ class PackagePages:
         _ = self.request.getText
 
         # Get new name from form and normalize.
-        pagelist = self.request.values.get('pagelist', u'')
-        packagename = self.request.values.get('packagename', u'')
+        pagelist = self.request.values.get('pagelist', '')
+        packagename = self.request.values.get('packagename', '')
         include_attachments = self.request.values.get('include_attachments', False)
 
         if not self.request.values.get('submit'):
@@ -80,7 +80,7 @@ class PackagePages:
             raise ActionError
 
         request = self.request
-        filelike = cStringIO.StringIO()
+        filelike = io.StringIO()
         package = self.collectpackage(unpackLine(pagelist, ","), filelike, target, include_attachments)
         request.headers['Content-Type'] = 'application/zip'
         request.headers['Content-Length'] = filelike.tell()
@@ -97,7 +97,7 @@ class PackagePages:
         _ = self.request.getText
 
         if error:
-            error = u'<p class="error">%s</p>\n' % error
+            error = '<p class="error">%s</p>\n' % error
 
         d = {
             'url': self.request.href(self.pagename),
@@ -219,7 +219,7 @@ class PackagePages:
                         zf.write(filename, zipname)
         script += [packLine(['Print', 'Thank you for using PackagePages!'])]
 
-        zf.writestr(MOIN_PACKAGE_FILE, u"\n".join(script).encode("utf-8"))
+        zf.writestr(MOIN_PACKAGE_FILE, "\n".join(script).encode("utf-8"))
         zf.close()
 
 def execute(pagename, request):

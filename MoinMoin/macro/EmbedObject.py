@@ -50,13 +50,13 @@ def _check_param_value(param, value, valuetype):
     else:
         return ""
 
-def macro_EmbedObject(macro, target=wikiutil.required_arg(unicode), pagename=None,
+def macro_EmbedObject(macro, target=wikiutil.required_arg(str), pagename=None,
                       width=wikiutil.UnitArgument(None, float, ['px', 'em', 'pt', 'in', 'mm', '%'], defaultunit='px'),
                       height=wikiutil.UnitArgument(None, float, ['px', 'em', 'pt', 'in', 'mm', '%'], defaultunit='px'),
-                      alt=u'',
-                      play=False, stop=True, loop=False, quality=(u'high', u'low', u'medium'),
-                      op=True, repeat=False, autostart=False, align=(u'middle', u'top', u'bottom'), hidden=False,
-                      menu=True, wmode=u'transparent', url_mimetype=None):
+                      alt='',
+                      play=False, stop=True, loop=False, quality=('high', 'low', 'medium'),
+                      op=True, repeat=False, autostart=False, align=('middle', 'top', 'bottom'), hidden=False,
+                      menu=True, wmode='transparent', url_mimetype=None):
     """ This macro is used to embed an object into a wiki page """
     # Join unit arguments with their units
     if width:

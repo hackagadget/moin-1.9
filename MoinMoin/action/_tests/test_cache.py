@@ -6,7 +6,7 @@
     @license: GNU GPL, see COPYING for details.
 """
 
-import os, StringIO
+import os, io
 
 from MoinMoin import caching
 from MoinMoin.action import AttachFile, cache
@@ -15,7 +15,7 @@ from MoinMoin._tests import become_trusted, create_page, nuke_page
 
 class TestSendCached:
     """ testing action cache """
-    pagename = u"AutoCreatedSillyPageToTestAttachments"
+    pagename = "AutoCreatedSillyPageToTestAttachments"
 
     def test_cache_key_content(self):
         request = self.request
@@ -34,7 +34,7 @@ class TestSendCached:
         attachname = 'foo.txt'
 
         become_trusted(request)
-        create_page(request, pagename, u"Foo!")
+        create_page(request, pagename, "Foo!")
 
         AttachFile.add_attachment(request, pagename, attachname, "Test content1", True)
 
@@ -98,7 +98,7 @@ class TestSendCached:
         key = 'nooneknowsit'
         filename = "test.png"
         data = "dontcareatall"
-        data_file = StringIO.StringIO(data)
+        data_file = io.StringIO(data)
         cache.put(request, key, data_file)
         url = cache.url(request, key)
 

@@ -22,12 +22,12 @@
 """
 
 import re
-import StringIO
+import io
 from MoinMoin import config, wikiutil
 from MoinMoin.macro import Macro
 from MoinMoin import config
-from _creole import Parser as CreoleParser
-from _creole import Rules as CreoleRules
+from ._creole import Parser as CreoleParser
+from ._creole import Rules as CreoleRules
 
 Dependencies = []
 
@@ -43,7 +43,7 @@ class Parser:
     # Enable caching
     caching = 1
     Dependencies = Dependencies
-    quickhelp = _(u"""\
+    quickhelp = _("""\
  Emphasis:: <<Verbatim(//)>>''italics''<<Verbatim(//)>>; <<Verbatim(**)>>'''bold'''<<Verbatim(**)>>; <<Verbatim(**//)>>'''''bold italics'''''<<Verbatim(//**)>>; <<Verbatim(//)>>''mixed ''<<Verbatim(**)>>'''''bold'''<<Verbatim(**)>> and italics''<<Verbatim(//)>>;
  Horizontal Rule:: <<Verbatim(----)>>
  Force Linebreak:: <<Verbatim(\\\\)>>
@@ -415,8 +415,8 @@ class Emitter:
             # The formatter.parser will *sometimes* just return the result
             # and *sometimes* try to write it directly. We need to take both
             # cases into account!
-            lines = node.content.split(u'\n')
-            buf = StringIO.StringIO()
+            lines = node.content.split('\n')
+            buf = io.StringIO()
             try:
                 try:
                     self.request.redirect(buf)

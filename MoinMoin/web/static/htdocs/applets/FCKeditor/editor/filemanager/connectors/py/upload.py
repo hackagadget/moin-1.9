@@ -78,11 +78,11 @@ if __name__ == '__main__':
 		data = conn.doResponse()
 		for header in conn.headers:
 			if not header is None:
-				print '%s: %s' % header
-		print
-		print data
+				print('%s: %s' % header)
+		print()
+		print(data)
 	except:
-		print "Content-Type: text/plain"
-		print
+		print("Content-Type: text/plain")
+		print()
 		import cgi
 		cgi.print_exception()

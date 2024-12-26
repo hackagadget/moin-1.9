@@ -92,10 +92,10 @@ General syntax: moin [options] import irclog [irclog-options]
                     if self.options.acl:
                         acl = "#acl %s\n" % (self.options.acl, )
                     p.saveText(acl + "#format irc\n" + decodeLinewise(fileObj.read()), 0)
-                except PageEditor.Unchanged, e:
+                except PageEditor.Unchanged as e:
                     pass
-                except PageEditor.SaveError, e:
-                    print "Got %r" % (e, )
+                except PageEditor.SaveError as e:
+                    print("Got %r" % (e, ))
                 fileObj.close()
         #print "Finished."
 

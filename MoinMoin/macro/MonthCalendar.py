@@ -219,18 +219,18 @@ def execute(macro, text):
         has_calparms = 1 # yes!
         text2 = macro.request.args['calparms']
         cparmpagename, cparmyear, cparmmonth, cparmoffset, cparmoffset2, cparmheight6, cparmanniversary, cparmtemplate = \
-            parseargs(request, text2, thispage, currentyear, currentmonth, 0, 0, False, False, u'')
+            parseargs(request, text2, thispage, currentyear, currentmonth, 0, 0, False, False, '')
         # Note: cparmheight6 and cparmanniversary are not used, they are just there
         # to have a consistent parameter string in calparms and macro args
     else:
         has_calparms = 0
 
     if text is None: # macro call without parameters
-        text = u''
+        text = ''
 
     # parse and check arguments
     parmpagename, parmyear, parmmonth, parmoffset, parmoffset2, parmheight6, anniversary, parmtemplate = \
-        parseargs(request, text, thispage, currentyear, currentmonth, 0, 0, False, False, u'')
+        parseargs(request, text, thispage, currentyear, currentmonth, 0, 0, False, False, '')
 
     # does url have calendar params and is THIS the right calendar to modify (we can have multiple
     # calendars on the same page)?
@@ -319,7 +319,7 @@ def execute(macro, text):
                  '  </th>\n' % (showpagename, prevyear, prevmonth, str(year), month, nextmonth, nextyear)
     restr1 = ' <tr>\n%s </tr>\n' % resth1
 
-    r7 = range(7)
+    r7 = list(range(7))
     restd2 = []
     for wkday in r7:
         wday = _(wkdays[wkday])

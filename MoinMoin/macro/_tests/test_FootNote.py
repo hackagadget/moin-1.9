@@ -15,11 +15,11 @@ from MoinMoin._tests import become_trusted, create_page, make_macro, nuke_page
 
 class TestFootNote:
     """ testing macro Action calling action raw """
-    pagename = u'AutoCreatedMoinMoinTemporaryTestPageForFootNote'
+    pagename = 'AutoCreatedMoinMoinTemporaryTestPageForFootNote'
 
     def setup_class(self):
         become_trusted(self.request)
-        self.page = create_page(self.request, self.pagename, u"Foo!")
+        self.page = create_page(self.request, self.pagename, "Foo!")
 
     def teardown_class(self):
         nuke_page(self.request, self.pagename)

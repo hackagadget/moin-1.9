@@ -344,7 +344,7 @@ class SecureCookie(ModificationTrackingDict):
 
             if items is not None and safe_str_cmp(client_hash, mac.digest()):
                 try:
-                    for key, value in items.items():
+                    for key, value in list(items.items()):
                         items[key] = cls.unquote(value)
                 except UnquoteError:
                     items = ()

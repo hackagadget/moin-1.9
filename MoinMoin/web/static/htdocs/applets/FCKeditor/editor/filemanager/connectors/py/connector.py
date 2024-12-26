@@ -48,7 +48,7 @@ class FCKeditorConnector(	FCKeditorConnectorBase,
 			return self.sendError(1, "This connector is disabled.  Please check the connector configurations in \"editor/filemanager/connectors/py/config.py\" and try again.")
 		# Make sure we have valid inputs
 		for key in ("Command","Type","CurrentFolder"):
-			if not self.request.has_key (key):
+			if key not in self.request:
 				return
 		# Get command, resource type and current folder
 		command = self.request.get("Command")
@@ -111,11 +111,11 @@ if __name__ == '__main__':
 		conn = FCKeditorConnector()
 		data = conn.doResponse()
 		for header in conn.headers:
-			print '%s: %s' % header
-		print
-		print data
+			print('%s: %s' % header)
+		print()
+		print(data)
 	except:
-		print "Content-Type: text/plain"
-		print
+		print("Content-Type: text/plain")
+		print()
 		import cgi
 		cgi.print_exception()

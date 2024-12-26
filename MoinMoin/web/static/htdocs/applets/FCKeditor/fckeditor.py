@@ -108,7 +108,7 @@ class FCKeditor(object):
         return Html
 
     def IsCompatible(self):
-        if (os.environ.has_key("HTTP_USER_AGENT")):
+        if ("HTTP_USER_AGENT" in os.environ):
             sAgent = os.environ.get("HTTP_USER_AGENT", "")
         else:
             sAgent = ""
@@ -144,7 +144,7 @@ class FCKeditor(object):
     def GetConfigFieldString(self):
         sParams = ""
         bFirst = True
-        for sKey in self.Config.keys():
+        for sKey in list(self.Config.keys()):
             sValue = self.Config[sKey]
             if (not bFirst):
                 sParams += "&amp;"

@@ -11,9 +11,9 @@ Full of evil antipatterns, incl. Exception exceptions.
 
 import sys
 import re
-import urllib2
-from urllib import quote
-import xmlrpclib
+import urllib.request, urllib.error, urllib.parse
+from urllib.parse import quote
+import xmlrpc.client
 import csv
 
 from MoinMoin.web.contexts import ScriptContext
@@ -52,7 +52,7 @@ class Task(object):
         self.desc = desc
 
     def __repr__(self):
-        return (u"<Task summary=%r label=%r hours=%i mentors=%r difficulty=%r types=%r desc='''%s'''>" % (
+        return ("<Task summary=%r label=%r hours=%i mentors=%r difficulty=%r types=%r desc='''%s'''>" % (
             self.summary, self.label, self.hours, self.mentors, self.difficulty,
             self.types, self.desc[:100])).encode("utf-8")
 
@@ -95,7 +95,7 @@ class Collector(object):
 
     def __init__(self, url):
         self.url = url
-        self.server = xmlrpclib.ServerProxy(url + "?action=xmlrpc2")
+        self.server = xmlrpc.client.ServerProxy(url + "?action=xmlrpc2")
 
     def collect_tasks(self):
         tasks = []
@@ -124,8 +124,8 @@ class Collector(object):
                 except DataNotFoundException:
                     # old tasks use "Type"
                     types = find_dict_entry("Type", page_contents)
-            except (DataNotFoundException, ValueError), e:
-                print >>sys.stderr, "Could not import %r because of %r" % (page, e)
+            except (DataNotFoundException, ValueError) as e:
+                print("Could not import %r because of %r" % (page, e), file=sys.stderr)
                 continue
             desc_m = re.search(desc_pattern, page_contents)
             if not desc_m:
@@ -162,7 +162,7 @@ class Collector(object):
         #languages = ["Lithuanian (lt)"]
         languages = []
         for language in languages:
-            page = u"EasyToDoTranslation"
+            page = "EasyToDoTranslation"
             page_contents = self.server.getPage(page)
             page_contents = page_contents.replace("LANG", language)
             summary = find_dict_entry("Summary", page_contents)
@@ -182,10 +182,10 @@ class Collector(object):
 
 
 def pull_and_gencsv():
-    print >> sys.stderr, "Collecting tasks ..."
+    print("Collecting tasks ...", file=sys.stderr)
     tasks = Collector("http://moinmo.in/").collect_tasks()
-    print >> sys.stderr, "Importing %i tasks ..." % (len(tasks), )
-    print >> sys.stderr, "\n".join(repr(task) for task in tasks)
+    print("Importing %i tasks ..." % (len(tasks), ), file=sys.stderr)
+    print("\n".join(repr(task) for task in tasks), file=sys.stderr)
 
     summary_prefix = '' # "[TEST] " # EMPTY FOR PRODUCTION IMPORT!
     tmin, tmax = 0, None

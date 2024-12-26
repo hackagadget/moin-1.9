@@ -167,7 +167,7 @@ class EditLog(LogFile):
         # this is needed so PageLock can work correctly for locks of anon editors.
         self.force_ip = kw.get('force_ip', False)
 
-    def add(self, request, mtime, rev, action, pagename, host=None, extra=u'', comment=u''):
+    def add(self, request, mtime, rev, action, pagename, host=None, extra='', comment=''):
         """ Generate (and add) a line to the edit-log.
 
         If `host` is None, it's read from request vars.
@@ -180,7 +180,7 @@ class EditLog(LogFile):
                 import socket
                 try:
                     hostname = socket.gethostbyaddr(host)[0]
-                    hostname = unicode(hostname, config.charset)
+                    hostname = str(hostname, config.charset)
                 except (socket.error, UnicodeError):
                     hostname = host
             else:
@@ -197,7 +197,7 @@ class EditLog(LogFile):
             hostname = self.uid_override
             host = ''
 
-        line = u"\t".join((str(long(mtime)), # has to be long for py 2.2.x
+        line = "\t".join((str(int(mtime)), # has to be long for py 2.2.x
                            "%08d" % rev,
                            action,
                            wikiutil.quoteWikinameFS(pagename),
@@ -223,7 +223,7 @@ class EditLog(LogFile):
         if not result.hostname:
             result.hostname = result.addr
         result.pagename = wikiutil.unquoteWikiname(result.pagename.encode('ascii'))
-        result.ed_time_usecs = long(result.ed_time_usecs or '0') # has to be long for py 2.2.x
+        result.ed_time_usecs = int(result.ed_time_usecs or '0') # has to be long for py 2.2.x
         return result
 
     def set_filter(self, **kw):
@@ -234,7 +234,7 @@ class EditLog(LogFile):
                 expr = "%s and x.%s == %s" % (expr, field, repr(kw[field]))
 
         if 'ed_time_usecs' in kw:
-            expr = "%s and long(x.ed_time_usecs) == %s" % (expr, long(kw['ed_time_usecs'])) # must be long for py 2.2.x
+            expr = "%s and long(x.ed_time_usecs) == %s" % (expr, int(kw['ed_time_usecs'])) # must be long for py 2.2.x
 
         self.filter = eval("lambda x: " + expr)
 

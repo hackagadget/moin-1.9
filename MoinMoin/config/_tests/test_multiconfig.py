@@ -10,20 +10,20 @@ import py
 
 
 class TestPasswordChecker:
-    username = u"SomeUser"
+    username = "SomeUser"
     tests_builtin = [
-        (u'', False), # empty
-        (u'1966', False), # too short
-        (u'asdfghjk', False), # keyboard sequence
-        (u'QwertZuiop', False), # german keyboard sequence, with uppercase
-        (u'mnbvcx', False), # reverse keyboard sequence
-        (u'12345678', False), # keyboard sequence, too easy
-        (u'aaaaaaaa', False), # not enough different chars
-        (u'BBBaaaddd', False), # not enough different chars
+        ('', False), # empty
+        ('1966', False), # too short
+        ('asdfghjk', False), # keyboard sequence
+        ('QwertZuiop', False), # german keyboard sequence, with uppercase
+        ('mnbvcx', False), # reverse keyboard sequence
+        ('12345678', False), # keyboard sequence, too easy
+        ('aaaaaaaa', False), # not enough different chars
+        ('BBBaaaddd', False), # not enough different chars
         (username, False), # username == password
         (username[1:-1], False), # password in username
-        (u"XXX%sXXX" % username, False), # username in password
-        (u'Moin-2007', True), # this should be OK
+        ("XXX%sXXX" % username, False), # username in password
+        ('Moin-2007', True), # this should be OK
     ]
     def testBuiltinPasswordChecker(self):
         pw_checker = self.request.cfg.password_checker
@@ -32,7 +32,7 @@ class TestPasswordChecker:
         else:
             for pw, result in self.tests_builtin:
                 pw_error = pw_checker(self.request, self.username, pw)
-                print "%r: %s" % (pw, pw_error)
+                print("%r: %s" % (pw, pw_error))
                 assert result == (pw_error is None)
 
 coverage_modules = ['MoinMoin.config.multiconfig']

@@ -106,7 +106,7 @@ class SharedDataMiddleware(object):
         self.cache_timeout = cache_timeout
 
         if hasattr(exports, "items"):
-            exports = exports.items()
+            exports = list(exports.items())
 
         for key, value in exports:
             if isinstance(value, tuple):

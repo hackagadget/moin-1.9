@@ -119,7 +119,7 @@ class PygmentsFormatter(pygments.formatter.Formatter):
                     line_parts.append(fmt.text(line))
                     if class_:
                         line_parts.append(fmt.code_token(0, class_))
-        if line_parts and line_parts != [u'']: # Don't output an empty line at the end.
+        if line_parts and line_parts != ['']: # Don't output an empty line at the end.
             self.add_next_line(line_parts)
 
 

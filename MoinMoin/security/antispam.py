@@ -66,7 +66,7 @@ def getblacklist(request, pagename, do_update):
         fail_time = failure.mtime() # only update if no failure in last hour
         if (mymtime < tooold) and (fail_time < tooold):
             logging.info("%d *BadContent too old, have to check for an update..." % tooold)
-            import xmlrpclib
+            import xmlrpc.client
             import socket
 
             timeout = 15 # time out for reaching the master server via xmlrpc
@@ -74,7 +74,7 @@ def getblacklist(request, pagename, do_update):
             socket.setdefaulttimeout(timeout)
 
             master_url = request.cfg.antispam_master_url
-            master = xmlrpclib.ServerProxy(master_url)
+            master = xmlrpc.client.ServerProxy(master_url)
             try:
                 # Get BadContent info
                 master.putClientInfo('ANTISPAM-CHECK', request.url)
@@ -93,7 +93,7 @@ def getblacklist(request, pagename, do_update):
                     mydate = datetime.datetime(*tuple(time.gmtime(mymtime))[0:6])
                 else:
                     # for python <= 2.4.x
-                    mydate = xmlrpclib.DateTime(tuple(time.gmtime(mymtime)))
+                    mydate = xmlrpc.client.DateTime(tuple(time.gmtime(mymtime)))
 
                 logging.debug("master: %s mine: %s" % (masterdate, mydate))
                 if mydate < masterdate:
@@ -110,17 +110,17 @@ def getblacklist(request, pagename, do_update):
                                        # permanent polling for every save when there
                                        # is no updated master page
 
-            except (socket.error, xmlrpclib.ProtocolError), err:
+            except (socket.error, xmlrpc.client.ProtocolError) as err:
                 logging.error('Timeout / socket / protocol error when accessing %s: %s' % (master_url, str(err)))
                 # update cache to wait before the next try
                 failure.update("")
 
-            except (xmlrpclib.Fault, ), err:
+            except (xmlrpc.client.Fault, ) as err:
                 logging.error('Fault on %s: %s' % (master_url, str(err)))
                 # update cache to wait before the next try
                 failure.update("")
 
-            except Error, err:
+            except Error as err:
                 # In case of Error, we log the error and use the local BadContent copy.
                 logging.error(str(err))
 
@@ -158,7 +158,7 @@ class SecurityPolicy(Permissions):
                     for blacklist_re in blacklist:
                         try:
                             mmblcache.append(re.compile(blacklist_re, re.I))
-                        except re.error, err:
+                        except re.error as err:
                             logging.error("Error in regex '%s': %s. Please check the pages %s." % (
                                           blacklist_re,
                                           str(err),
@@ -175,7 +175,7 @@ class SecurityPolicy(Permissions):
                 newset = frozenset(newtext.splitlines(1))
                 oldset = frozenset(oldtext.splitlines(1))
                 difference = newset - oldset
-                addedtext = kw.get('comment', u'') + u''.join(difference)
+                addedtext = kw.get('comment', '') + ''.join(difference)
 
                 for blacklist_re in request.cfg.cache.antispam_blacklist[1]:
                     match = blacklist_re.search(addedtext)

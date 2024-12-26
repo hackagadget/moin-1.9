@@ -60,7 +60,7 @@ class TOCFormatter(FormatterBase):
         if not id is None:
             id = self.request._tocfm_orig_formatter.make_id_unique(id)
         if on:
-            self.collected_headings.append([depth, id, u''])
+            self.collected_headings.append([depth, id, ''])
         return ''
 
     def macro(self, macro_obj, name, args, markup=None):

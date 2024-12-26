@@ -21,25 +21,25 @@ SHARE = os.path.abspath(os.path.join(moinpath, 'wiki'))
 
 
 def removeTestWiki():
-    print 'removing old wiki ...'
+    print('removing old wiki ...')
     for dir in ['data', 'underlay']:
         try:
             shutil.rmtree(os.path.join(WIKI, dir))
-        except OSError, err:
+        except OSError as err:
             if not (err.errno == errno.ENOENT or
                     (err.errno == 3 and os.name == 'nt')):
                 raise
 
 
 def copyData():
-    print 'copying data ...'
+    print('copying data ...')
     src = os.path.join(SHARE, 'data')
     dst = os.path.join(WIKI, 'data')
     shutil.copytree(src, dst)
 
 
 def untarUnderlay():
-    print 'untaring underlay ...'
+    print('untaring underlay ...')
     tar = tarfile.open(os.path.join(SHARE, 'underlay.tar'))
     for member in tar:
         tar.extract(member, WIKI)
@@ -49,7 +49,7 @@ def untarUnderlay():
 def run(skip_if_existing=False):
     try:
         os.makedirs(WIKI)
-    except OSError, e:
+    except OSError as e:
         if e.errno != errno.EEXIST:
             raise
 

@@ -54,7 +54,7 @@ def execute(pagename, request):
 
     rev = request.rev or 0
     savetext = request.form.get('savetext')
-    comment = request.form.get('comment', u'')
+    comment = request.form.get('comment', '')
     category = request.form.get('category')
     rstrip = int(request.form.get('rstrip', '0'))
     trivial = int(request.form.get('trivial', '0'))
@@ -135,12 +135,12 @@ def execute(pagename, request):
                 confirmed = wikiutil.filterCategoryPages(request, categories)
                 if len(confirmed) < len(categories):
                     # This was not a categories line, add separator
-                    savetext += u'\n----\n'
+                    savetext += '\n----\n'
 
         # Add new category
-        if savetext and savetext[-1] != u'\n':
+        if savetext and savetext[-1] != '\n':
             savetext += ' '
-        savetext += category + u'\n' # Should end with newline!
+        savetext += category + '\n' # Should end with newline!
 
     if (request.cfg.edit_ticketing and
         not wikiutil.checkTicket(request, request.form.get('ticket', ''))):
@@ -166,7 +166,7 @@ def execute(pagename, request):
             if request.cfg.comment_required and not comment:
                 raise pg.SaveError(_('Supplying a comment is mandatory. Write a comment below and try again...'))
             savemsg = pg.saveText(savetext, rev, trivial=trivial, comment=comment)
-        except pg.EditConflict, e:
+        except pg.EditConflict as e:
             msg = e.message
 
             # Handle conflict and send editor
@@ -177,9 +177,9 @@ def execute(pagename, request):
             pg.sendEditor(msg=msg, comment=comment)
             return
 
-        except pg.SaveError, msg:
+        except pg.SaveError as msg:
             # Show the error message
-            request.theme.add_msg(unicode(msg), "error")
+            request.theme.add_msg(str(msg), "error")
             # And show the editor again
             pg.sendEditor(preview=savetext, comment=comment, staytop=1)
             return

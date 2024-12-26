@@ -6,7 +6,7 @@ MoinMoin - find inactive users (and disable / remove them)
 @license: GNU GPL, see COPYING for details.
 """
 
-from __future__ import with_statement
+
 
 import sys, os
 
@@ -100,7 +100,7 @@ General syntax: moin [options] account inactive [inactive-options]
             with open(fn, "a") as f:
                 for uid in editlog_uids:
                     u = User(request, uid)
-                    code = u'editlog_uids.add(%r)  # %r %r %r\n' % (
+                    code = 'editlog_uids.add(%r)  # %r %r %r\n' % (
                                uid, u.name, u.email, u.jid)
                     f.write(code.encode('utf-8'))
 
@@ -108,13 +108,13 @@ General syntax: moin [options] account inactive [inactive-options]
             def check_interactive(u):
                 if self.options.interactive:
                     prompt = "%s %r %r %r disabled=%r (y/N)? " % (u.id, u.name, u.email, u.jid, u.disabled)
-                    return raw_input(prompt).strip() in ['y', 'Y', ]
+                    return input(prompt).strip() in ['y', 'Y', ]
                 else:
                     return True
 
             fn = self.options.py_exec_file
             locs = dict(editlog_uids=set())
-            execfile(fn, {}, locs)
+            exec(compile(open(fn, "rb").read(), fn, 'exec'), {}, locs)
             editlog_uids = locs.get('editlog_uids')
 
             profile_uids = set(getUserList(request))
@@ -123,7 +123,7 @@ General syntax: moin [options] account inactive [inactive-options]
             for uid in inactive_uids:
                 u = User(request, uid)
                 if self.options.show:
-                    print "%s\t%r\t%r\t%r" % (uid, u.name, u.email, u.disabled)
+                    print("%s\t%r\t%r\t%r" % (uid, u.name, u.email, u.disabled))
                 if self.options.disable:
                     if check_interactive(u):
                         u.disabled = 1

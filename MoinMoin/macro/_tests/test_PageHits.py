@@ -16,12 +16,12 @@ from MoinMoin._tests import become_trusted, create_page, make_macro, nuke_eventl
 
 class TestHits:
     """Hits: testing Hits macro """
-    pagename = u'AutoCreatedMoinMoinTemporaryTestPageForPageHits'
+    pagename = 'AutoCreatedMoinMoinTemporaryTestPageForPageHits'
 
     def setup_class(self):
         request = self.request
         become_trusted(request)
-        self.page = create_page(request, self.pagename, u"Foo!")
+        self.page = create_page(request, self.pagename, "Foo!")
         # for that test eventlog needs to be empty
         nuke_eventlog(self.request)
         # hits is based on hitcounts which reads the cache
@@ -40,7 +40,7 @@ class TestHits:
         count = 20
         for counter in range(count):
             eventlog.EventLog(self.request).add(self.request, 'VIEWPAGE', {'pagename': 'PageHits'})
-            result = self._test_macro(u'PageHits', u'') # XXX SENSE???
+            result = self._test_macro('PageHits', '') # XXX SENSE???
         cache = caching.CacheEntry(self.request, 'charts', 'pagehits', scope='wiki', use_pickle=True)
         date, hits = 0, {}
         if cache.exists():

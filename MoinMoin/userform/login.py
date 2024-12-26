@@ -110,7 +110,7 @@ document.getElementById("loginform").submit();
 </script>
 """)
 
-        return unicode(self._form)
+        return str(self._form)
 
 def getLogin(request):
     """ Return HTML code for the login. """

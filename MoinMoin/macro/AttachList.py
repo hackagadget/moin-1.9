@@ -17,7 +17,7 @@ import re
 
 from MoinMoin.action.AttachFile import _build_filelist
 
-def macro_AttachList(macro, pagename=None, mime_type=u'*', search_term=u'.+'):
+def macro_AttachList(macro, pagename=None, mime_type='*', search_term='.+'):
     # defaults if we don't get anything better
     if not pagename:
         pagename = macro.formatter.page.page_name

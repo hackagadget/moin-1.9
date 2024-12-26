@@ -5,7 +5,7 @@ parsedatetime/warns.py
 All subclasses inherited from `Warning` class
 
 """
-from __future__ import absolute_import
+
 
 import warnings
 

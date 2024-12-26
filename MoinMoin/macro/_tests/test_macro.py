@@ -13,12 +13,12 @@ from MoinMoin.formatter.text_html import Formatter
 from MoinMoin._tests import become_trusted, create_page, make_macro, nuke_page
 
 class TestMacro:
-    pagename = u'AutoCreatedMoinMoinTemporaryTestPageForTestMacro'
+    pagename = 'AutoCreatedMoinMoinTemporaryTestPageForTestMacro'
 
     def setup_class(self):
         request = self.request
         become_trusted(request)
-        self.page = create_page(request, self.pagename, u"Foo!")
+        self.page = create_page(request, self.pagename, "Foo!")
 
     def teardown_class(self):
         nuke_page(self.request, self.pagename)
