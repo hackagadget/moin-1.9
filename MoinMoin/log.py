@@ -166,7 +166,7 @@ def getLogger(name):
     if not configured:
         load_config()
     logger = logging.getLogger(name)
-    for levelnumber, levelname in list(logging._levelNames.items()):
+    for levelnumber, levelname in [[logging._levelToName[k], k] for k in logging._levelToName.keys()]:
         if isinstance(levelnumber, int): # that list has also the reverse mapping...
             setattr(logger, levelname, levelnumber)
     return logger
