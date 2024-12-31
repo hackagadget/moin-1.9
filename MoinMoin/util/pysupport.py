@@ -40,30 +40,25 @@ def getPackageModules(packagefile):
     """ Return a list of modules for a package, omitting any modules
         starting with an underscore.
     """
-    import os, re
+    import importlib.resources, os, re
 
     packagedir = os.path.dirname(packagefile)
 
     in_plugin_dir = lambda dir, ops=os.path.split: ops(ops(dir)[0])[1] == "plugin"
 
-    moinmodule = __import__('MoinMoin')
+    moinmodule = importlib.import_module('MoinMoin')
 
     # Is it in a .zip file?
     if not in_plugin_dir(packagedir) and hasattr(moinmodule, '__loader__'):
         pyre = re.compile(r"^([^_].*)\.py(?:c|o)$")
-        zipfiles = moinmodule.__loader__._files
-        dirlist = [entry[0].replace(r'/', '\\').split('\\')[-1]
-                   for entry in list(zipfiles.values()) if packagedir in entry[0]]
     else:
         pyre = re.compile(r"^([^_].*)\.py$")
-        dirlist = os.listdir(packagedir)
 
-    matches = [pyre.match(fn) for fn in dirlist]
+    matches = [pyre.match(fn.name) for fn in importlib.resources.files(moinmodule).iterdir()]
     modules = [match.group(1) for match in matches if match]
 
     modules.sort()
     return modules
-
 
 def importName(modulename, name):
     """ Import name dynamically from module
