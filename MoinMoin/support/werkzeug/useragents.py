@@ -196,7 +196,5 @@ class UserAgent(object):
     def __bool__(self):
         return bool(self.browser)
 
-    __bool__ = __nonzero__
-
     def __repr__(self):
         return "<%s %r/%s>" % (self.__class__.__name__, self.browser, self.version)

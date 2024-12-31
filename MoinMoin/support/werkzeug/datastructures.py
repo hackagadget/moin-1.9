@@ -2507,8 +2507,6 @@ class ETags(collections_abc.Container, collections_abc.Iterable):
     def __bool__(self):
         return bool(self.star_tag or self._strong or self._weak)
 
-    __nonzero__ = __bool__
-
     def __str__(self):
         return self.to_header()
 
@@ -2692,8 +2690,6 @@ class ContentRange(object):
 
     def __bool__(self):
         return self.units is not None
-
-    __bool__ = __nonzero__
 
     def __str__(self):
         return self.to_header()
@@ -3081,8 +3077,6 @@ class FileStorage(object):
 
     def __bool__(self):
         return bool(self.filename)
-
-    __bool__ = __nonzero__
 
     def __getattr__(self, name):
         try:
