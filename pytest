@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 sources = """
 eNrsvWuX41hyIDartS0v15Z2Jdkraa01mrUpAF1M1KN7NLN0s8at7uqdkvpRrsrSjJydZiNJZCYm
@@ -2208,7 +2208,7 @@ DjLJd5OU9Ix0u7TQQ1TSy/9Z5v8H35a0uw==
 import sys
 import base64
 import zlib
-import imp
+import importlib
 
 class DictImporter(object):
     def __init__(self, sources):
@@ -2254,7 +2254,7 @@ if __name__ == "__main__":
         sources = sources.encode("ascii") # ensure bytes
         sources = pickle.loads(zlib.decompress(base64.decodebytes(sources)))
     else:
-        import cPickle as pickle
+        import pickle as pickle
         exec("def do_exec(co, loc): exec co in loc\n")
         sources = pickle.loads(zlib.decompress(base64.decodestring(sources)))
 
