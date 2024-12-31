@@ -34,10 +34,10 @@
     @license: GNU GPL, see COPYING for details.
 """
 
-import os, re, codecs
+import logging, os, re, codecs
 
 from MoinMoin import log
-logging = log.getLogger(__name__)
+logger = log.getLogger(__name__)
 
 from MoinMoin import config, caching, user, util, wikiutil
 from MoinMoin.logfile import eventlog
@@ -93,7 +93,7 @@ class ItemCache:
             data = None
             hit_str = 'miss'
         self.requests += 1
-        logging.log(self.loglevel, "%s cache %s (h/r %2.1f%%) for %r %r" % (
+        logger.log(self.loglevel, "%s cache %s (h/r %2.1f%%) for %r %r" % (
             self.name,
             hit_str,
             float(self.hits * 100) / self.requests,
@@ -115,13 +115,13 @@ class ItemCache:
         if items:
             if self.name == 'meta':
                 for item in items:
-                    logging.log(self.loglevel, "cache: removing %r" % item)
+                    logger.log(self.loglevel, "cache: removing %r" % item)
                     try:
                         del self.cache[item]
                     except:
                         pass
             elif self.name == 'pagelists':
-                logging.log(self.loglevel, "cache: clearing pagelist cache")
+                logger.log(self.loglevel, "cache: clearing pagelist cache")
                 self.cache = {}
         self.log_pos = new_pos # important to do this at the end -
                                # avoids threading race conditions
@@ -386,7 +386,7 @@ class Page(object):
             cache_data = request.cfg.cache.meta.getItem(request, cache_name, cache_key)
             if cache_data and (rev == 0 or rev == cache_data[1]):
                 # we got the correct rev data from the cache
-                #logging.debug("got data from cache: %r %r %r" % cache_data)
+                #logger.debug("got data from cache: %r %r %r" % cache_data)
                 return cache_data
 
         # Figure out if we should use underlay or not, if needed.
@@ -1433,7 +1433,7 @@ class Page(object):
                 except Exception as e:
                     if not is_cache_exception(e):
                         raise
-                    logging.error('page cache failed after creation')
+                    logger.error('page cache failed after creation')
                     self.format(parser)
 
         request.clock.stop('send_page_content')
@@ -1475,7 +1475,7 @@ class Page(object):
             # See http://docs.python.org/lib/module-marshal.html
             raise Exception('CacheNeedsUpdate')
         except Exception as err:
-            logging.info('failed to load "%s" cache: %s' %
+            logger.info('failed to load "%s" cache: %s' %
                         (self.page_name, str(err)))
             raise Exception('CacheNeedsUpdate')
 
@@ -1526,7 +1526,7 @@ class Page(object):
             page._text_filename_force = page._text_filename()
         else:
             page.body = alternative_text
-            logging.warn('The page "%s" could not be found. Check your'
+            logger.warn('The page "%s" could not be found. Check your'
                          ' underlay directory setting.' % page.page_name)
         page.page_name = self.page_name
 
@@ -1628,10 +1628,10 @@ class Page(object):
         """
         pagename = self.page_name
         if request.parsePageLinks_running.get(pagename, False):
-            #logging.debug("avoid recursion for page %r" % pagename)
+            #logger.debug("avoid recursion for page %r" % pagename)
             return [] # avoid recursion
 
-        #logging.debug("running parsePageLinks for page %r" % pagename)
+        #logger.debug("running parsePageLinks for page %r" % pagename)
         # remember we are already running this function for this page:
         request.parsePageLinks_running[pagename] = True
 
@@ -1643,7 +1643,7 @@ class Page(object):
 
         request.redirect(Null())
         request.mode_getpagelinks += 1
-        #logging.debug("mode_getpagelinks == %r" % request.mode_getpagelinks)
+        #logger.debug("mode_getpagelinks == %r" % request.mode_getpagelinks)
         try:
             try:
                 from MoinMoin.formatter.pagelinks import Formatter
@@ -1651,10 +1651,10 @@ class Page(object):
                 page = Page(request, pagename, formatter=formatter)
                 page.send_page(content_only=1)
             except:
-                logging.exception("pagelinks formatter failed, traceback follows")
+                logger.exception("pagelinks formatter failed, traceback follows")
         finally:
             request.mode_getpagelinks -= 1
-            #logging.debug("mode_getpagelinks == %r" % request.mode_getpagelinks)
+            #logger.debug("mode_getpagelinks == %r" % request.mode_getpagelinks)
             request.redirect()
             if hasattr(request, '_fmt_hd_counters'):
                 del request._fmt_hd_counters
@@ -1708,7 +1708,7 @@ class Page(object):
                 aclRevision, acl = None, None
             else:
                 aclRevision, acl = cache_data
-            #logging.debug("currrev: %r, cachedaclrev: %r" % (currentRevision, aclRevision))
+            #logger.debug("currrev: %r, cachedaclrev: %r" % (currentRevision, aclRevision))
             if aclRevision != currentRevision:
                 acl = self.parseACL()
                 if currentRevision != 99999999:
