@@ -22,7 +22,7 @@ from MoinMoin import log
 logging = log.getLogger(__name__)
 
 from MoinMoin import config
-from inspect import getargspec, isfunction, isclass, ismethod
+from inspect import getfullargspec, isfunction, isclass, ismethod
 
 from MoinMoin import web # needed so that next lines work:
 import werkzeug
@@ -1888,10 +1888,10 @@ def invoke_extension_function(request, function, args, fixed_args=[]):
         positional = []
 
     if isfunction(function) or ismethod(function):
-        argnames, varargs, varkw, defaultlist = getargspec(function)
+        argnames, varargs, varkw, defaultlist = getfullargspec(function)
     elif isclass(function):
         (argnames, varargs,
-         varkw, defaultlist) = getargspec(function.__init__.__func__)
+         varkw, defaultlist) = getfullargspec(function.__init__.__func__)
     else:
         raise TypeError('function must be a function, method or class')
 
