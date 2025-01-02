@@ -2,7 +2,7 @@
 #=============================================================================
 # imports
 #=============================================================================
-
+from __future__ import with_statement
 # core
 import inspect
 import logging; log = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ from passlib.utils.binary import (
     ALL_BYTE_VALUES,
 )
 from passlib.utils.compat import join_byte_values, irange, u, native_string_types, \
-                                 uascii_to_str, join_unicode, str, str_to_uascii, \
+                                 uascii_to_str, join_unicode, unicode, str_to_uascii, \
                                  join_unicode, unicode_or_bytes_types, PY2, int_types
 from passlib.utils.decor import classproperty, deprecated_method
 # local
@@ -125,7 +125,7 @@ def validate_secret(secret):
 
 def to_unicode_for_identify(hash):
     """convert hash to unicode for identify method"""
-    if isinstance(hash, str):
+    if isinstance(hash, unicode):
         return hash
     elif isinstance(hash, bytes):
         # try as utf-8, but if it fails, use foolproof latin-1,
@@ -154,12 +154,12 @@ def parse_mc2(hash, prefix, sep=_UDOLLAR, handler=None):
     """
     # detect prefix
     hash = to_unicode(hash, "ascii", "hash")
-    assert isinstance(prefix, str)
+    assert isinstance(prefix, unicode)
     if not hash.startswith(prefix):
         raise exc.InvalidHashError(handler)
 
     # parse 2-part hash or 1-part config string
-    assert isinstance(sep, str)
+    assert isinstance(sep, unicode)
     parts = hash[len(prefix):].split(sep)
     if len(parts) == 2:
         salt, chk = parts
@@ -193,12 +193,12 @@ def parse_mc3(hash, prefix, sep=_UDOLLAR, rounds_base=10,
     """
     # detect prefix
     hash = to_unicode(hash, "ascii", "hash")
-    assert isinstance(prefix, str)
+    assert isinstance(prefix, unicode)
     if not hash.startswith(prefix):
         raise exc.InvalidHashError(handler)
 
     # parse 3-part hash or 2-part config string
-    assert isinstance(sep, str)
+    assert isinstance(sep, unicode)
     parts = hash[len(prefix):].split(sep)
     if len(parts) == 3:
         rounds, salt, chk = parts
@@ -308,7 +308,7 @@ def render_mc3(ident, rounds, salt, checksum, sep=u("$"), rounds_base=10):
         rounds = u("%x") % rounds
     else:
         assert rounds_base == 10
-        rounds = str(rounds)
+        rounds = unicode(rounds)
     if checksum:
         parts = [ident, rounds, sep, salt, sep, checksum]
     else:
@@ -316,7 +316,7 @@ def render_mc3(ident, rounds, salt, checksum, sep=u("$"), rounds_base=10):
     return uascii_to_str(join_unicode(parts))
 
 
-def mask_value(value, show=4, pct=0.125, char="*"):
+def mask_value(value, show=4, pct=0.125, char=u"*"):
     """
     helper to mask contents of sensitive field.
 
@@ -336,16 +336,15 @@ def mask_value(value, show=4, pct=0.125, char="*"):
     """
     if value is None:
         return None
-    if not isinstance(value, str):
+    if not isinstance(value, unicode):
         if isinstance(value, bytes):
             from passlib.utils.binary import ab64_encode
             value = ab64_encode(value).decode("ascii")
         else:
-            value = str(value)
+            value = unicode(value)
     size = len(value)
     show = min(show, int(size * pct))
     return value[:show] + char * (size - show)
-
 
 #=============================================================================
 # parameter helpers
@@ -642,7 +641,7 @@ class GenericHandler(MinimalHandler):
             if not isinstance(checksum, bytes):
                 raise exc.ExpectedTypeError(checksum, "bytes", "checksum")
 
-        elif not isinstance(checksum, str):
+        elif not isinstance(checksum, unicode):
             if isinstance(checksum, bytes) and relaxed:
                 warn("checksum should be unicode, not bytes", PasslibHashWarning)
                 checksum = checksum.decode("ascii")
@@ -697,7 +696,7 @@ class GenericHandler(MinimalHandler):
         r"""
         return parsed instance from hash/configuration string
 
-        :param \*\*context:
+        :param \\*\\*context:
             context keywords to pass to constructor (if applicable).
 
         :raises ValueError: if hash is incorrectly formatted
@@ -1447,7 +1446,7 @@ class HasSalt(GenericHandler):
             if not isinstance(salt, bytes):
                 raise exc.ExpectedTypeError(salt, "bytes", "salt")
         else:
-            if not isinstance(salt, str):
+            if not isinstance(salt, unicode):
                 # NOTE: allowing bytes under py2 so salt can be native str.
                 if isinstance(salt, bytes) and (PY2 or relaxed):
                     salt = salt.decode("ascii")
@@ -2324,7 +2323,7 @@ class SubclassBackendMixin(BackendMixin):
         # modify <cls> to remove existing backend mixins, and insert the new one
         update_mixin_classes(cls,
             add=mixin_cls,
-            remove=list(mixin_map.values()),
+            remove=mixin_map.values(),
             append=True, before=SubclassBackendMixin,
             dryrun=dryrun,
         )

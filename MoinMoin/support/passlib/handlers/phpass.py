@@ -14,7 +14,7 @@ import logging; log = logging.getLogger(__name__)
 # site
 # pkg
 from passlib.utils.binary import h64
-from passlib.utils.compat import u, uascii_to_str, str
+from passlib.utils.compat import u, uascii_to_str, unicode
 import passlib.utils.handlers as uh
 # local
 __all__ = [
@@ -116,7 +116,7 @@ class phpass(uh.HasManyIdents, uh.HasRounds, uh.HasSalt, uh.GenericHandler):
     #===================================================================
     def _calc_checksum(self, secret):
         # FIXME: can't find definitive policy on how phpass handles non-ascii.
-        if isinstance(secret, str):
+        if isinstance(secret, unicode):
             secret = secret.encode("utf-8")
         real_rounds = 1<<self.rounds
         result = md5(self.salt.encode("ascii") + secret).digest()

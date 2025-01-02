@@ -10,7 +10,7 @@ from warnings import warn
 # pkg
 from passlib.utils import safe_crypt, test_crypt, to_unicode
 from passlib.utils.binary import h64, h64big
-from passlib.utils.compat import byte_elem_value, u, uascii_to_str, str, suppress_cause
+from passlib.utils.compat import byte_elem_value, u, uascii_to_str, unicode, suppress_cause
 from passlib.crypto.des import des_encrypt_int_block
 import passlib.utils.handlers as uh
 # local
@@ -53,7 +53,7 @@ def _raw_des_crypt(secret, salt):
     salt_value = h64.decode_int12(salt)
 
     # gotta do something - no official policy since this predates unicode
-    if isinstance(secret, str):
+    if isinstance(secret, unicode):
         secret = secret.encode("utf-8")
     assert isinstance(secret, bytes)
 
@@ -89,7 +89,7 @@ def _raw_bsdi_crypt(secret, rounds, salt):
     salt_value = h64.decode_int24(salt)
 
     # gotta do something - no official policy since this predates unicode
-    if isinstance(secret, str):
+    if isinstance(secret, unicode):
         secret = secret.encode("utf-8")
     assert isinstance(secret, bytes)
 
@@ -217,13 +217,13 @@ class des_crypt(uh.TruncateMixin, uh.HasManyBackends, uh.HasSalt, uh.GenericHand
         # NOTE: we let safe_crypt() encode unicode secret -> utf8;
         #       no official policy since des-crypt predates unicode
         hash = safe_crypt(secret, self.salt)
-        if hash:
-            assert hash.startswith(self.salt) and len(hash) == 13
-            return hash[2:]
-        else:
+        if hash is None:
             # py3's crypt.crypt() can't handle non-utf8 bytes.
             # fallback to builtin alg, which is always available.
             return self._calc_checksum_builtin(secret)
+        if not hash.startswith(self.salt) or len(hash) != 13:
+            raise uh.exc.CryptBackendError(self, self.salt, hash)
+        return hash[2:]
 
     #---------------------------------------------------------------
     # builtin backend
@@ -380,13 +380,13 @@ class bsdi_crypt(uh.HasManyBackends, uh.HasRounds, uh.HasSalt, uh.GenericHandler
     def _calc_checksum_os_crypt(self, secret):
         config = self.to_string()
         hash = safe_crypt(secret, config)
-        if hash:
-            assert hash.startswith(config[:9]) and len(hash) == 20
-            return hash[-11:]
-        else:
+        if hash is None:
             # py3's crypt.crypt() can't handle non-utf8 bytes.
             # fallback to builtin alg, which is always available.
             return self._calc_checksum_builtin(secret)
+        if not hash.startswith(config[:9]) or len(hash) != 20:
+            raise uh.exc.CryptBackendError(self, config, hash)
+        return hash[-11:]
 
     #---------------------------------------------------------------
     # builtin backend
@@ -471,7 +471,7 @@ class bigcrypt(uh.HasSalt, uh.GenericHandler):
     # backend
     #===================================================================
     def _calc_checksum(self, secret):
-        if isinstance(secret, str):
+        if isinstance(secret, unicode):
             secret = secret.encode("utf-8")
         chk = _raw_des_crypt(secret, self.salt.encode("ascii"))
         idx = 8
@@ -569,7 +569,7 @@ class crypt16(uh.TruncateMixin, uh.HasSalt, uh.GenericHandler):
     # backend
     #===================================================================
     def _calc_checksum(self, secret):
-        if isinstance(secret, str):
+        if isinstance(secret, unicode):
             secret = secret.encode("utf-8")
 
         # check for truncation (during .hash() calls only)

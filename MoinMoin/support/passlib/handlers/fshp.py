@@ -13,7 +13,7 @@ import logging; log = logging.getLogger(__name__)
 from passlib.utils import to_unicode
 import passlib.utils.handlers as uh
 from passlib.utils.compat import bascii_to_str, iteritems, u,\
-                                 str
+                                 unicode
 from passlib.crypto.digest import pbkdf1
 # local
 __all__ = [
@@ -92,7 +92,7 @@ class fshp(uh.HasRounds, uh.HasRawSalt, uh.HasRawChecksum, uh.GenericHandler):
         3: ("sha512",   64),
         }
     _variant_aliases = dict(
-        [(str(k),k) for k in _variant_info] +
+        [(unicode(k),k) for k in _variant_info] +
         [(v[0],k) for k,v in iteritems(_variant_info)]
         )
 
@@ -131,7 +131,7 @@ class fshp(uh.HasRounds, uh.HasRawSalt, uh.HasRawChecksum, uh.GenericHandler):
     def _norm_variant(cls, variant):
         if isinstance(variant, bytes):
             variant = variant.decode("ascii")
-        if isinstance(variant, str):
+        if isinstance(variant, unicode):
             try:
                 variant = cls._variant_aliases[variant]
             except KeyError:
@@ -192,7 +192,7 @@ class fshp(uh.HasRounds, uh.HasRawSalt, uh.HasRawChecksum, uh.GenericHandler):
     #===================================================================
 
     def _calc_checksum(self, secret):
-        if isinstance(secret, str):
+        if isinstance(secret, unicode):
             secret = secret.encode("utf-8")
         # NOTE: for some reason, FSHP uses pbkdf1 with password & salt reversed.
         #       this has only a minimal impact on security,

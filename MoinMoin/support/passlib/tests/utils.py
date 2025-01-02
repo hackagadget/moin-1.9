@@ -2,7 +2,7 @@
 #=============================================================================
 # imports
 #=============================================================================
-
+from __future__ import with_statement
 # core
 from binascii import unhexlify
 import contextlib
@@ -29,7 +29,7 @@ from passlib.tests.backports import TestCase as _TestCase, skip, skipIf, skipUnl
 from passlib.utils import has_rounds_info, has_salt_info, rounds_cost_values, \
                           rng as sys_rng, getrandstr, is_ascii_safe, to_native_str, \
                           repeat_string, tick, batch
-from passlib.utils.compat import iteritems, irange, u, str, PY2
+from passlib.utils.compat import iteritems, irange, u, unicode, PY2, nullcontext
 from passlib.utils.decor import classproperty
 import passlib.utils.handlers as uh
 # local
@@ -219,7 +219,7 @@ def patch_calc_min_rounds(handler):
 #=============================================================================
 def set_file(path, content):
     """set file to specified bytes"""
-    if isinstance(content, str):
+    if isinstance(content, unicode):
         content = content.encode("utf-8")
     with open(path, "wb") as fh:
         fh.write(content)
@@ -356,6 +356,8 @@ class TestCase(_TestCase):
     def setUp(self):
         super(TestCase, self).setUp()
         self.setUpWarnings()
+        # have uh.debug_only_repr() return real values for duration of test
+        self.patchAttr(exc, "ENABLE_DEBUG_ONLY_REPR", True)
 
     def setUpWarnings(self):
         """helper to init warning filters before subclass setUp()"""
@@ -364,11 +366,16 @@ class TestCase(_TestCase):
             ctx.__enter__()
             self.addCleanup(ctx.__exit__)
 
+            # ignore security warnings, tests may deliberately cause these
+            # TODO: may want to filter out a few of this, but not blanket filter...
+            # warnings.filterwarnings("ignore", category=exc.PasslibSecurityWarning)
+
             # ignore warnings about PasswordHash features deprecated in 1.7
             # TODO: should be cleaned in 2.0, when support will be dropped.
             #       should be kept until then, so we test the legacy paths.
             warnings.filterwarnings("ignore", r"the method .*\.(encrypt|genconfig|genhash)\(\) is deprecated")
             warnings.filterwarnings("ignore", r"the 'vary_rounds' option is deprecated")
+            warnings.filterwarnings("ignore", r"Support for `(py-bcrypt|bcryptor)` is deprecated")
 
     #---------------------------------------------------------------
     # tweak message formatting so longMessage mode is only enabled
@@ -621,6 +628,66 @@ class TestCase(_TestCase):
             return value
 
     #===================================================================
+    # subtests
+    #===================================================================
+
+    has_real_subtest = hasattr(_TestCase, "subTest")
+
+    @contextlib.contextmanager
+    def subTest(self, *args, **kwds):
+        """
+        wrapper/backport for .subTest() which also traps SkipTest errors.
+        (see source for details)
+        """
+        # this function works around two things:
+        # * TestCase.subTest() wasn't added until Py34; so for older python versions,
+        #   we either need unittest2 installed, or provide stub of our own.
+        #   this method provides a stub if needed (based on .has_real_subtest check)
+        #
+        # * as 2020-10-08, .subTest() doesn't play nicely w/ .skipTest();
+        #   and also makes it hard to debug which subtest had a failure.
+        #   (see https://bugs.python.org/issue25894 and https://bugs.python.org/issue35327)
+        #   this method traps skipTest exceptions, and adds some logging to help debug
+        #   which subtest caused the issue.
+
+        # setup way to log subtest info
+        # XXX: would like better way to inject messages into test output;
+        #      but this at least gets us something for debugging...
+        # NOTE: this hack will miss parent params if called from nested .subTest()
+        def _render_title(_msg=None, **params):
+            out = ("[%s] " % _msg if _msg else "")
+            if params:
+                out += "(%s)" % " ".join("%s=%r" % tuple(item) for item in params.items())
+            return out.strip() or "<subtest>"
+
+        test_log = self.getLogger()
+        title = _render_title(*args, **kwds)
+
+        # use real subtest manager if available
+        if self.has_real_subtest:
+            ctx = super(TestCase, self).subTest(*args, **kwds)
+        else:
+            ctx = nullcontext()
+
+        # run the subtest
+        with ctx:
+            test_log.info("running subtest: %s", title)
+            try:
+                yield
+            except SkipTest:
+                # silence "SkipTest" exceptions, want to keep running next subtest.
+                test_log.info("subtest skipped: %s", title)
+                pass
+            except Exception as err:
+                # log unhandled exception occurred
+                # (assuming traceback will be reported up higher, so not bothering here)
+                test_log.warning("subtest failed: %s: %s: %r", title, type(err).__name__, str(err))
+                raise
+
+        # XXX: check for "failed" state in ``self._outcome`` before writing this?
+        test_log.info("subtest passed: %s", title)
+
+    #===================================================================
     # other
     #===================================================================
     _mktemp_queue = None
@@ -662,6 +729,18 @@ class TestCase(_TestCase):
             wraps(orig)(value)
         setattr(obj, attr, value)
 
+    def getLogger(self):
+        """
+        return logger named after current test.
+        """
+        cls = type(self)
+        # NOTE: conditional on qualname for PY2 compat
+        path = cls.__module__ + "." + getattr(cls, "__qualname__", cls.__name__)
+        name = self._testMethodName
+        if name:
+            path = path + "." + name
+        return logging.getLogger(path)
+
     #===================================================================
     # eoc
     #===================================================================
@@ -669,7 +748,21 @@ class TestCase(_TestCase):
 #=============================================================================
 # other unittest helpers
 #=============================================================================
+
 RESERVED_BACKEND_NAMES = ["any", "default"]
+
+
+def doesnt_require_backend(func):
+    """
+    decorator for HandlerCase.create_backend_case() --
+    used to decorate methods that should be run even if backend isn't present
+    (by default, full test suite is skipped when backend is missing)
+
+    NOTE: tests decorated with this should not rely on handler have expected (or any!) backend.
+    """
+    func._doesnt_require_backend = True
+    return func
+
 
 class HandlerCase(TestCase):
     """base class for testing password hash handlers (esp passlib.utils.handlers subclasses)
@@ -739,7 +832,7 @@ class HandlerCase(TestCase):
     # don't need to be overidden.
     stock_passwords = [
         u("test"),
-        u("\\u20AC\\u00A5$"),
+        u("\u20AC\u00A5$"),
         b'\xe2\x82\xac\xc2\xa5$'
     ]
 
@@ -913,7 +1006,8 @@ class HandlerCase(TestCase):
     # and other backend helpers
     #---------------------------------------------------------------
 
-    BACKEND_NOT_AVAILABLE = "backend not available"
+    #: default message used by _get_skip_backend_reason()
+    _BACKEND_NOT_AVAILABLE = "backend not available"
 
     @classmethod
     def _get_skip_backend_reason(cls, backend):
@@ -926,7 +1020,7 @@ class HandlerCase(TestCase):
             return "only default backend is being tested"
         if handler.has_backend(backend):
             return None
-        return cls.BACKEND_NOT_AVAILABLE
+        return cls._BACKEND_NOT_AVAILABLE
 
     @classmethod
     def create_backend_case(cls, backend):
@@ -943,28 +1037,51 @@ class HandlerCase(TestCase):
             dict(
                 descriptionPrefix="%s (%s backend)" % (name, backend),
                 backend=backend,
+                _skip_backend_reason=cls._get_skip_backend_reason(backend),
                 __module__=cls.__module__,
             )
         )
-        skip_reason = cls._get_skip_backend_reason(backend)
-        if skip_reason:
-            subcls = skip(skip_reason)(subcls)
         return subcls
+
+    #: flag for setUp() indicating this class is disabled due to backend issue;
+    #: this is only set for dynamic subclasses generated by create_backend_case()
+    _skip_backend_reason = None
+
+    def _test_requires_backend(self):
+        """
+        check if current test method decorated with doesnt_require_backend() helper
+        """
+        meth = getattr(self, self._testMethodName, None)
+        return not getattr(meth, "_doesnt_require_backend", False)
 
     #===================================================================
     # setup
     #===================================================================
     def setUp(self):
+
+        # check if test is disabled due to missing backend;
+        # and that it wasn't exempted via @doesnt_require_backend() decorator
+        test_requires_backend = self._test_requires_backend()
+        if test_requires_backend and self._skip_backend_reason:
+            raise self.skipTest(self._skip_backend_reason)
+
         super(HandlerCase, self).setUp()
 
         # if needed, select specific backend for duration of test
+        # NOTE: skipping this if create_backend_case() signalled we're skipping backend
+        #       (can only get here for @doesnt_require_backend decorated methods)
         handler = self.handler
         backend = self.backend
         if backend:
             if not hasattr(handler, "set_backend"):
                 raise RuntimeError("handler doesn't support multiple backends")
-            self.addCleanup(handler.set_backend, handler.get_backend())
-            handler.set_backend(backend)
+            try:
+                self.addCleanup(handler.set_backend, handler.get_backend())
+                handler.set_backend(backend)
+            except uh.exc.MissingBackendError:
+                if test_requires_backend:
+                    raise
+                # else test is decorated with @doesnt_require_backend, let it through.
 
         # patch some RNG references so they're reproducible.
         from passlib.utils import handlers
@@ -1399,7 +1516,7 @@ class HandlerCase(TestCase):
         if getattr(self.handler, "_salt_is_bytes", False):
             return bytes
         else:
-            return str
+            return unicode
 
     def test_15_salt_type(self):
         """test non-string salt values"""
@@ -1413,12 +1530,12 @@ class HandlerCase(TestCase):
         self.assertRaises(TypeError, self.do_encrypt, 'stub', salt=fake())
 
         # unicode should be accepted only if salt_type is unicode.
-        if salt_type is not str:
+        if salt_type is not unicode:
             self.assertRaises(TypeError, self.do_encrypt, 'stub', salt=u('x') * salt_size)
 
         # bytes should be accepted only if salt_type is bytes,
         # OR if salt type is unicode and running PY2 - to allow native strings.
-        if not (salt_type is bytes or (PY2 and salt_type is str)):
+        if not (salt_type is bytes or (PY2 and salt_type is unicode)):
             self.assertRaises(TypeError, self.do_encrypt, 'stub', salt=b'x' * salt_size)
 
     def test_using_salt_size(self):
@@ -1894,13 +2011,13 @@ class HandlerCase(TestCase):
 
         # check ident_values list
         for value in cls.ident_values:
-            self.assertIsInstance(value, str,
+            self.assertIsInstance(value, unicode,
                                   "cls.ident_values must be unicode:")
         self.assertTrue(len(cls.ident_values)>1,
                         "cls.ident_values must have 2+ elements:")
 
         # check default_ident value
-        self.assertIsInstance(cls.default_ident, str,
+        self.assertIsInstance(cls.default_ident, unicode,
                               "cls.default_ident must be unicode:")
         self.assertTrue(cls.default_ident in cls.ident_values,
                         "cls.default_ident must specify member of cls.ident_values")
@@ -1908,9 +2025,9 @@ class HandlerCase(TestCase):
         # check optional aliases list
         if cls.ident_aliases:
             for alias, ident in iteritems(cls.ident_aliases):
-                self.assertIsInstance(alias, str,
+                self.assertIsInstance(alias, unicode,
                                       "cls.ident_aliases keys must be unicode:") # XXX: allow ints?
-                self.assertIsInstance(ident, str,
+                self.assertIsInstance(ident, unicode,
                                       "cls.ident_aliases values must be unicode:")
                 self.assertTrue(ident in cls.ident_values,
                                 "cls.ident_aliases must map to cls.ident_values members: %r" % (ident,))
@@ -1980,7 +2097,7 @@ class HandlerCase(TestCase):
 
         # check ident aliases are being honored
         if handler.ident_aliases:
-            for alias, ident in list(handler.ident_aliases.items()):
+            for alias, ident in handler.ident_aliases.items():
                 subcls = handler.using(ident=alias)
                 self.assertEqual(subcls.default_ident, ident, msg="alias %r:" % alias)
 
@@ -2539,7 +2656,7 @@ class HandlerCase(TestCase):
         """
         if value is None:
             return
-        self.assertIsInstance(value, str)
+        self.assertIsInstance(value, unicode)
         # assumes mask_value() defaults will never show more than <show> chars (4);
         # and show nothing if size less than 1/<pct> (8).
         ref = value if len(value) < 8 else value[4:]
@@ -2687,7 +2804,9 @@ class HandlerCase(TestCase):
                     failed[0] += 1
                 raise
         def launch(n):
-            name = "Fuzz-Thread-%d" % (n,)
+            cls = type(self)
+            name = "Fuzz-Thread-%d ('%s:%s.%s')" % (n, cls.__module__, cls.__name__,
+                                                    self._testMethodName)
             thread = threading.Thread(target=wrapper, name=name)
             thread.setDaemon(True)
             thread.start()
@@ -2810,7 +2929,7 @@ class HandlerCase(TestCase):
         #==========================================================
 
         # alphabet for randomly generated passwords
-        password_alphabet = u('qwertyASDF1234<>.@*#! \\u00E1\\u0259\\u0411\\u2113')
+        password_alphabet = u('qwertyASDF1234<>.@*#! \u00E1\u0259\u0411\u2113')
 
         # encoding when testing bytes
         password_encoding = "utf-8"
@@ -2842,8 +2961,7 @@ class HandlerCase(TestCase):
             """
             def gendict(map):
                 out = {}
-                for key, meth in list(map.items()):
-                    func = getattr(self, meth)
+                for key, meth in map.items():
                     value = getattr(self, meth)()
                     if value is not None:
                         out[key] = value
@@ -2940,7 +3058,7 @@ class HandlerCase(TestCase):
             result = getrandstr(rng, self.password_alphabet, size)
 
             # trim ones that encode past truncate point.
-            if truncate_size and isinstance(result, str):
+            if truncate_size and isinstance(result, unicode):
                 while len(result.encode("utf-8")) > truncate_size:
                     result = result[:-1]
 
@@ -3073,12 +3191,6 @@ class OsCryptMixin(HandlerCase):
     # list of (platform_regex, True|False|None) entries.
     platform_crypt_support = []
 
-    #: flag indicating backend provides a fallback when safe_crypt() can't handle password
-    has_os_crypt_fallback = True
-
-    #: alternate handler to use when searching for backend to fake safe_crypt() support.
-    alt_safe_crypt_handler = None
-
     #===================================================================
     # instance attrs
     #===================================================================
@@ -3096,6 +3208,7 @@ class OsCryptMixin(HandlerCase):
     def setUp(self):
         assert self.backend == "os_crypt"
         if not self.handler.has_backend("os_crypt"):
+            # XXX: currently, any tests that use this are skipped entirely! (see issue 120)
             self._patch_safe_crypt()
         super(OsCryptMixin, self).setUp()
 
@@ -3106,9 +3219,7 @@ class OsCryptMixin(HandlerCase):
         backend will be None if none availabe.
         """
         # find handler that generates safe_crypt() compatible hash
-        handler = cls.alt_safe_crypt_handler
-        if not handler:
-            handler = unwrap_handler(cls.handler)
+        handler = unwrap_handler(cls.handler)
 
         # hack to prevent recursion issue when .has_backend() is called
         handler.get_backend()
@@ -3116,6 +3227,14 @@ class OsCryptMixin(HandlerCase):
         # find backend which isn't os_crypt
         alt_backend = get_alt_backend(handler, "os_crypt")
         return handler, alt_backend
+
+    @property
+    def has_os_crypt_fallback(self):
+        """
+        test if there's a fallback handler to test against if os_crypt can't support
+        a specified secret (may be explicitly set to False for some subclasses)
+        """
+        return self._get_safe_crypt_handler_backend()[0] is not None
 
     def _patch_safe_crypt(self):
         """if crypt() doesn't support current hash alg, this patches
@@ -3151,7 +3270,7 @@ class OsCryptMixin(HandlerCase):
         reason = super(OsCryptMixin, cls)._get_skip_backend_reason(backend)
 
         from passlib.utils import has_crypt
-        if reason == cls.BACKEND_NOT_AVAILABLE and has_crypt:
+        if reason == cls._BACKEND_NOT_AVAILABLE and has_crypt:
             if TEST_MODE("full") and cls._get_safe_crypt_handler_backend()[1]:
                 # in this case, _patch_safe_crypt() will monkeypatch os_crypt
                 # to use another backend, just so we can test os_crypt fully.
@@ -3191,7 +3310,7 @@ class OsCryptMixin(HandlerCase):
     def test_80_faulty_crypt(self):
         """test with faulty crypt()"""
         hash = self.get_sample_hash()[1]
-        exc_types = (AssertionError,)
+        exc_types = (exc.InternalBackendError,)
         mock_crypt = self._use_mock_crypt()
 
         def test(value):
@@ -3221,40 +3340,60 @@ class OsCryptMixin(HandlerCase):
             self.assertTrue(self.do_verify("stub", h1))
         else:
             # handler should give up
-            from passlib.exc import MissingBackendError
+            from passlib.exc import InternalBackendError as err_type
             hash = self.get_sample_hash()[1]
-            self.assertRaises(MissingBackendError, self.do_encrypt, 'stub')
-            self.assertRaises(MissingBackendError, self.do_genhash, 'stub', hash)
-            self.assertRaises(MissingBackendError, self.do_verify, 'stub', hash)
+            self.assertRaises(err_type, self.do_encrypt, 'stub')
+            self.assertRaises(err_type, self.do_genhash, 'stub', hash)
+            self.assertRaises(err_type, self.do_verify, 'stub', hash)
 
+    @doesnt_require_backend
     def test_82_crypt_support(self):
-        """test platform-specific crypt() support detection"""
-        # NOTE: this is mainly just a sanity check to ensure the runtime
-        #       detection is functioning correctly on some known platforms,
-        #       so that I can feel more confident it'll work right on unknown ones.
+        """
+        test platform-specific crypt() support detection
+
+        NOTE: this is mainly just a sanity check to ensure the runtime
+              detection is functioning correctly on some known platforms,
+              so that we can feel more confident it'll work right on unknown ones.
+        """
+
+        # skip wrapper handlers, won't ever have crypt support
         if hasattr(self.handler, "orig_prefix"):
             raise self.skipTest("not applicable to wrappers")
+
+        # look for first entry that matches current system
+        # XXX: append "/" + platform.release() to string?
+        # XXX: probably should rework to support rows being dicts w/ "minver" / "maxver" keys,
+        #      instead of hack where we add major # as part of platform regex.
+        using_backend = not self.using_patched_crypt
+        name = self.handler.name
         platform = sys.platform
-        for pattern, state in self.platform_crypt_support:
+        for pattern, expected in self.platform_crypt_support:
             if re.match(pattern, platform):
                 break
         else:
-            raise self.skipTest("no data for %r platform" % platform)
-        if state is None:
-            # e.g. platform='freebsd8' ... sha256_crypt not added until 8.3
-            raise self.skipTest("varied support on %r platform" % platform)
-        elif state != self.using_patched_crypt:
-            return
-        elif state:
-            self.fail("expected %r platform would have native support "
-                      "for %r" % (platform, self.handler.name))
+            raise self.skipTest("no data for %r platform (current host support = %r)" %
+                                (platform, using_backend))
+
+        # rules can use "state=None" to signal varied support;
+        # e.g. platform='freebsd8' ... sha256_crypt not added until 8.3
+        if expected is None:
+            raise self.skipTest("varied support on %r platform (current host support = %r)" %
+                                (platform, using_backend))
+
+        # compare expectation vs reality
+        if expected == using_backend:
+            pass
+        elif expected:
+            self.fail("expected %r platform would have native support for %r" %
+                      (platform, name))
         else:
-            self.fail("did not expect %r platform would have native support "
-                      "for %r" % (platform, self.handler.name))
+            self.fail("did not expect %r platform would have native support for %r" %
+                      (platform, name))
 
     #===================================================================
-    # fuzzy verified support -- add new verified that uses os crypt()
+    # fuzzy verified support -- add additional verifier that uses os crypt()
     #===================================================================
+
     def fuzz_verifier_crypt(self):
         """test results against OS crypt()"""
 
@@ -3266,14 +3405,17 @@ class OsCryptMixin(HandlerCase):
 
         # create a wrapper for fuzzy verified to use
         from crypt import crypt
+        from passlib.utils import _safe_crypt_lock
         encoding = self.FuzzHashGenerator.password_encoding
 
         def check_crypt(secret, hash):
             """stdlib-crypt"""
             if not self.crypt_supports_variant(hash):
                 return "skip"
+            # XXX: any reason not to use safe_crypt() here?  or just want to test against bare metal?
             secret = to_native_str(secret, encoding)
-            return crypt(secret, hash) == hash
+            with _safe_crypt_lock:
+                return crypt(secret, hash) == hash
 
         return check_crypt
 
@@ -3403,12 +3545,12 @@ class EncodingHandlerMixin(HandlerCase):
     stock_passwords = [
         u("test"),
         b"test",
-        u("\\u00AC\\u00BA"),
+        u("\u00AC\u00BA"),
     ]
 
     class FuzzHashGenerator(HandlerCase.FuzzHashGenerator):
 
-        password_alphabet = u('qwerty1234<>.@*#! \\u00AC')
+        password_alphabet = u('qwerty1234<>.@*#! \u00AC')
 
     def populate_context(self, secret, kwds):
         """insert encoding into kwds"""

@@ -3,12 +3,12 @@
 # imports
 #=============================================================================
 # core
-
+from __future__ import with_statement
 from passlib.utils.compat import PY3
 if PY3:
     from configparser import NoSectionError
 else:
-    from configparser import NoSectionError
+    from ConfigParser import NoSectionError
 import datetime
 from functools import partial
 import logging; log = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ from passlib import hash
 from passlib.context import CryptContext, LazyCryptContext
 from passlib.exc import PasslibConfigWarning, PasslibHashWarning
 from passlib.utils import tick, to_unicode
-from passlib.utils.compat import irange, u, str, str_to_uascii, PY2, PY26
+from passlib.utils.compat import irange, u, unicode, str_to_uascii, PY2, PY26
 import passlib.utils.handlers as uh
 from passlib.tests.utils import (TestCase, set_file, TICK_RESOLUTION,
                                  quicksleep, time_call, handler_derived_from)
@@ -1175,7 +1175,7 @@ sha512_crypt__min_rounds = 45000
 
             def _calc_checksum(self, secret):
                 from hashlib import md5
-                if isinstance(secret, str):
+                if isinstance(secret, unicode):
                     secret = secret.encode("utf-8")
                 return str_to_uascii(md5(secret).hexdigest())
 
@@ -1647,6 +1647,7 @@ sha512_crypt__min_rounds = 45000
         #
         # init ref info
         #
+        from passlib.exc import UnknownHashError
         from passlib.hash import md5_crypt, unix_disabled
 
         ctx = CryptContext(["des_crypt"])
@@ -1684,18 +1685,13 @@ sha512_crypt__min_rounds = 45000
 
         # test w/o disabled hash support
         self.assertTrue(ctx.is_enabled(h_ref))
-        HASH_NOT_IDENTIFIED = "hash could not be identified"
-        self.assertRaisesRegex(ValueError, HASH_NOT_IDENTIFIED,
-                               ctx.is_enabled, h_other)
-        self.assertRaisesRegex(ValueError, HASH_NOT_IDENTIFIED,
-                               ctx.is_enabled, h_dis)
-        self.assertRaisesRegex(ValueError, HASH_NOT_IDENTIFIED,
-                               ctx.is_enabled, h_dis_ref)
+        self.assertRaises(UnknownHashError, ctx.is_enabled, h_other)
+        self.assertRaises(UnknownHashError, ctx.is_enabled, h_dis)
+        self.assertRaises(UnknownHashError, ctx.is_enabled, h_dis_ref)
 
         # test w/ disabled hash support
         self.assertTrue(ctx2.is_enabled(h_ref))
-        self.assertRaisesRegex(ValueError, HASH_NOT_IDENTIFIED,
-                               ctx.is_enabled, h_other)
+        self.assertRaises(UnknownHashError, ctx.is_enabled, h_other)
         self.assertFalse(ctx2.is_enabled(h_dis))
         self.assertFalse(ctx2.is_enabled(h_dis_ref))
 
@@ -1704,24 +1700,18 @@ sha512_crypt__min_rounds = 45000
         #
 
         # test w/o disabled hash support
-        self.assertRaisesRegex(ValueError, HASH_NOT_IDENTIFIED,
-                               ctx.enable, "")
+        self.assertRaises(UnknownHashError, ctx.enable, "")
         self.assertRaises(TypeError, ctx.enable, None)
         self.assertEqual(ctx.enable(h_ref), h_ref)
-        self.assertRaisesRegex(ValueError, HASH_NOT_IDENTIFIED,
-                               ctx.enable, h_other)
-        self.assertRaisesRegex(ValueError, HASH_NOT_IDENTIFIED,
-                               ctx.enable, h_dis)
-        self.assertRaisesRegex(ValueError, HASH_NOT_IDENTIFIED,
-                               ctx.enable, h_dis_ref)
+        self.assertRaises(UnknownHashError, ctx.enable, h_other)
+        self.assertRaises(UnknownHashError, ctx.enable, h_dis)
+        self.assertRaises(UnknownHashError, ctx.enable, h_dis_ref)
 
         # test w/ disabled hash support
-        self.assertRaisesRegex(ValueError, HASH_NOT_IDENTIFIED,
-                               ctx.enable, "")
+        self.assertRaises(UnknownHashError, ctx.enable, "")
         self.assertRaises(TypeError, ctx2.enable, None)
         self.assertEqual(ctx2.enable(h_ref), h_ref)
-        self.assertRaisesRegex(ValueError, HASH_NOT_IDENTIFIED,
-                               ctx2.enable, h_other)
+        self.assertRaises(UnknownHashError, ctx2.enable, h_other)
         self.assertRaisesRegex(ValueError, "cannot restore original hash",
                                ctx2.enable, h_dis)
         self.assertEqual(ctx2.enable(h_dis_ref), h_ref)
@@ -1742,7 +1732,7 @@ class DelayHash(uh.StaticHandler):
 
     def _calc_checksum(self, secret):
         time.sleep(self.delay)
-        if isinstance(secret, str):
+        if isinstance(secret, unicode):
             secret = secret.encode("utf-8")
         return str_to_uascii(hashlib.sha1(b"prefix" + secret).hexdigest())
 

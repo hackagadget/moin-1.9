@@ -15,7 +15,7 @@ References
 #=============================================================================
 # imports
 #=============================================================================
-
+from __future__ import with_statement, absolute_import
 # core
 import logging
 log = logging.getLogger(__name__)
@@ -30,7 +30,7 @@ from passlib import exc
 from passlib.crypto.digest import MAX_UINT32
 from passlib.utils import classproperty, to_bytes, render_bytes
 from passlib.utils.binary import b64s_encode, b64s_decode
-from passlib.utils.compat import u, str, bascii_to_str, uascii_to_str, PY2
+from passlib.utils.compat import u, unicode, bascii_to_str, uascii_to_str, PY2
 import passlib.utils.handlers as uh
 # local
 __all__ = [
@@ -396,7 +396,7 @@ class _Argon2Common(uh.SubclassBackendMixin, uh.ParallelismMixin,
     def from_string(cls, hash):
         # NOTE: assuming hash will be unicode, or use ascii-compatible encoding.
         # TODO: switch to working w/ str or unicode
-        if isinstance(hash, str):
+        if isinstance(hash, unicode):
             hash = hash.encode("utf-8")
         if not isinstance(hash, bytes):
             raise exc.ExpectedStringError(hash, "hash")
@@ -500,7 +500,7 @@ class _Argon2Common(uh.SubclassBackendMixin, uh.ParallelismMixin,
     @classmethod
     def _norm_type(cls, value):
         # type check
-        if not isinstance(value, str):
+        if not isinstance(value, unicode):
             if PY2 and isinstance(value, bytes):
                 value = value.decode('ascii')
             else:

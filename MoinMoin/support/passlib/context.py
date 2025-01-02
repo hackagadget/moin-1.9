@@ -2,7 +2,7 @@
 #=============================================================================
 # imports
 #=============================================================================
-
+from __future__ import with_statement
 # core
 import re
 import logging; log = logging.getLogger(__name__)
@@ -11,6 +11,7 @@ import time
 from warnings import warn
 # site
 # pkg
+from passlib import exc
 from passlib.exc import ExpectedStringError, ExpectedTypeError, PasslibConfigWarning
 from passlib.registry import get_crypt_handler, _validate_handler_name
 from passlib.utils import (handlers as uh, to_bytes,
@@ -19,7 +20,7 @@ from passlib.utils import (handlers as uh, to_bytes,
                            )
 from passlib.utils.binary import BASE64_CHARS
 from passlib.utils.compat import (iteritems, num_types, irange,
-                                  PY2, PY3, str, SafeConfigParser,
+                                  PY2, PY3, unicode, SafeConfigParser,
                                   NativeStringIO, BytesIO,
                                   unicode_or_bytes_types, native_string_types,
                                   )
@@ -225,10 +226,10 @@ class CryptPolicy(object):
             return source
         elif isinstance(source, dict):
             return cls(_internal_context=CryptContext(**source))
-        elif not isinstance(source, (bytes,str)):
+        elif not isinstance(source, (bytes,unicode)):
             raise TypeError("source must be CryptPolicy, dict, config string, "
                             "or file path: %r" % (type(source),))
-        elif any(c in source for c in "\n\r\t") or not source.strip(" \t./\;:"):
+        elif any(c in source for c in "\n\r\t") or not source.strip(" \t./;:"):
             return cls(_internal_context=CryptContext.from_string(source))
         else:
             return cls(_internal_context=CryptContext.from_path(source))
@@ -1059,7 +1060,7 @@ class _CryptConfig(object):
 
         # type check
         if category is not None and not isinstance(category, native_string_types):
-            if PY2 and isinstance(category, str):
+            if PY2 and isinstance(category, unicode):
                 # for compatibility with unicode-centric py2 apps
                 return self.get_record(scheme, category.encode("utf-8"))
             raise ExpectedTypeError(category, "str or None", "category")
@@ -1128,7 +1129,7 @@ class _CryptConfig(object):
         elif not self.schemes:
             raise KeyError("no crypt algorithms supported")
         else:
-            raise ValueError("hash could not be identified")
+            raise exc.UnknownHashError("hash could not be identified")
 
     @memoized_property
     def disabled_record(self):
@@ -1528,8 +1529,12 @@ class CryptContext(object):
 
         :type encoding: str
         :param encoding:
-            Encoding to use when decode bytes from string.
-            Defaults to ``"utf-8"``. Ignoring when loading from a dictionary.
+            Encoding to use when **source** is bytes.
+            Defaults to ``"utf-8"``. Ignored when loading from a dictionary.
+
+            .. deprecated:: 1.8
+
+                This keyword, and support for bytes input, will be dropped in Passlib 2.0
 
         :raises TypeError:
             * If the source cannot be identified.
@@ -2223,7 +2228,7 @@ class CryptContext(object):
             be used when hashing the password (e.g. different default scheme,
             different default rounds values, etc).
 
-        :param \*\*kwds:
+        :param \\*\\*kwds:
             All other keyword options are passed to the selected algorithm's
             :meth:`PasswordHash.hash() <passlib.ifc.PasswordHash.hash>` method.
 
@@ -2300,7 +2305,7 @@ class CryptContext(object):
             This is mainly used when generating new hashes, it has little
             effect when verifying; this keyword is mainly provided for symmetry.
 
-        :param \*\*kwds:
+        :param \\*\\*kwds:
             All additional keywords are passed to the appropriate handler,
             and should match its :attr:`~passlib.ifc.PasswordHash.context_kwds`.
 
@@ -2380,7 +2385,7 @@ class CryptContext(object):
             If specified, this will cause any category-specific defaults to
             be used if the password has to be re-hashed.
 
-        :param \*\*kwds:
+        :param \\*\\*kwds:
             all additional keywords are passed to the appropriate handler,
             and should match that hash's
             :attr:`PasswordHash.context_kwds <passlib.ifc.PasswordHash.context_kwds>`.

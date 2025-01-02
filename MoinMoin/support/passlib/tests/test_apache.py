@@ -2,7 +2,7 @@
 #=============================================================================
 # imports
 #=============================================================================
-
+from __future__ import with_statement
 # core
 from logging import getLogger
 import os
@@ -348,7 +348,7 @@ class HtpasswdFileTest(TestCase):
         # check sample utf-8
         ht = apache.HtpasswdFile.from_string(self.sample_04_utf8, encoding="utf-8",
                                              return_unicode=True)
-        self.assertEqual(ht.users(), [ u("user\\u00e6") ])
+        self.assertEqual(ht.users(), [ u("user\u00e6") ])
 
         # test deprecated encoding=None
         with self.assertWarningList("``encoding=None`` is deprecated"):
@@ -358,7 +358,7 @@ class HtpasswdFileTest(TestCase):
         # check sample latin-1
         ht = apache.HtpasswdFile.from_string(self.sample_04_latin1,
                                               encoding="latin-1", return_unicode=True)
-        self.assertEqual(ht.users(), [ u("user\\u00e6") ])
+        self.assertEqual(ht.users(), [ u("user\u00e6") ])
 
     def test_08_get_hash(self):
         """test get_hash()"""
@@ -735,13 +735,13 @@ class HtdigestFileTest(TestCase):
 
         # check sample utf-8
         ht = apache.HtdigestFile.from_string(self.sample_04_utf8, encoding="utf-8", return_unicode=True)
-        self.assertEqual(ht.realms(), [ u("realm\\u00e6") ])
-        self.assertEqual(ht.users(u("realm\\u00e6")), [ u("user\\u00e6") ])
+        self.assertEqual(ht.realms(), [ u("realm\u00e6") ])
+        self.assertEqual(ht.users(u("realm\u00e6")), [ u("user\u00e6") ])
 
         # check sample latin-1
         ht = apache.HtdigestFile.from_string(self.sample_04_latin1, encoding="latin-1", return_unicode=True)
-        self.assertEqual(ht.realms(), [ u("realm\\u00e6") ])
-        self.assertEqual(ht.users(u("realm\\u00e6")), [ u("user\\u00e6") ])
+        self.assertEqual(ht.realms(), [ u("realm\u00e6") ])
+        self.assertEqual(ht.users(u("realm\u00e6")), [ u("user\u00e6") ])
 
     def test_10_to_string(self):
         """test to_string()"""

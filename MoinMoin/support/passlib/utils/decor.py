@@ -5,7 +5,7 @@ passlib.utils.decor -- helper decorators & properties
 # imports
 #=============================================================================
 # core
-
+from __future__ import absolute_import, division, print_function
 import logging
 log = logging.getLogger(__name__)
 from functools import wraps, update_wrapper
@@ -33,15 +33,15 @@ class classproperty(object):
     """Function decorator which acts like a combination of classmethod+property (limited to read-only properties)"""
 
     def __init__(self, func):
-        self.__func__ = func
+        self.im_func = func
 
     def __get__(self, obj, cls):
-        return self.__func__(cls)
+        return self.im_func(cls)
 
     @property
     def __func__(self):
         """py3 compatible alias"""
-        return self.__func__
+        return self.im_func
 
 class hybrid_method(object):
     """

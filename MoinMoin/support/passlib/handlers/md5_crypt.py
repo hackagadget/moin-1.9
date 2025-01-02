@@ -9,7 +9,7 @@ import logging; log = logging.getLogger(__name__)
 # pkg
 from passlib.utils import safe_crypt, test_crypt, repeat_string
 from passlib.utils.binary import h64
-from passlib.utils.compat import str, u
+from passlib.utils.compat import unicode, u
 import passlib.utils.handlers as uh
 # local
 __all__ = [
@@ -67,7 +67,7 @@ def _raw_md5_crypt(pwd, salt, use_apr=False):
 
     # validate secret
     # XXX: not sure what official unicode policy is, using this as default
-    if isinstance(pwd, str):
+    if isinstance(pwd, unicode):
         pwd = pwd.encode("utf-8")
     assert isinstance(pwd, bytes), "pwd not unicode or bytes"
     if _BNULL in pwd:
@@ -75,7 +75,7 @@ def _raw_md5_crypt(pwd, salt, use_apr=False):
     pwd_len = len(pwd)
 
     # validate salt - should have been taken care of by caller
-    assert isinstance(salt, str), "salt not unicode"
+    assert isinstance(salt, unicode), "salt not unicode"
     salt = salt.encode("ascii")
     assert len(salt) < 9, "salt too large"
         # NOTE: spec says salts larger than 8 bytes should be truncated,
@@ -279,13 +279,13 @@ class md5_crypt(uh.HasManyBackends, _MD5_Common):
     def _calc_checksum_os_crypt(self, secret):
         config = self.ident + self.salt
         hash = safe_crypt(secret, config)
-        if hash:
-            assert hash.startswith(config) and len(hash) == len(config) + 23
-            return hash[-22:]
-        else:
+        if hash is None:
             # py3's crypt.crypt() can't handle non-utf8 bytes.
             # fallback to builtin alg, which is always available.
             return self._calc_checksum_builtin(secret)
+        if not hash.startswith(config) or len(hash) != len(config) + 23:
+            raise uh.exc.CryptBackendError(self, config, hash)
+        return hash[-22:]
 
     #---------------------------------------------------------------
     # builtin backend

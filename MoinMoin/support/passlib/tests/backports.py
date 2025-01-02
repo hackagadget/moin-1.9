@@ -2,7 +2,7 @@
 #=============================================================================
 # imports
 #=============================================================================
-
+from __future__ import with_statement
 # core
 import logging; log = logging.getLogger(__name__)
 import re
@@ -53,10 +53,10 @@ class TestCase(unittest.TestCase):
     # was present in 2.7 under an alternate name
     #---------------------------------------------------------------
     if not hasattr(unittest.TestCase, "assertRegex"):
-        assertRegex = unittest.TestCase.assertRegex
+        assertRegex = unittest.TestCase.assertRegexpMatches
 
     if not hasattr(unittest.TestCase, "assertRaisesRegex"):
-        assertRaisesRegex = unittest.TestCase.assertRaisesRegex
+        assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
 
     #===================================================================
     # eoc

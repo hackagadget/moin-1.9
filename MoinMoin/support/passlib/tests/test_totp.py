@@ -11,7 +11,7 @@ import time as _time
 # site
 # pkg
 from passlib import exc
-from passlib.utils.compat import str, u
+from passlib.utils.compat import unicode, u
 from passlib.tests.utils import TestCase, time_call
 # subject
 from passlib import totp as totp_module
@@ -372,6 +372,8 @@ class AppWalletTest(TestCase):
         wallet.encrypt_cost += 3
         delta2, _ = time_call(partial(wallet.encrypt_key, KEY1_RAW), maxtime=0)
 
+        # TODO: rework timing test here to inject mock pbkdf2_hmac() function instead;
+        #       and test that it's being invoked w/ proper options.
         self.assertAlmostEqual(delta2, delta*8, delta=(delta*8)*0.5)
 
     #=============================================================================
@@ -878,7 +880,7 @@ class TotpTest(TestCase):
         time = self.randtime()
         result = otp.generate(time)
         token = result.token
-        self.assertIsInstance(token, str)
+        self.assertIsInstance(token, unicode)
         start_time = result.counter * 30
 
         # should generate same token for next 29s

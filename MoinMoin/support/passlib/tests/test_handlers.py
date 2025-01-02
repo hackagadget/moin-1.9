@@ -2,7 +2,7 @@
 #=============================================================================
 # imports
 #=============================================================================
-
+from __future__ import with_statement
 # core
 import logging; log = logging.getLogger(__name__)
 import os
@@ -10,7 +10,7 @@ import sys
 import warnings
 # site
 # pkg
-from passlib import hash
+from passlib import exc, hash
 from passlib.utils import repeat_string
 from passlib.utils.compat import irange, PY3, u, get_method_function
 from passlib.tests.utils import TestCase, HandlerCase, skipUnless, \
@@ -22,9 +22,9 @@ from passlib.tests.utils import TestCase, HandlerCase, skipUnless, \
 #=============================================================================
 
 # some common unicode passwords which used as test cases
-UPASS_WAV = u('\\u0399\\u03c9\\u03b1\\u03bd\\u03bd\\u03b7\\u03c2')
-UPASS_USD = u("\\u20AC\\u00A5$")
-UPASS_TABLE = u("t\\u00e1\\u0411\\u2113\\u0259")
+UPASS_WAV = u('\u0399\u03c9\u03b1\u03bd\u03bd\u03b7\u03c2')
+UPASS_USD = u("\u20AC\u00A5$")
+UPASS_TABLE = u("t\u00e1\u0411\u2113\u0259")
 
 PASS_TABLE_UTF8 = b't\xc3\xa1\xd0\x91\xe2\x84\x93\xc9\x99' # utf-8
 
@@ -43,12 +43,30 @@ _handler_test_modules = [
 ]
 
 def get_handler_case(scheme):
-    """return HandlerCase instance for scheme, used by other tests"""
+    """
+    return HandlerCase instance for scheme, used by other tests.
+
+    :param scheme: name of hasher to locate test for (e.g. "bcrypt")
+
+    :raises KeyError:
+        if scheme isn't known hasher.
+
+    :raises MissingBackendError:
+        if hasher doesn't have any available backends.
+
+    :returns:
+        HandlerCase subclass (which derives from TestCase)
+    """
     from passlib.registry import get_crypt_handler
     handler = get_crypt_handler(scheme)
     if hasattr(handler, "backends") and scheme not in _omitted_backend_tests:
-        # NOTE: will throw MissingBackendError if none are installed.
-        backend = handler.get_backend()
+        # XXX: if no backends available, could proceed to pick first backend for test lookup;
+        #      should investigate if that would be useful to callers.
+        try:
+            backend = handler.get_backend()
+        except exc.MissingBackendError:
+            assert scheme in conditionally_available_hashes
+            raise
         name = "%s_%s_test" % (scheme, backend)
     else:
         name = "%s_test" % scheme
@@ -60,7 +78,9 @@ def get_handler_case(scheme):
             return getattr(mod, name)
         except AttributeError:
             pass
-    raise KeyError("test case %r not found" % name)
+    # every hasher should have test suite, so if we get here, means test is either missing,
+    # misnamed, or _handler_test_modules list is out of date.
+    raise RuntimeError("can't find test case named %r for %r" % (name, scheme))
 
 #: hashes which there may not be a backend available for,
 #: and get_handler_case() may (correctly) throw a MissingBackendError
@@ -175,9 +195,14 @@ class _bsdi_crypt_test(HandlerCase):
     ]
 
     platform_crypt_support = [
-        ("freebsd|openbsd|netbsd|darwin", True),
+        # openbsd 5.8 dropped everything except bcrypt
+        ("openbsd[6789]", False),
+        ("openbsd5", None),
+        ("openbsd", True),
+
+        ("freebsd|netbsd|darwin", True),
         ("solaris", False),
-        # linux - may be present in libxcrypt
+        ("linux", None),  # may be present if libxcrypt is in use
     ]
 
     def test_77_fuzz_input(self, **kwds):
@@ -264,7 +289,7 @@ class _des_crypt_test(HandlerCase):
         ('AlOtBsOl', 'cEpWz5IUCShqM'),
 
         # ensures utf-8 used for unicode
-        (u('hell\\u00D6'), 'saykDgk3BPZ9E'),
+        (u('hell\u00D6'), 'saykDgk3BPZ9E'),
         ]
     known_unidentified_hashes = [
         # bad char in otherwise correctly formatted hash
@@ -277,7 +302,12 @@ class _des_crypt_test(HandlerCase):
         ]
 
     platform_crypt_support = [
-        ("freebsd|openbsd|netbsd|linux|solaris|darwin", True),
+        # openbsd 5.8 dropped everything except bcrypt
+        ("openbsd[6789]", False),
+        ("openbsd5", None),
+        ("openbsd", True),
+
+        ("freebsd|netbsd|linux|solaris|darwin", True),
     ]
 
 # create test cases for specific backends
@@ -382,6 +412,40 @@ class hex_md5_test(HandlerCase):
         ("password", '5f4dcc3b5aa765d61d8327deb882cf99'),
         (UPASS_TABLE, '05473f8a19f66815e737b33264a0d0b0'),
     ]
+
+    # XXX: should test this for ALL the create_hex_md5() hashers.
+    def test_mock_fips_mode(self):
+        """
+        if md5 isn't available, a dummy instance should be created.
+        (helps on FIPS systems).
+        """
+        from passlib.exc import UnknownHashError
+        from passlib.crypto.digest import lookup_hash, _set_mock_fips_mode
+
+        # check if md5 is available so we can test mock helper
+        supported = lookup_hash("md5", required=False).supported
+        self.assertEqual(self.handler.supported, supported)
+        if supported:
+            _set_mock_fips_mode()
+            self.addCleanup(_set_mock_fips_mode, False)
+
+        # HACK: have to recreate hasher, since underlying HashInfo has changed.
+        #       could reload module and re-import, but this should be good enough.
+        from passlib.handlers.digests import create_hex_hash
+        hasher = create_hex_hash("md5", required=False)
+        self.assertFalse(hasher.supported)
+
+        # can identify hashes even if disabled
+        ref1 = '5f4dcc3b5aa765d61d8327deb882cf99'
+        ref2 = 'xxx'
+        self.assertTrue(hasher.identify(ref1))
+        self.assertFalse(hasher.identify(ref2))
+
+        # throw error if try to use it
+        pat = "'md5' hash disabled for fips"
+        self.assertRaisesRegex(UnknownHashError, pat, hasher.hash, "password")
+        self.assertRaisesRegex(UnknownHashError, pat, hasher.verify, "password", ref1)
+
 
 class hex_sha1_test(HandlerCase):
     handler = hash.hex_sha1
@@ -512,6 +576,67 @@ class ldap_salted_sha1_test(HandlerCase):
         '{SSHA}P90+qijSp8MJ1tN25j5o1PflUvlqjXHOGeOck===',
     ]
 
+
+class ldap_salted_sha256_test(HandlerCase):
+    handler = hash.ldap_salted_sha256
+    known_correct_hashes = [
+        # generated locally
+        # salt size = 8
+        ("password", '{SSHA256}x1tymSTVjozxQ2PtT46ysrzhZxbcskK0o2f8hEFx7fAQQmhtDSEkJA=='),
+        ("test", '{SSHA256}xfqc9aOR6z15YaEk3/Ufd7UL9+JozB/1EPmCDTizL0GkdA7BuNda6w=='),
+        ("toomanysecrets", '{SSHA256}RrTKrg6HFXcjJ+eDAq4UtbODxOr9RLeG+I69FoJvutcbY0zpfU+p1Q=='),
+        (u('letm\xe8\xefn'), '{SSHA256}km7UjUTBZN8a+gf1ND2/qn15N7LsO/jmGYJXvyTfJKAbI0RoLWWslQ=='),
+
+        # alternate salt sizes (4, 15, 16)
+        # generated locally
+        ('test', '{SSHA256}TFv2RpwyO0U9mA0Hk8FsXRa1I+4dNUtv27Qa8dzGVLinlDIm'),
+        ('test', '{SSHA256}J6MFQdkfjdmXz9UyUPb773kekJdm4dgSL4y8WQEQW11VipHSundOKaV0LsV4L6U='),
+        ('test', '{SSHA256}uBLazLaiBaPb6Cpnvq2XTYDkvXbYIuqRW1anMKk85d1/j1GqFQIgpHSOMUYIIcS4'),
+    ]
+
+    known_malformed_hashes = [
+        # salt too small (3)
+        '{SSHA256}Lpdyr1+lR+rtxgp3SpQnUuNw33ENivTl28nzF2ZI4Gm41/o=',
+
+        # incorrect base64 encoding
+        '{SSHA256}TFv2RpwyO0U9mA0Hk8FsXRa1I+4dNUtv27Qa8dzGVLinlDI@',
+        '{SSHA256}TFv2RpwyO0U9mA0Hk8FsXRa1I+4dNUtv27Qa8dzGVLinlDI',
+        '{SSHA256}TFv2RpwyO0U9mA0Hk8FsXRa1I+4dNUtv27Qa8dzGVLinlDIm===',
+    ]
+
+
+
+class ldap_salted_sha512_test(HandlerCase):
+    handler = hash.ldap_salted_sha512
+    known_correct_hashes = [
+        # generated by testing ldap server web interface (see issue 124 comments)
+        # salt size = 8
+        ("toomanysecrets", '{SSHA512}wExp4xjiCHS0zidJDC4UJq9EEeIebAQPJ1PWSwfhxWjfutI9XiiKuHm2AE41cEFfK+8HyI8bh+ztbczUGsvVFIgICWWPt7qu'),
+        (u('letm\xe8\xefn'), '{SSHA512}mpNUSmZc3TNx+RnPwkIAVMf7ocEKLPrIoQNsg4Eu8dHvyCeb2xzHp5A6n4tF7ntknSvfvRZaJII4ImvNJlYsgiwAm0FMqR+3'),
+
+        # generated locally
+        # salt size = 8
+        ("password", '{SSHA512}f/lFQskkl7PdMsTGJxHZq8LDt/l+UqRMm6/pj4pV7/xZkcOaKCgvQqp+KCeXc/Vd4RY6vEHWn4y0DnFcQ6wgyv9fyxk='),
+        ("test", '{SSHA512}Tgx/uhHnlM9/GgQvI31dN7cheDXg7WypZwaaIkyRsgV/BKIzBG3G/wUd9o1dpi06p3SYzMedg0lvTc3b6CtdO0Xo/f9/L+Uc'),
+
+        # alternate salt sizes (4, 15, 16)
+        # generated locally
+        ('test', '{SSHA512}Yg9DQ2wURCFGwobu7R2O6cq7nVbnGMPrFCX0aPQ9kj/y1hd6k9PEzkgWCB5aXdPwPzNrVb0PkiHiBnG1CxFiT+B8L8U='),
+        ('test', '{SSHA512}5ecDGWs5RY4xLszUO6hAcl90W3wAozGQoI4Gqj8xSZdcfU1lVEM4aY8s+4xVeLitcn7BO8i7xkzMFWLoxas7SeHc23sP4dx77937PyeE0A=='),
+        ('test', '{SSHA512}6FQv5W47HGg2MFBFZofoiIbO8KRW75Pm51NKoInpthYQQ5ujazHGhVGzrj3JXgA7j0k+UNmkHdbJjdY5xcUHPzynFEII4fwfIySEcG5NKSU='),
+    ]
+
+    known_malformed_hashes = [
+        # salt too small (3)
+        '{SSHA512}zFnn4/8x8GveUaMqgrYWyIWqFQ0Irt6gADPtRk4Uv3nUC6uR5cD8+YdQni/0ZNij9etm6p17kSFuww3M6l+d6AbAeA==',
+
+        # incorrect base64 encoding
+        '{SSHA512}Tgx/uhHnlM9/GgQvI31dN7cheDXg7WypZwaaIkyRsgV/BKIzBG3G/wUd9o1dpi06p3SYzMedg0lvTc3b6CtdO0Xo/f9/L+U',
+        '{SSHA512}Tgx/uhHnlM9/GgQvI31dN7cheDXg7WypZwaaIkyRsgV/BKIzBG3G/wUd9o1dpi06p3SYzMedg0lvTc3b6CtdO0Xo/f9/L+U@',
+        '{SSHA512}Tgx/uhHnlM9/GgQvI31dN7cheDXg7WypZwaaIkyRsgV/BKIzBG3G/wUd9o1dpi06p3SYzMedg0lvTc3b6CtdO0Xo/f9/L+U===',
+    ]
+
+
 class ldap_plaintext_test(HandlerCase):
     # TODO: integrate EncodingHandlerMixin
     handler = hash.ldap_plaintext
@@ -583,7 +708,7 @@ class _ldap_sha1_crypt_test(HandlerCase):
         kwds.setdefault("rounds", 10)
         super(_ldap_sha1_crypt_test, self).populate_settings(kwds)
 
-    def test_77_fuzz_input(self):
+    def test_77_fuzz_input(self, **ignored):
         raise self.skipTest("unneeded")
 
 # create test cases for specific backends
@@ -685,7 +810,12 @@ class _md5_crypt_test(HandlerCase):
         ]
 
     platform_crypt_support = [
-        ("freebsd|openbsd|netbsd|linux|solaris", True),
+        # openbsd 5.8 dropped everything except bcrypt
+        ("openbsd[6789]", False),
+        ("openbsd5", None),
+        ("openbsd", True),
+
+        ("freebsd|netbsd|linux|solaris", True),
         ("darwin", False),
     ]
 
@@ -736,9 +866,9 @@ class msdcc_test(UserHandlerMixin, HandlerCase):
         (("", "root"), "176a4c2bd45ac73687676c2f09045353"),
         (("test1", "TEST1"), "64cd29e36a8431a2b111378564a10631"),
         (("okolada", "nineteen_characters"), "290efa10307e36a79b3eebf2a6b29455"),
-        ((u("\\u00FC"), u("\\u00FC")), "48f84e6f73d6d5305f6558a33fa2c9bb"),
-        ((u("\\u00FC\\u00FC"), u("\\u00FC\\u00FC")), "593246a8335cf0261799bda2a2a9c623"),
-        ((u("\\u20AC\\u20AC"), "user"), "9121790702dda0fa5d353014c334c2ce"),
+        ((u("\u00FC"), u("\u00FC")), "48f84e6f73d6d5305f6558a33fa2c9bb"),
+        ((u("\u00FC\u00FC"), u("\u00FC\u00FC")), "593246a8335cf0261799bda2a2a9c623"),
+        ((u("\u20AC\u20AC"), "user"), "9121790702dda0fa5d353014c334c2ce"),
 
         #
         # custom
@@ -774,9 +904,9 @@ class msdcc2_test(UserHandlerMixin, HandlerCase):
         (("test2", "TEST2"), "c6758e5be7fc943d00b97972a8a97620"),
         (("test3", "test3"), "360e51304a2d383ea33467ab0b639cc4"),
         (("test4", "test4"), "6f79ee93518306f071c47185998566ae"),
-        ((u("\\u00FC"), "joe"), "bdb80f2c4656a8b8591bd27d39064a54"),
-        ((u("\\u20AC\\u20AC"), "joe"), "1e1e20f482ff748038e47d801d0d1bda"),
-        ((u("\\u00FC\\u00FC"), "admin"), "0839e4a07c00f18a8c65cf5b985b9e73"),
+        ((u("\u00FC"), "joe"), "bdb80f2c4656a8b8591bd27d39064a54"),
+        ((u("\u20AC\u20AC"), "joe"), "1e1e20f482ff748038e47d801d0d1bda"),
+        ((u("\u00FC\u00FC"), "admin"), "0839e4a07c00f18a8c65cf5b985b9e73"),
 
         #
         # custom
@@ -1255,7 +1385,7 @@ class _sha1_crypt_test(HandlerCase):
     platform_crypt_support = [
         ("netbsd", True),
         ("freebsd|openbsd|solaris|darwin", False),
-        # linux - may be present in libxcrypt
+        ("linux", None),  # may be present if libxcrypt is in use
     ]
 
 # create test cases for specific backends
@@ -1326,7 +1456,7 @@ class _sha256_crypt_test(HandlerCase):
         ('test', '$5$rounds=11858$WH1ABM5sKhxbkgCK$aTQsjPkz0rBsH3lQlJxw9HDTDXPKBxC0LlVeV69P.t1'),
         ('Compl3X AlphaNu3meric', '$5$rounds=10350$o.pwkySLCzwTdmQX$nCMVsnF3TXWcBPOympBUUSQi6LGGloZoOsVJMGJ09UB'),
         ('4lpHa N|_|M3r1K W/ Cur5Es: #$%(*)(*%#', '$5$rounds=11944$9dhlu07dQMRWvTId$LyUI5VWkGFwASlzntk1RLurxX54LUhgAcJZIt0pYGT7'),
-        (u('with unic\\u00D6de'), '$5$rounds=1000$IbG0EuGQXw5EkMdP$LQ5AfPf13KufFsKtmazqnzSGZ4pxtUNw3woQ.ELRDF4'),
+        (u('with unic\u00D6de'), '$5$rounds=1000$IbG0EuGQXw5EkMdP$LQ5AfPf13KufFsKtmazqnzSGZ4pxtUNw3woQ.ELRDF4'),
         ]
 
     if TEST_MODE("full"):
@@ -1391,9 +1521,9 @@ class _sha256_crypt_test(HandlerCase):
 
     platform_crypt_support = [
         ("freebsd(9|1\d)|linux", True),
-        ("freebsd8", None), # added in freebsd 8.3
+        ("freebsd8", None),  # added in freebsd 8.3
         ("freebsd|openbsd|netbsd|darwin", False),
-        # solaris - depends on policy
+        ("solaris", None),  # depends on policy
     ]
 
 # create test cases for specific backends

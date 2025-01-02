@@ -450,7 +450,7 @@ class _CommonScryptTest(TestCase):
             return hexstr(scrypt_mod.scrypt(secret, "salt", 2, 2, 2, 16))
 
         # unicode
-        TEXT = u("abc\\u00defg")
+        TEXT = u("abc\u00defg")
         self.assertEqual(run_scrypt(TEXT), '05717106997bfe0da42cf4779a2f8bd8')
 
         # utf8 bytes
@@ -475,7 +475,7 @@ class _CommonScryptTest(TestCase):
             return hexstr(scrypt_mod.scrypt("secret", salt, 2, 2, 2, 16))
 
         # unicode
-        TEXT = u("abc\\u00defg")
+        TEXT = u("abc\u00defg")
         self.assertEqual(run_scrypt(TEXT), 'a748ec0f4613929e9e5f03d1ab741d88')
 
         # utf8 bytes
@@ -550,7 +550,7 @@ class _CommonScryptTest(TestCase):
         self.assertEqual(run_scrypt(1), 'da')
 
         # pick random value
-        ksize = rng.randint(0, 1 << 10)
+        ksize = rng.randint(1, 1 << 10)
         self.assertEqual(len(run_scrypt(ksize)), 2*ksize) # 2 hex chars per output
 
         # one more than upper bound

@@ -11,7 +11,7 @@ import logging; log = logging.getLogger(__name__)
 # pkg
 from passlib.utils import safe_crypt, test_crypt
 from passlib.utils.binary import h64
-from passlib.utils.compat import u, str, irange
+from passlib.utils.compat import u, unicode, irange
 from passlib.crypto.digest import compile_hmac
 import passlib.utils.handlers as uh
 # local
@@ -109,13 +109,13 @@ class sha1_crypt(uh.HasManyBackends, uh.HasRounds, uh.HasSalt, uh.GenericHandler
     def _calc_checksum_os_crypt(self, secret):
         config = self.to_string(config=True)
         hash = safe_crypt(secret, config)
-        if hash:
-            assert hash.startswith(config) and len(hash) == len(config) + 29
-            return hash[-28:]
-        else:
+        if hash is None:
             # py3's crypt.crypt() can't handle non-utf8 bytes.
             # fallback to builtin alg, which is always available.
             return self._calc_checksum_builtin(secret)
+        if not hash.startswith(config) or len(hash) != len(config) + 29:
+            raise uh.exc.CryptBackendError(self, config, hash)
+        return hash[-28:]
 
     #---------------------------------------------------------------
     # builtin backend
@@ -126,7 +126,7 @@ class sha1_crypt(uh.HasManyBackends, uh.HasRounds, uh.HasSalt, uh.GenericHandler
         return True
 
     def _calc_checksum_builtin(self, secret):
-        if isinstance(secret, str):
+        if isinstance(secret, unicode):
             secret = secret.encode("utf-8")
         if _BNULL in secret:
             raise uh.exc.NullPasswordError(self)
